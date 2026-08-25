@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bybit Futures Risk, RRR & Position Sizing Calculator (Net Fee Adjusted)</title>
+  <title>Bybit Futures Risk, RRR Calculator & Trading Journal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,6 +24,8 @@
       --red-bg: rgba(246, 70, 93, 0.12);
       --blue: #2979ff;
       --blue-bg: rgba(41, 121, 255, 0.12);
+      --purple: #a855f7;
+      --purple-bg: rgba(168, 85, 247, 0.12);
       --orange: #ff9800;
       --orange-bg: rgba(255, 152, 0, 0.12);
       --radius-sm: 8px;
@@ -46,12 +48,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px 60px;
+      padding: 24px 16px 80px;
     }
 
     .container {
       width: 100%;
-      max-width: 1160px;
+      max-width: 1200px;
     }
 
     /* Header */
@@ -128,6 +130,11 @@
       gap: 8px;
     }
 
+    .card-title-actions {
+      display: flex;
+      gap: 8px;
+    }
+
     /* Direction Toggle */
     .direction-toggle {
       display: grid;
@@ -179,6 +186,12 @@
       gap: 12px;
     }
 
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
     label {
       display: flex;
       justify-content: space-between;
@@ -200,7 +213,7 @@
       align-items: center;
     }
 
-    input[type="number"], input[type="text"], select {
+    input[type="number"], input[type="text"], select, textarea {
       width: 100%;
       background: var(--input-bg);
       border: 1px solid var(--input-border);
@@ -220,7 +233,16 @@
       padding-right: 32px;
     }
 
-    input[type="number"]:focus, input[type="text"]:focus, select:focus {
+    textarea {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 13px;
+      padding: 10px 12px;
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    input[type="number"]:focus, input[type="text"]:focus, select:focus, textarea:focus {
       border-color: var(--accent-yellow);
       box-shadow: 0 0 0 2px rgba(247, 166, 0, 0.15);
     }
@@ -370,6 +392,49 @@
       display: block;
     }
 
+    /* Buttons */
+    .btn-action {
+      background: #1c2638;
+      border: 1px solid #334460;
+      color: #cfd8dc;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: var(--accent-yellow);
+      color: #000;
+      border-color: var(--accent-yellow);
+    }
+
+    .btn-action.primary {
+      background: var(--accent-yellow);
+      color: #000;
+      border-color: var(--accent-yellow);
+      font-weight: 700;
+    }
+
+    .btn-action.primary:hover {
+      background: var(--accent-yellow-hover);
+    }
+
+    .btn-action.green {
+      background: rgba(14, 203, 129, 0.18);
+      border-color: rgba(14, 203, 129, 0.4);
+      color: #a7f3d0;
+    }
+    .btn-action.green:hover {
+      background: var(--green);
+      color: #000;
+    }
+
     /* Output Results Side */
     .results-card {
       display: flex;
@@ -438,28 +503,6 @@
       justify-content: space-between;
       font-size: 12px;
       color: #90a4ae;
-    }
-
-    /* Copy Button */
-    .btn-copy {
-      background: #1c2638;
-      border: 1px solid #334460;
-      color: #cfd8dc;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
-    }
-
-    .btn-copy:hover {
-      background: var(--accent-yellow);
-      color: #000;
-      border-color: var(--accent-yellow);
     }
 
     /* RRR Dedicated Card */
@@ -744,54 +787,648 @@
       margin-bottom: 2px;
     }
 
-    /* Formula Walkthrough Bottom Card */
-    .math-card {
-      margin-top: 24px;
+    /* ============================================================ */
+    /* NOTION-STYLE TRADING JOURNAL SECTION */
+    /* ============================================================ */
+    .journal-section {
+      margin-top: 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .journal-header-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: var(--radius-lg);
       padding: 20px 24px;
+      box-shadow: var(--shadow);
     }
 
-    .math-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #cfd8dc;
-      margin-bottom: 12px;
+    .journal-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .journal-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .journal-main-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .formula-steps {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 12px;
+    /* Notion-style View Tabs */
+    .view-switcher {
+      display: flex;
+      gap: 4px;
+      background: var(--input-bg);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--input-border);
     }
 
-    .formula-step {
+    .view-btn {
+      padding: 6px 14px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .view-btn.active {
+      background: #2a354b;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    /* Summary Metrics Bar */
+    .journal-stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .j-stat-card {
       background: #0f131a;
       border: 1px solid #1f2737;
       border-radius: var(--radius-sm);
-      padding: 12px;
-      font-size: 12px;
+      padding: 12px 14px;
     }
 
-    .step-header {
-      color: var(--accent-yellow);
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .step-code {
-      font-family: 'JetBrains Mono', monospace;
-      color: #eceff1;
+    .j-stat-title {
       font-size: 11px;
-      line-height: 1.5;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
     }
+
+    .j-stat-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .j-stat-num.green { color: var(--green); }
+    .j-stat-num.red { color: var(--red); }
+    .j-stat-num.yellow { color: var(--accent-yellow); }
+
+    /* Category & Filter Pills */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .category-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .cat-pill {
+      padding: 5px 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cat-pill:hover, .cat-pill.active {
+      background: rgba(247, 166, 0, 0.15);
+      border-color: var(--accent-yellow);
+      color: var(--accent-yellow);
+    }
+
+    .cat-pill.win.active {
+      background: var(--green-bg);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .cat-pill.loss.active {
+      background: var(--red-bg);
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .cat-pill.open.active {
+      background: var(--blue-bg);
+      border-color: var(--blue);
+      color: #90caf9;
+    }
+
+    .search-input {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 20px;
+      color: #fff;
+      font-size: 12px;
+      padding: 6px 14px;
+      outline: none;
+      width: 180px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* TABLE VIEW */
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+      box-shadow: var(--shadow);
+    }
+
+    table.journal-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    table.journal-table th {
+      background: #11151f;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--card-border);
+      white-space: nowrap;
+    }
+
+    table.journal-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #1c2331;
+      vertical-align: middle;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+    }
+
+    table.journal-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .thumb-cell {
+      width: 52px;
+      height: 40px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #1c2432;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 1px solid #2e3a4e;
+    }
+
+    .thumb-cell img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .thumb-cell .no-img {
+      font-size: 16px;
+      color: #4b5568;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .status-badge.win {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid rgba(14, 203, 129, 0.3);
+    }
+
+    .status-badge.loss {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(246, 70, 93, 0.3);
+    }
+
+    .status-badge.open {
+      background: var(--blue-bg);
+      color: #90caf9;
+      border: 1px solid rgba(41, 121, 255, 0.3);
+    }
+
+    .status-badge.breakeven {
+      background: rgba(255, 255, 255, 0.08);
+      color: #cfd8dc;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .dir-tag {
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10.5px;
+    }
+    .dir-tag.long { background: var(--green-bg); color: var(--green); }
+    .dir-tag.short { background: var(--red-bg); color: var(--red); }
+
+    /* GALLERY / CARDS VIEW */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 20px;
+    }
+
+    .trade-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .trade-card:hover {
+      transform: translateY(-2px);
+      border-color: #3b4863;
+    }
+
+    .card-img-wrap {
+      width: 100%;
+      height: 160px;
+      background: #11151f;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .card-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    .card-img-wrap:hover img {
+      transform: scale(1.04);
+    }
+
+    .card-img-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.2s;
+      gap: 6px;
+    }
+
+    .card-img-wrap:hover .card-img-overlay {
+      opacity: 1;
+    }
+
+    .card-no-img {
+      color: #3a475d;
+      font-size: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-no-img span {
+      font-size: 11px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-symbol-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-pnl-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 8px 10px;
+      background: #0f131a;
+      border: 1px solid #1f2737;
+      border-radius: 6px;
+    }
+
+    .card-pnl-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .card-pnl-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .card-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 11.5px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #cfd8dc;
+    }
+
+    .card-meta-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-meta-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      text-transform: uppercase;
+    }
+
+    .card-notes {
+      font-size: 12px;
+      color: #90a4ae;
+      line-height: 1.4;
+      background: rgba(0,0,0,0.15);
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px dashed #232c3d;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .card-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .card-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      background: #1e283a;
+      color: #90caf9;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--card-border);
+      padding-top: 12px;
+      margin-top: auto;
+    }
+
+    /* Modal Dialog (Add / Edit Trade) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .modal-close:hover { color: #fff; }
+
+    .modal-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: #11151f;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    /* Image Dropzone in Modal */
+    .dropzone {
+      border: 2px dashed #334460;
+      border-radius: var(--radius-md);
+      padding: 20px;
+      text-align: center;
+      background: #10141d;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent-yellow);
+      background: rgba(247, 166, 0, 0.05);
+    }
+
+    .dropzone-preview {
+      width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+      border-radius: 6px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .dropzone-icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+      color: var(--accent-yellow);
+    }
+
+    .dropzone-text {
+      font-size: 12.5px;
+      color: #cfd8dc;
+      font-weight: 600;
+    }
+
+    .dropzone-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Lightbox Fullscreen */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 24px;
+    }
+
+    .lightbox-overlay.active {
+      display: flex;
+    }
+
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 85vh;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      object-fit: contain;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .lightbox-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 10px; }
 
     footer {
-      margin-top: 32px;
+      margin-top: 40px;
       text-align: center;
       font-size: 12px;
       color: #546e7a;
@@ -802,11 +1439,12 @@
 
   <div class="container">
     <header>
-      <div class="badge">⚡ Bybit Isolated Margin • Net Risk Mode</div>
-      <h1>Futures Risk, RRR & Position Sizing Calculator</h1>
-      <p class="subtitle">Guarantees your <strong>exact net dollar loss after fees</strong> at Stop Loss, and displays <strong>actual net profits & RRR</strong>.</p>
+      <div class="badge">⚡ Bybit Isolated Margin • Risk Cockpit</div>
+      <h1>Futures Position Calculator & Trading Journal</h1>
+      <p class="subtitle">Lock your net dollar loss ($R$), verify Bybit liquidation safety, and log trades with chart screenshots just like in Notion.</p>
     </header>
 
+    <!-- TOP: CALCULATOR GRID -->
     <div class="grid">
       <!-- Input Panel -->
       <div class="card">
@@ -814,7 +1452,10 @@
           <div class="card-title-left">
             <span>⚙️</span> Order Parameters
           </div>
-          <button class="btn-copy" id="copyOrderBtn" onclick="copyOrderDetails()">📋 Copy Order</button>
+          <div class="card-title-actions">
+            <button class="btn-action green" onclick="openLogModalFromCurrentCalc()">💾 Log Trade</button>
+            <button class="btn-action" id="copyOrderBtn" onclick="copyOrderDetails()">📋 Copy</button>
+          </div>
         </div>
 
         <!-- Direction Toggle -->
@@ -827,15 +1468,25 @@
           </button>
         </div>
 
-        <!-- Fixed Risk / Loss -->
-        <div class="form-group">
-          <label>
-            <span>Target Net Loss at SL (After Fees)</span>
-            <span class="hint" style="color: #69f0ae;">✨ True Net Risk</span>
-          </label>
-          <div class="input-wrapper">
-            <input type="number" id="riskAmount" step="0.01" value="0.20" oninput="onRiskOrEntryChange()">
-            <span class="unit-badge">USDT</span>
+        <!-- Coin Symbol & Fixed Risk Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>
+              <span>Coin / Symbol</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="text" id="coinSymbol" value="KASUSDT" style="text-transform: uppercase;">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>
+              <span>Target Net Loss ($R$)</span>
+              <span class="hint" style="color: #69f0ae;">✨ True Net Risk</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="number" id="riskAmount" step="0.01" value="0.20" oninput="onRiskOrEntryChange()">
+              <span class="unit-badge">USDT</span>
+            </div>
           </div>
         </div>
 
@@ -976,6 +1627,7 @@
           <div class="card-title-left">
             <span>📊</span> Calculation Output
           </div>
+          <button class="btn-action primary" onclick="openLogModalFromCurrentCalc()">💾 Log to Journal</button>
         </div>
 
         <!-- Highlight Box: Recommended Quantity -->
@@ -1032,22 +1684,22 @@
           <!-- Actual Loss at SL (Net after fees) -->
           <div class="stat-item" style="border-left: 3px solid var(--red);">
             <div class="stat-name">Actual Loss at SL (Net)</div>
-            <div class="stat-val loss" id="outActualLoss">-0.2000 USDT</div>
-            <div class="stat-sub" id="outSlFeeSub">Gross: -0.1922 | SL Fees: 0.0075</div>
+            <div class="stat-val loss" id="outActualLoss">-0.1933 USDT</div>
+            <div class="stat-sub" id="outSlFeeSub">Price: -0.1860 | Fees: -0.0073</div>
           </div>
 
           <!-- Actual Profit at TP (Net after fees) -->
           <div class="stat-item" style="border-left: 3px solid var(--green);">
             <div class="stat-name">Actual Profit at TP (Net)</div>
-            <div class="stat-val profit" id="outProfit">+0.6502 USDT</div>
-            <div class="stat-sub" id="outTpFeeSub">Gross: +0.6572 | TP Fees: 0.0080</div>
+            <div class="stat-val profit" id="outProfit">+0.6280 USDT</div>
+            <div class="stat-sub" id="outTpFeeSub">Price: +0.6360 | Fees: -0.0080</div>
           </div>
 
           <!-- Margin Required -->
           <div class="stat-item">
             <div class="stat-name">Margin Required (Cost)</div>
-            <div class="stat-val" id="outMargin">1.38 USDT</div>
-            <div class="stat-sub" id="outPosValSub">Position: 6.92 USDT</div>
+            <div class="stat-val" id="outMargin">1.34 USDT</div>
+            <div class="stat-sub" id="outPosValSub">Position: 6.70 USDT</div>
           </div>
 
           <!-- Max Safe Leverage -->
@@ -1061,7 +1713,7 @@
           <div class="stat-item">
             <div class="stat-name">Est. Total Fees (Open+Close)</div>
             <div class="stat-val" id="outFees" style="color: #b0bec5;">0.0080 USDT</div>
-            <div class="stat-sub" id="outFeeRateSub">0.055% Taker Tier</div>
+            <div class="stat-sub" id="outFeeRateSub">0.110% rate (0.60% of margin @ 5x)</div>
           </div>
 
           <!-- Liquidation Price -->
@@ -1084,45 +1736,236 @@
       </div>
     </div>
 
-    <!-- Math Logic Reference -->
-    <div class="math-card">
-      <div class="math-title">
-        <span>📐</span> Step-by-Step Mathematical Verification (Net Fee-Adjusted)
+    <!-- ============================================================ -->
+    <!-- NOTION-STYLE TRADING JOURNAL & LOG -->
+    <!-- ============================================================ -->
+    <div class="journal-section" id="journalSection">
+      <div class="journal-header-card">
+        <div class="journal-top-bar">
+          <div class="journal-title-group">
+            <div class="journal-main-title">
+              <span>📓</span> Trade Journal & Visual Log
+            </div>
+            <!-- Notion View Switcher -->
+            <div class="view-switcher">
+              <button class="view-btn active" id="btnTableView" onclick="switchView('table')">
+                <span>📋</span> Table View
+              </button>
+              <button class="view-btn" id="btnGalleryView" onclick="switchView('gallery')">
+                <span>🖼️</span> Images / Cards View
+              </button>
+            </div>
+          </div>
+
+          <div class="card-title-actions">
+            <button class="btn-action primary" onclick="openNewTradeModal()">+ New Trade</button>
+            <button class="btn-action" onclick="exportTradesToCSV()">📥 Export CSV</button>
+            <button class="btn-action" onclick="exportBackupJSON()">💾 Backup</button>
+            <button class="btn-action" onclick="document.getElementById('importFileInput').click()">📂 Restore</button>
+            <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="importBackupJSON(event)">
+          </div>
+        </div>
+
+        <!-- Summary Performance Metrics -->
+        <div class="journal-stats-bar">
+          <div class="j-stat-card">
+            <div class="j-stat-title">Total Trades</div>
+            <div class="j-stat-num" id="statTotalTrades">0</div>
+          </div>
+          <div class="j-stat-card">
+            <div class="j-stat-title">Win Rate %</div>
+            <div class="j-stat-num yellow" id="statWinRate">0.0%</div>
+          </div>
+          <div class="j-stat-card">
+            <div class="j-stat-title">Net Realized PnL</div>
+            <div class="j-stat-num green" id="statTotalPnl">+0.00 USDT</div>
+          </div>
+          <div class="j-stat-card">
+            <div class="j-stat-title">Wins / Losses</div>
+            <div class="j-stat-num" id="statWinLossRatio">0W / 0L</div>
+          </div>
+          <div class="j-stat-card">
+            <div class="j-stat-title">Profit Factor</div>
+            <div class="j-stat-num" id="statProfitFactor">—</div>
+          </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="filter-bar">
+          <div class="category-pills">
+            <button class="cat-pill active" onclick="setCategoryFilter('ALL')">All Trades (<span id="countAll">0</span>)</button>
+            <button class="cat-pill win" onclick="setCategoryFilter('WIN')">🟢 Wins (<span id="countWin">0</span>)</button>
+            <button class="cat-pill loss" onclick="setCategoryFilter('LOSS')">🔴 Losses (<span id="countLoss">0</span>)</button>
+            <button class="cat-pill open" onclick="setCategoryFilter('OPEN')">⏳ Open (<span id="countOpen">0</span>)</button>
+            <button class="cat-pill" onclick="setCategoryFilter('BREAKEVEN')">⚪ BE (<span id="countBE">0</span>)</button>
+          </div>
+          <input type="text" id="tradeSearchInput" class="search-input" placeholder="🔍 Search symbol, tag..." oninput="renderJournal()">
+        </div>
       </div>
-      <div class="formula-steps">
-        <div class="formula-step">
-          <div class="step-header">1. Loss per Unit with Fees</div>
-          <div class="step-code" id="step1Code">ΔP + Fee_open + Fee_sl = 0.0161 USDT</div>
+
+      <!-- VIEW 1: TABLE VIEW -->
+      <div class="table-container" id="tableViewContainer">
+        <table class="journal-table">
+          <thead>
+            <tr>
+              <th>Chart</th>
+              <th>Date</th>
+              <th>Symbol</th>
+              <th>Side</th>
+              <th>Entry / SL / TP</th>
+              <th>Lev & Qty</th>
+              <th>Target RRR</th>
+              <th>Status</th>
+              <th>Net P&L</th>
+              <th>Strategy & Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="journalTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- VIEW 2: GALLERY / CARDS VIEW (IMAGES VIEW) -->
+      <div class="gallery-grid" id="galleryViewContainer" style="display: none;">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL: ADD / EDIT TRADE -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="tradeModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title" id="modalTitle">
+            <span>📝</span> Log Trade Entry
+          </div>
+          <button class="modal-close" onclick="closeTradeModal()">✕</button>
         </div>
-        <div class="formula-step">
-          <div class="step-header">2. Fee-Adjusted Qty</div>
-          <div class="step-code" id="step2Code">0.20 / 0.0161 = 12.42 units</div>
+        <div class="modal-body">
+          <input type="hidden" id="modalTradeId">
+
+          <!-- Symbol, Direction, Date -->
+          <div class="form-row-3">
+            <div class="form-group" style="margin: 0;">
+              <label><span>Symbol</span></label>
+              <input type="text" id="mSymbol" value="KASUSDT" style="text-transform: uppercase;">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label><span>Direction</span></label>
+              <select id="mDirection">
+                <option value="LONG">▲ LONG (Buy)</option>
+                <option value="SHORT">▼ SHORT (Sell)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label><span>Leverage</span></label>
+              <input type="number" id="mLeverage" value="5">
+            </div>
+          </div>
+
+          <!-- Entry, SL, TP -->
+          <div class="form-row-3">
+            <div class="form-group" style="margin: 0;">
+              <label><span>Entry Price</span></label>
+              <input type="number" id="mEntry" step="0.0001" value="0.5581">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label><span>Stop Loss (SL)</span></label>
+              <input type="number" id="mStopLoss" step="0.0001" value="0.5426">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label><span>Take Profit (TP)</span></label>
+              <input type="number" id="mTakeProfit" step="0.0001" value="0.6111">
+            </div>
+          </div>
+
+          <!-- Quantity, Target Risk, Net RRR -->
+          <div class="form-row-3">
+            <div class="form-group" style="margin: 0;">
+              <label><span>Quantity (Units)</span></label>
+              <input type="number" id="mQuantity" value="12">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label><span>Net Risk ($R)</span></label>
+              <input type="number" id="mRisk" step="0.01" value="0.20">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label><span>Net RRR</span></label>
+              <input type="number" id="mRrr" step="0.01" value="3.25">
+            </div>
+          </div>
+
+          <!-- Outcome Status & Realized Net P&L -->
+          <div class="form-row">
+            <div class="form-group" style="margin: 0;">
+              <label><span>Trade Status / Outcome</span></label>
+              <select id="mStatus" onchange="onModalStatusChange()">
+                <option value="OPEN">⏳ Open Position</option>
+                <option value="WIN">🟢 WIN (Target Hit)</option>
+                <option value="LOSS">🔴 LOSS (Stop Loss Hit)</option>
+                <option value="BREAKEVEN">⚪ BREAKEVEN</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label><span>Actual Realized Net P&L</span></label>
+              <div class="input-wrapper">
+                <input type="number" id="mRealizedPnl" step="0.0001" placeholder="0.0000">
+                <span class="unit-badge">USDT</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Strategy Tags & Notes -->
+          <div class="form-group" style="margin: 0;">
+            <label><span>Strategy Setup / Tags</span><span class="hint">e.g. Breakout, 4H Support, Trend</span></label>
+            <input type="text" id="mTags" placeholder="Breakout, Retest, 15m Supply">
+          </div>
+
+          <div class="form-group" style="margin: 0;">
+            <label><span>Trade Notes & Reflection</span></label>
+            <textarea id="mNotes" placeholder="Reason for entry, emotions, execution details, post-trade analysis..."></textarea>
+          </div>
+
+          <!-- Chart Screenshot Attachment (Dropzone + Paste Support) -->
+          <div class="form-group" style="margin: 0;">
+            <label><span>Chart Screenshot Attachment</span><span class="hint" style="color: #69f0ae;">Tip: Press Ctrl+V to paste!</span></label>
+            <div class="dropzone" id="modalDropzone" onclick="document.getElementById('modalImageInput').click()">
+              <input type="file" id="modalImageInput" accept="image/*" style="display: none;" onchange="handleImageFileSelect(event)">
+              <div class="dropzone-icon">📸</div>
+              <div class="dropzone-text">Click to upload, drag image here, or <strong>paste (Ctrl+V)</strong></div>
+              <div class="dropzone-sub">Supports PNG, JPG, WebP chart screenshots</div>
+              <img id="modalImgPreview" class="dropzone-preview" alt="Chart Preview">
+            </div>
+            <button type="button" id="btnRemoveImg" class="btn-action" style="margin-top: 6px; display: none; color: #ff8a80;" onclick="removeModalImage()">🗑️ Remove Attached Image</button>
+          </div>
         </div>
-        <div class="formula-step">
-          <div class="step-header">3. Net Loss at SL (Guaranteed)</div>
-          <div class="step-code" id="step3Code">Price Loss + Total Fees = -0.2000 USDT</div>
-        </div>
-        <div class="formula-step">
-          <div class="step-header">4. Net Profit at TP</div>
-          <div class="step-code" id="step4Code">Gross (+0.657) - Fees (0.008) = +0.650 USDT</div>
-        </div>
-        <div class="formula-step">
-          <div class="step-header">5. Actual Net RRR</div>
-          <div class="step-code" id="step5Code">0.6502 / 0.2000 = 1 : 3.25 (3.25R)</div>
-        </div>
-        <div class="formula-step">
-          <div class="step-header">6. Min. Win Rate (Net)</div>
-          <div class="step-code" id="step6Code">1 / (1 + 3.25) = 23.53%</div>
+        <div class="modal-footer">
+          <button type="button" class="btn-action" onclick="closeTradeModal()">Cancel</button>
+          <button type="button" class="btn-action primary" onclick="saveTradeEntry()">💾 Save Entry</button>
         </div>
       </div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- LIGHTBOX: FULL-SCREEN IMAGE PREVIEW -->
+    <!-- ============================================================ -->
+    <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
+      <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+      <img id="lightboxImg" class="lightbox-img" alt="Enlarged Chart View">
+    </div>
+
     <footer>
-      Bybit Isolated Margin Liquidation & Sizing Engine • True Net Risk Management (Fee-Adjusted)
+      Bybit Isolated Margin Liquidation & Sizing Engine • Notion-Style Visual Trading Journal
     </footer>
   </div>
 
   <script>
+    /* ============================================================ */
+    /* 1. CALCULATOR LOGIC & STATE */
+    /* ============================================================ */
     let currentDirection = 'LONG';
     let currentLotStep = '1'; // '1', '0.1', '0.01', 'exact'
 
@@ -1220,20 +2063,11 @@
       const deltaP = Math.abs(EP - SL);
 
       if (EP > 0 && deltaP > 0 && targetRrr > 0) {
-        // Net Loss per unit at SL = deltaP + (EP * f) + (SL * f)
         const lossPerUnit = deltaP + (EP * f) + (SL * f);
-        // Desired Net Profit per unit = targetRrr * lossPerUnit
-        // Net Profit per unit = deltaP_TP - (EP * f) - (TP * f)
-        // For LONG: TP - EP - (EP * f) - (TP * f) = targetRrr * lossPerUnit
-        // TP * (1 - f) = targetRrr * lossPerUnit + EP * (1 + f)
-        // TP = (targetRrr * lossPerUnit + EP * (1 + f)) / (1 - f)
         let tpPrice = 0;
         if (currentDirection === 'LONG') {
           tpPrice = (targetRrr * lossPerUnit + EP * (1 + f)) / (1 - f);
         } else {
-          // For SHORT: EP - TP - (EP * f) - (TP * f) = targetRrr * lossPerUnit
-          // EP * (1 - f) - TP * (1 + f) = targetRrr * lossPerUnit
-          // TP = (EP * (1 - f) - targetRrr * lossPerUnit) / (1 + f)
           tpPrice = (EP * (1 - f) - targetRrr * lossPerUnit) / (1 + f);
         }
         document.getElementById('takeProfitPrice').value = tpPrice > 10 ? tpPrice.toFixed(2) : (tpPrice > 1 ? tpPrice.toFixed(4) : tpPrice.toFixed(5));
@@ -1283,6 +2117,7 @@
 
     function copyOrderDetails() {
       const dir = currentDirection;
+      const symb = document.getElementById('coinSymbol').value.toUpperCase();
       const qty = document.getElementById('outQuantity').innerText;
       const ep = document.getElementById('entryPrice').value;
       const sl = document.getElementById('stopLossPrice').value;
@@ -1292,12 +2127,12 @@
       const rrr = document.getElementById('outRRR').innerText;
       const netProfit = document.getElementById('outProfit').innerText;
 
-      const text = `[Bybit Order Setup - Net Fee Adjusted]\nDirection: ${dir}\nQty: ${qty}\nEntry: ${ep} USDT\nStop Loss: ${sl} USDT\nTake Profit: ${tp} USDT\nLeverage: ${lev}x Isolated\nNet Loss @ SL: -${risk} USDT\nNet Profit @ TP: ${netProfit}\nNet RRR: ${rrr}`;
+      const text = `[Bybit Order Setup - ${symb}]\nDirection: ${dir}\nQty: ${qty}\nEntry: ${ep} USDT\nStop Loss: ${sl} USDT\nTake Profit: ${tp} USDT\nLeverage: ${lev}x Isolated\nNet Loss @ SL: -${risk} USDT\nNet Profit @ TP: ${netProfit}\nNet RRR: ${rrr}`;
       
       navigator.clipboard.writeText(text).then(() => {
         const btn = document.getElementById('copyOrderBtn');
         btn.innerText = '✅ Copied!';
-        setTimeout(() => { btn.innerText = '📋 Copy Order'; }, 2000);
+        setTimeout(() => { btn.innerText = '📋 Copy'; }, 2000);
       }).catch(err => {
         alert('Copied setup to clipboard!');
       });
@@ -1319,18 +2154,16 @@
       const deltaP = Math.abs(EP - SL);
       if (deltaP === 0) return;
 
-      // 1. Fee-Adjusted Loss per Unit at SL
-      // Loss = Qty * [ |EP - SL| + (EP * f) + (SL * f) ]
       const lossPerUnit = deltaP + (EP * f) + (SL * f);
       const exactQty = R / lossPerUnit;
 
       let finalQty = applyLotStep(exactQty, currentLotStep);
-      if (finalQty <= 0) finalQty = exactQty;
+      if (finalQty <= 0) finalQty = 1;
 
       const posValue = finalQty * EP;
       const IM = posValue / L;
 
-      // 2. Liquidation Price & Max Safe Leverage
+      // Liquidation & Max Leverage
       let LP = 0;
       let maxL = 0;
       let isSafe = true;
@@ -1362,14 +2195,14 @@
         }
       }
 
-      // 3. Exact Actual Net Loss at SL
+      // Exact Actual Net Loss at SL
       const grossLoss = finalQty * deltaP;
       const openFee = posValue * f;
       const slExitFee = (finalQty * SL) * f;
       const totalSlFees = openFee + slExitFee;
       const actualNetLoss = grossLoss + totalSlFees;
 
-      // 4. Exact Actual Net Profit at TP
+      // Exact Actual Net Profit at TP
       let grossProfit = 0;
       let tpExitFee = 0;
       let totalTpFees = 0;
@@ -1492,21 +2325,8 @@
       }
       safetyText.innerHTML = safetyMsg;
 
-      // Update Interactive Visual Ladder (Using Actual Net PnL)
+      // Update Interactive Visual Ladder
       updateLadder(EP, SL, TP, LP, actualNetProfit, actualNetLoss, isSafe);
-
-      // Step-by-Step Math Update
-      document.getElementById('step1Code').innerText = `${deltaP.toFixed(4)} + ${(EP * f).toFixed(4)} + ${(SL * f).toFixed(4)} = ${lossPerUnit.toFixed(4)} USDT`;
-      document.getElementById('step2Code').innerText = `${R.toFixed(2)} / ${lossPerUnit.toFixed(4)} = ${exactQty.toFixed(2)} → ${qtyStr}`;
-      document.getElementById('step3Code').innerText = `-${grossLoss.toFixed(4)} (price) + -${totalSlFees.toFixed(4)} (fees) = -${actualNetLoss.toFixed(4)} USDT`;
-      document.getElementById('step4Code').innerText = `+${grossProfit.toFixed(4)} (price) - ${totalTpFees.toFixed(4)} (fees) = +${actualNetProfit.toFixed(4)} USDT`;
-      if (netRrr > 0) {
-        document.getElementById('step5Code').innerText = `${actualNetProfit.toFixed(4)} / ${actualNetLoss.toFixed(4)} = 1 : ${netRrr.toFixed(2)} (${netRrr.toFixed(2)}R Net)`;
-        document.getElementById('step6Code').innerText = `1 / (1 + ${netRrr.toFixed(2)}) = ${winRate.toFixed(2)}%`;
-      } else {
-        document.getElementById('step5Code').innerText = `Set TP to view Net RRR`;
-        document.getElementById('step6Code').innerText = `—`;
-      }
     }
 
     function updateLadder(EP, SL, TP, LP, netProfit, netLoss, isSafe) {
@@ -1557,8 +2377,629 @@
       }
     }
 
-    // Initialize on page load
+    /* ============================================================ */
+    /* 2. NOTION-STYLE TRADING JOURNAL (IndexedDB + Storage) */
+    /* ============================================================ */
+    let currentJournalView = 'table'; // 'table' or 'gallery'
+    let currentCategoryFilter = 'ALL'; // 'ALL', 'WIN', 'LOSS', 'OPEN', 'BREAKEVEN'
+    let tradesData = [];
+    let modalAttachedImage = null; // Base64 dataURL
+
+    // IndexedDB Setup for large screenshot storage
+    const DB_NAME = 'BybitTradingJournalDB';
+    const DB_VERSION = 1;
+    let dbInstance = null;
+
+    function initDB() {
+      return new Promise((resolve) => {
+        if (!window.indexedDB) {
+          // Fallback to localStorage
+          loadTradesFromLocalStorage();
+          resolve();
+          return;
+        }
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('trades')) {
+            db.createObjectStore('trades', { keyPath: 'id' });
+          }
+        };
+        request.onsuccess = (e) => {
+          dbInstance = e.target.result;
+          loadTradesFromDB().then(() => resolve());
+        };
+        request.onerror = () => {
+          loadTradesFromLocalStorage();
+          resolve();
+        };
+      });
+    }
+
+    function loadTradesFromDB() {
+      return new Promise((resolve) => {
+        if (!dbInstance) {
+          loadTradesFromLocalStorage();
+          resolve();
+          return;
+        }
+        const tx = dbInstance.transaction('trades', 'readonly');
+        const store = tx.objectStore('trades');
+        const request = store.getAll();
+        request.onsuccess = () => {
+          tradesData = request.result || [];
+          if (tradesData.length === 0) {
+            loadDefaultSampleTrades();
+          }
+          renderJournal();
+          resolve();
+        };
+        request.onerror = () => {
+          loadTradesFromLocalStorage();
+          resolve();
+        };
+      });
+    }
+
+    function saveTradeToDB(trade) {
+      return new Promise((resolve) => {
+        if (!dbInstance) {
+          saveTradesToLocalStorage();
+          resolve();
+          return;
+        }
+        const tx = dbInstance.transaction('trades', 'readwrite');
+        const store = tx.objectStore('trades');
+        store.put(trade);
+        tx.oncomplete = () => resolve();
+      });
+    }
+
+    function deleteTradeFromDB(tradeId) {
+      return new Promise((resolve) => {
+        if (!dbInstance) {
+          saveTradesToLocalStorage();
+          resolve();
+        }
+        const tx = dbInstance.transaction('trades', 'readwrite');
+        const store = tx.objectStore('trades');
+        store.delete(tradeId);
+        tx.oncomplete = () => resolve();
+      });
+    }
+
+    function loadTradesFromLocalStorage() {
+      try {
+        const stored = localStorage.getItem('bybit_journal_trades');
+        tradesData = stored ? JSON.parse(stored) : [];
+        if (tradesData.length === 0) loadDefaultSampleTrades();
+      } catch (e) {
+        tradesData = [];
+      }
+      renderJournal();
+    }
+
+    function saveTradesToLocalStorage() {
+      try {
+        localStorage.setItem('bybit_journal_trades', JSON.stringify(tradesData));
+      } catch (e) {
+        console.warn('Storage quota reached in localStorage');
+      }
+    }
+
+    function loadDefaultSampleTrades() {
+      // Add initial verified sample trade so user sees Notion-style journal in action
+      const sampleTrade = {
+        id: 'trade_' + Date.now(),
+        date: new Date().toISOString(),
+        symbol: 'KASUSDT',
+        direction: 'LONG',
+        entry: 0.5581,
+        stopLoss: 0.5426,
+        takeProfit: 0.6111,
+        leverage: 5,
+        quantity: 12,
+        risk: 0.20,
+        netRrr: 3.25,
+        status: 'OPEN',
+        realizedPnl: 0,
+        tags: 'Breakout, Support, 5x Isolated',
+        notes: 'Clean bounce off 0.5581 support level. Risk capped to strictly 0.20 USDT net after fees.',
+        image: null
+      };
+      tradesData = [sampleTrade];
+      if (dbInstance) saveTradeToDB(sampleTrade);
+      else saveTradesToLocalStorage();
+    }
+
+    /* Notion View Switcher */
+    function switchView(viewName) {
+      currentJournalView = viewName;
+      const btnTable = document.getElementById('btnTableView');
+      const btnGallery = document.getElementById('btnGalleryView');
+      const tableContainer = document.getElementById('tableViewContainer');
+      const galleryContainer = document.getElementById('galleryViewContainer');
+
+      if (viewName === 'table') {
+        btnTable.classList.add('active');
+        btnGallery.classList.remove('active');
+        tableContainer.style.display = 'block';
+        galleryContainer.style.display = 'none';
+      } else {
+        btnGallery.classList.add('active');
+        btnTable.classList.remove('active');
+        tableContainer.style.display = 'none';
+        galleryContainer.style.display = 'grid';
+      }
+      renderJournal();
+    }
+
+    function setCategoryFilter(cat) {
+      currentCategoryFilter = cat;
+      const pills = document.querySelectorAll('.category-pills .cat-pill');
+      pills.forEach(p => p.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      renderJournal();
+    }
+
+    /* Modal Operations */
+    function openNewTradeModal() {
+      document.getElementById('modalTitle').innerHTML = '<span>📝</span> Log New Trade';
+      document.getElementById('modalTradeId').value = '';
+      document.getElementById('mSymbol').value = document.getElementById('coinSymbol').value.toUpperCase() || 'KASUSDT';
+      document.getElementById('mDirection').value = currentDirection;
+      document.getElementById('mLeverage').value = document.getElementById('leverageSlider').value;
+      document.getElementById('mEntry').value = document.getElementById('entryPrice').value;
+      document.getElementById('mStopLoss').value = document.getElementById('stopLossPrice').value;
+      document.getElementById('mTakeProfit').value = document.getElementById('takeProfitPrice').value;
+      document.getElementById('mQuantity').value = document.getElementById('outQuantity').innerText;
+      document.getElementById('mRisk').value = document.getElementById('riskAmount').value;
+      document.getElementById('mRrr').value = document.getElementById('targetRrrInput').value;
+      document.getElementById('mStatus').value = 'OPEN';
+      document.getElementById('mRealizedPnl').value = '';
+      document.getElementById('mTags').value = '';
+      document.getElementById('mNotes').value = '';
+      
+      removeModalImage();
+      document.getElementById('tradeModal').classList.add('active');
+    }
+
+    function openLogModalFromCurrentCalc() {
+      openNewTradeModal();
+      const symbol = document.getElementById('coinSymbol').value.toUpperCase() || 'TRADE';
+      document.getElementById('mTags').value = `${symbol}, ${document.getElementById('leverageSlider').value}x Isolated, Strict Risk`;
+    }
+
+    function editTrade(id) {
+      const t = tradesData.find(x => x.id === id);
+      if (!t) return;
+
+      document.getElementById('modalTitle').innerHTML = '<span>✏️</span> Edit Trade Entry';
+      document.getElementById('modalTradeId').value = t.id;
+      document.getElementById('mSymbol').value = t.symbol;
+      document.getElementById('mDirection').value = t.direction;
+      document.getElementById('mLeverage').value = t.leverage;
+      document.getElementById('mEntry').value = t.entry;
+      document.getElementById('mStopLoss').value = t.stopLoss;
+      document.getElementById('mTakeProfit').value = t.takeProfit;
+      document.getElementById('mQuantity').value = t.quantity;
+      document.getElementById('mRisk').value = t.risk;
+      document.getElementById('mRrr').value = t.netRrr;
+      document.getElementById('mStatus').value = t.status;
+      document.getElementById('mRealizedPnl').value = t.realizedPnl !== undefined ? t.realizedPnl : '';
+      document.getElementById('mTags').value = t.tags || '';
+      document.getElementById('mNotes').value = t.notes || '';
+
+      if (t.image) {
+        setModalImagePreview(t.image);
+      } else {
+        removeModalImage();
+      }
+
+      document.getElementById('tradeModal').classList.add('active');
+    }
+
+    function closeTradeModal() {
+      document.getElementById('tradeModal').classList.remove('active');
+    }
+
+    function onModalStatusChange() {
+      const status = document.getElementById('mStatus').value;
+      const pnlInput = document.getElementById('mRealizedPnl');
+      const risk = parseFloat(document.getElementById('mRisk').value) || 0.20;
+      const rrr = parseFloat(document.getElementById('mRrr').value) || 3.0;
+
+      if (status === 'WIN') {
+        const estProfit = risk * rrr;
+        pnlInput.value = estProfit.toFixed(4);
+      } else if (status === 'LOSS') {
+        pnlInput.value = (-risk).toFixed(4);
+      } else if (status === 'BREAKEVEN') {
+        pnlInput.value = '0.0000';
+      } else {
+        pnlInput.value = '';
+      }
+    }
+
+    function saveTradeEntry() {
+      const editId = document.getElementById('modalTradeId').value;
+      const id = editId || ('trade_' + Date.now());
+      const existing = tradesData.find(x => x.id === id);
+
+      const trade = {
+        id: id,
+        date: existing ? existing.date : new Date().toISOString(),
+        symbol: document.getElementById('mSymbol').value.toUpperCase().trim() || 'TRADE',
+        direction: document.getElementById('mDirection').value,
+        leverage: parseFloat(document.getElementById('mLeverage').value) || 5,
+        entry: parseFloat(document.getElementById('mEntry').value) || 0,
+        stopLoss: parseFloat(document.getElementById('mStopLoss').value) || 0,
+        takeProfit: parseFloat(document.getElementById('mTakeProfit').value) || 0,
+        quantity: parseFloat(document.getElementById('mQuantity').value) || 1,
+        risk: parseFloat(document.getElementById('mRisk').value) || 0.20,
+        netRrr: parseFloat(document.getElementById('mRrr').value) || 3.0,
+        status: document.getElementById('mStatus').value,
+        realizedPnl: parseFloat(document.getElementById('mRealizedPnl').value) || 0,
+        tags: document.getElementById('mTags').value.trim(),
+        notes: document.getElementById('mNotes').value.trim(),
+        image: modalAttachedImage
+      };
+
+      if (editId) {
+        const idx = tradesData.findIndex(x => x.id === editId);
+        if (idx !== -1) tradesData[idx] = trade;
+      } else {
+        tradesData.unshift(trade);
+      }
+
+      saveTradeToDB(trade);
+      closeTradeModal();
+      renderJournal();
+    }
+
+    function deleteTrade(id) {
+      if (!confirm('Are you sure you want to delete this trade entry?')) return;
+      tradesData = tradesData.filter(x => x.id !== id);
+      deleteTradeFromDB(id);
+      renderJournal();
+    }
+
+    function quickSetStatus(id, newStatus) {
+      const t = tradesData.find(x => x.id === id);
+      if (!t) return;
+      t.status = newStatus;
+      if (newStatus === 'WIN') {
+        t.realizedPnl = parseFloat((t.risk * t.netRrr).toFixed(4));
+      } else if (newStatus === 'LOSS') {
+        t.realizedPnl = parseFloat((-t.risk).toFixed(4));
+      } else if (newStatus === 'BREAKEVEN') {
+        t.realizedPnl = 0;
+      }
+      saveTradeToDB(t);
+      renderJournal();
+    }
+
+    /* Image Attachment & Clipboard Paste Support */
+    function handleImageFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      processImageFile(file);
+    }
+
+    function processImageFile(file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setModalImagePreview(event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function setModalImagePreview(dataUrl) {
+      modalAttachedImage = dataUrl;
+      const preview = document.getElementById('modalImgPreview');
+      preview.src = dataUrl;
+      preview.style.display = 'block';
+      document.getElementById('btnRemoveImg').style.display = 'inline-flex';
+    }
+
+    function removeModalImage() {
+      modalAttachedImage = null;
+      const preview = document.getElementById('modalImgPreview');
+      preview.src = '';
+      preview.style.display = 'none';
+      document.getElementById('btnRemoveImg').style.display = 'none';
+      document.getElementById('modalImageInput').value = '';
+    }
+
+    // Direct Ctrl+V Paste Listener for Chart Screenshots
+    window.addEventListener('paste', (e) => {
+      const modal = document.getElementById('tradeModal');
+      if (!modal.classList.contains('active')) return;
+
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+      for (let item of items) {
+        if (item.type.indexOf('image') === 0) {
+          const blob = item.getAsFile();
+          processImageFile(blob);
+          e.preventDefault();
+          break;
+        }
+      }
+    });
+
+    /* Lightbox Full-screen Viewer */
+    function openLightbox(imgSrc) {
+      if (!imgSrc) return;
+      const overlay = document.getElementById('lightboxOverlay');
+      const img = document.getElementById('lightboxImg');
+      img.src = imgSrc;
+      overlay.classList.add('active');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightboxOverlay').classList.remove('active');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+        closeTradeModal();
+      }
+    });
+
+    /* Render Journal System (Table + Gallery + Stats) */
+    function renderJournal() {
+      const search = (document.getElementById('tradeSearchInput').value || '').toLowerCase();
+
+      // Counts
+      const totalAll = tradesData.length;
+      const countWins = tradesData.filter(x => x.status === 'WIN').length;
+      const countLosses = tradesData.filter(x => x.status === 'LOSS').length;
+      const countOpens = tradesData.filter(x => x.status === 'OPEN').length;
+      const countBE = tradesData.filter(x => x.status === 'BREAKEVEN').length;
+
+      document.getElementById('countAll').innerText = totalAll;
+      document.getElementById('countWin').innerText = countWins;
+      document.getElementById('countLoss').innerText = countLosses;
+      document.getElementById('countOpen').innerText = countOpens;
+      document.getElementById('countBE').innerText = countBE;
+
+      // Stats Calculations
+      const closedTrades = tradesData.filter(x => x.status === 'WIN' || x.status === 'LOSS' || x.status === 'BREAKEVEN');
+      const totalPnl = closedTrades.reduce((acc, x) => acc + (parseFloat(x.realizedPnl) || 0), 0);
+      const winRate = closedTrades.length > 0 ? ((countWins / closedTrades.length) * 100) : 0;
+      
+      const totalWinsPnl = closedTrades.filter(x => x.status === 'WIN').reduce((acc, x) => acc + (parseFloat(x.realizedPnl) || 0), 0);
+      const totalLossesPnl = Math.abs(closedTrades.filter(x => x.status === 'LOSS').reduce((acc, x) => acc + (parseFloat(x.realizedPnl) || 0), 0));
+      const profitFactor = totalLossesPnl > 0 ? (totalWinsPnl / totalLossesPnl).toFixed(2) : (totalWinsPnl > 0 ? '∞' : '—');
+
+      document.getElementById('statTotalTrades').innerText = totalAll;
+      document.getElementById('statWinRate').innerText = `${winRate.toFixed(1)}%`;
+      
+      const pnlElem = document.getElementById('statTotalPnl');
+      pnlElem.innerText = `${totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)} USDT`;
+      pnlElem.className = `j-stat-num ${totalPnl >= 0 ? 'green' : 'red'}`;
+      document.getElementById('statWinLossRatio').innerText = `${countWins}W / ${countLosses}L (${countOpens} Open)`;
+      document.getElementById('statProfitFactor').innerText = profitFactor;
+
+      // Filtered Trades
+      let filtered = tradesData.filter(t => {
+        if (currentCategoryFilter !== 'ALL' && t.status !== currentCategoryFilter) return false;
+        if (search) {
+          const matchSym = t.symbol.toLowerCase().includes(search);
+          const matchTag = (t.tags || '').toLowerCase().includes(search);
+          const matchNotes = (t.notes || '').toLowerCase().includes(search);
+          if (!matchSym && !matchTag && !matchNotes) return false;
+        }
+        return true;
+      });
+
+      // Render Table View
+      const tbody = document.getElementById('journalTableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="empty-state"><div class="empty-icon">📭</div><div>No trades found in this view. Click <strong>"+ New Trade"</strong> to log one!</div></td></tr>`;
+      } else {
+        tbody.innerHTML = filtered.map(t => {
+          const dStr = new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+          const pnlVal = parseFloat(t.realizedPnl) || 0;
+          const pnlColor = pnlVal > 0 ? 'var(--green)' : (pnlVal < 0 ? 'var(--red)' : '#90a4ae');
+          const pnlText = t.status === 'OPEN' ? '<span style="color: var(--text-muted);">In Progress</span>' : `<span style="color: ${pnlColor}; font-weight: 700;">${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)}</span>`;
+
+          const imgCell = t.image 
+            ? `<div class="thumb-cell" onclick="openLightbox('${t.image}')" title="Click to enlarge chart"><img src="${t.image}" alt="Chart"></div>`
+            : `<div class="thumb-cell" onclick="editTrade('${t.id}')" title="Add Chart Image"><span class="no-img">📷</span></div>`;
+
+          return `
+            <tr>
+              <td>${imgCell}</td>
+              <td style="color: var(--text-muted); font-size: 11px;">${dStr}</td>
+              <td style="font-weight: 800; color: #fff;">${t.symbol}</td>
+              <td><span class="dir-tag ${t.direction.toLowerCase()}">${t.direction}</span></td>
+              <td>
+                <span style="color: #90caf9;">${t.entry}</span> / 
+                <span style="color: var(--red);">${t.stopLoss}</span> / 
+                <span style="color: var(--green);">${t.takeProfit}</span>
+              </td>
+              <td>${t.leverage}x (${t.quantity})</td>
+              <td style="color: var(--accent-yellow); font-weight: 700;">1 : ${t.netRrr}</td>
+              <td>
+                <select class="status-badge ${t.status.toLowerCase()}" onchange="quickSetStatus('${t.id}', this.value)" style="border: none; padding: 3px 6px; font-weight: 700;">
+                  <option value="OPEN" ${t.status === 'OPEN' ? 'selected' : ''}>⏳ OPEN</option>
+                  <option value="WIN" ${t.status === 'WIN' ? 'selected' : ''}>🟢 WIN</option>
+                  <option value="LOSS" ${t.status === 'LOSS' ? 'selected' : ''}>🔴 LOSS</option>
+                  <option value="BREAKEVEN" ${t.status === 'BREAKEVEN' ? 'selected' : ''}>⚪ BE</option>
+                </select>
+              </td>
+              <td>${pnlText}</td>
+              <td style="max-width: 200px; font-family: 'Inter', sans-serif; font-size: 12px; color: #b0bec5;">
+                ${t.tags ? `<div style="color: #90caf9; font-size: 10.5px; font-weight: 600;">#${t.tags}</div>` : ''}
+                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${t.notes || '—'}</div>
+              </td>
+              <td>
+                <div style="display: flex; gap: 4px;">
+                  <button class="btn-action" style="padding: 3px 8px; font-size: 11px;" onclick="editTrade('${t.id}')">✏️</button>
+                  <button class="btn-action" style="padding: 3px 8px; font-size: 11px; color: #ff8a80;" onclick="deleteTrade('${t.id}')">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Render Gallery View (Images View)
+      const gallery = document.getElementById('galleryViewContainer');
+      if (filtered.length === 0) {
+        gallery.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><div class="empty-icon">📭</div><div>No trades found. Click <strong>"+ New Trade"</strong> to log one!</div></div>`;
+      } else {
+        gallery.innerHTML = filtered.map(t => {
+          const dStr = new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          const pnlVal = parseFloat(t.realizedPnl) || 0;
+          const pnlColor = pnlVal > 0 ? 'var(--green)' : (pnlVal < 0 ? 'var(--red)' : '#90a4ae');
+          const pnlText = t.status === 'OPEN' ? 'Open Position' : `${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)} USDT`;
+
+          const imgBlock = t.image 
+            ? `<div class="card-img-wrap" onclick="openLightbox('${t.image}')">
+                 <img src="${t.image}" alt="Chart Screenshot">
+                 <div class="card-img-overlay">🔍 Click to Expand</div>
+               </div>`
+            : `<div class="card-img-wrap" onclick="editTrade('${t.id}')">
+                 <div class="card-no-img">📷<span>No chart attached • Click to add</span></div>
+               </div>`;
+
+          const tagList = (t.tags || '').split(',').map(x => x.trim()).filter(Boolean);
+
+          return `
+            <div class="trade-card">
+              ${imgBlock}
+              <div class="card-body">
+                <div class="card-header-row">
+                  <div class="card-symbol-title">
+                    <span>${t.symbol}</span>
+                    <span class="dir-tag ${t.direction.toLowerCase()}">${t.direction}</span>
+                  </div>
+                  <span class="status-badge ${t.status.toLowerCase()}">${t.status}</span>
+                </div>
+
+                <div class="card-pnl-row">
+                  <span class="card-pnl-label">Realized Net P&L:</span>
+                  <span class="card-pnl-val" style="color: ${pnlColor};">${pnlText}</span>
+                </div>
+
+                <div class="card-meta-grid">
+                  <div class="card-meta-item">
+                    <span class="card-meta-label">Entry Price</span>
+                    <span style="color: #90caf9;">${t.entry}</span>
+                  </div>
+                  <div class="card-meta-item">
+                    <span class="card-meta-label">Net RRR</span>
+                    <span style="color: var(--accent-yellow); font-weight: 700;">1 : ${t.netRrr}</span>
+                  </div>
+                  <div class="card-meta-item">
+                    <span class="card-meta-label">Stop Loss</span>
+                    <span style="color: var(--red);">${t.stopLoss}</span>
+                  </div>
+                  <div class="card-meta-item">
+                    <span class="card-meta-label">Take Profit</span>
+                    <span style="color: var(--green);">${t.takeProfit}</span>
+                  </div>
+                </div>
+
+                ${tagList.length > 0 ? `
+                  <div class="card-tags">
+                    ${tagList.map(tag => `<span class="card-tag">#${tag}</span>`).join('')}
+                  </div>
+                ` : ''}
+
+                ${t.notes ? `<div class="card-notes">${t.notes}</div>` : ''}
+
+                <div class="card-actions">
+                  <span style="font-size: 11px; color: var(--text-muted);">${dStr} • ${t.leverage}x Lev</span>
+                  <div style="display: flex; gap: 6px;">
+                    <button class="btn-action" style="padding: 4px 8px; font-size: 11px;" onclick="editTrade('${t.id}')">✏️ Edit</button>
+                    <button class="btn-action" style="padding: 4px 8px; font-size: 11px; color: #ff8a80;" onclick="deleteTrade('${t.id}')">🗑️</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    /* CSV Export & JSON Backup / Restore */
+    function exportTradesToCSV() {
+      if (tradesData.length === 0) {
+        alert('No trades in journal to export.');
+        return;
+      }
+      const headers = ['ID', 'Date', 'Symbol', 'Direction', 'Leverage', 'Entry', 'StopLoss', 'TakeProfit', 'Quantity', 'Risk_USDT', 'Net_RRR', 'Status', 'Realized_PnL_USDT', 'Tags', 'Notes'];
+      const rows = tradesData.map(t => [
+        t.id,
+        t.date,
+        t.symbol,
+        t.direction,
+        t.leverage,
+        t.entry,
+        t.stopLoss,
+        t.takeProfit,
+        t.quantity,
+        t.risk,
+        t.netRrr,
+        t.status,
+        t.realizedPnl,
+        `"${(t.tags || '').replace(/"/g, '""')}"`,
+        `"${(t.notes || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `bybit_trade_journal_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function exportBackupJSON() {
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(tradesData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', dataStr);
+      downloadAnchor.setAttribute('download', `bybit_trading_journal_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importBackupJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            tradesData = imported;
+            if (dbInstance) {
+              const tx = dbInstance.transaction('trades', 'readwrite');
+              const store = tx.objectStore('trades');
+              store.clear();
+              imported.forEach(t => store.put(t));
+            }
+            saveTradesToLocalStorage();
+            renderJournal();
+            alert(`Successfully restored ${imported.length} trades!`);
+          }
+        } catch (err) {
+          alert('Invalid backup file format.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Initialize Calculator & Journal Database
     calculate();
+    initDB();
   </script>
 </body>
 </html>
