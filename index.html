@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bybit Futures Risk, RRR & Position Sizing Calculator (Net Fee Adjusted)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b0e14;
+      --card-bg: #151a23;
+      --card-border: #262d3d;
+      --input-bg: #1d2432;
+      --input-border: #313a4e;
+      --text-main: #f0f3f8;
+      --text-muted: #8b98af;
+      --accent-yellow: #f7a600;
+      --accent-yellow-hover: #ffb726;
+      --green: #0ecb81;
+      --green-bg: rgba(14, 203, 129, 0.12);
+      --red: #f6465d;
+      --red-bg: rgba(246, 70, 93, 0.12);
+      --blue: #2979ff;
+      --blue-bg: rgba(41, 121, 255, 0.12);
+      --orange: #ff9800;
+      --orange-bg: rgba(255, 152, 0, 0.12);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 60px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1160px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(247, 166, 0, 0.12);
+      color: var(--accent-yellow);
+      border: 1px solid rgba(247, 166, 0, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Main Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 960px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      color: #ffffff;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+
+    .card-title-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Direction Toggle */
+    .direction-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: var(--input-bg);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      margin-bottom: 20px;
+      border: 1px solid var(--card-border);
+    }
+
+    .dir-btn {
+      padding: 10px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .dir-btn.active.long {
+      background: var(--green);
+      color: #000;
+      box-shadow: 0 4px 12px rgba(14, 203, 129, 0.3);
+    }
+
+    .dir-btn.active.short {
+      background: var(--red);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(246, 70, 93, 0.3);
+    }
+
+    /* Form Inputs */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      color: #b0bec5;
+      margin-bottom: 6px;
+    }
+
+    label .hint {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 11px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="number"], input[type="text"], select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-size: 15px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      padding: 10px 48px 10px 12px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    select {
+      appearance: none;
+      cursor: pointer;
+      padding-right: 32px;
+    }
+
+    input[type="number"]:focus, input[type="text"]:focus, select:focus {
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 0 2px rgba(247, 166, 0, 0.15);
+    }
+
+    .unit-badge {
+      position: absolute;
+      right: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* RRR Quick Buttons */
+    .rrr-quick-bar {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .btn-pill {
+      flex: 1;
+      padding: 5px 0;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: #90caf9;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .btn-pill:hover, .btn-pill.active {
+      border-color: #2979ff;
+      background: rgba(41, 121, 255, 0.15);
+      color: #ffffff;
+    }
+
+    /* Precision / Step Buttons */
+    .step-bar {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .btn-step {
+      flex: 1;
+      padding: 4px 0;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-step:hover, .btn-step.active {
+      border-color: var(--accent-yellow);
+      color: var(--accent-yellow);
+      background: rgba(247, 166, 0, 0.12);
+    }
+
+    /* Leverage Section */
+    .leverage-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .leverage-value-badge {
+      background: var(--accent-yellow);
+      color: #000;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 2px 10px;
+      border-radius: 12px;
+    }
+
+    .range-slider {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--input-border);
+      outline: none;
+      accent-color: var(--accent-yellow);
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .quick-lev-buttons {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .btn-lev {
+      flex: 1;
+      padding: 6px 0;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-lev:hover, .btn-lev.active {
+      border-color: var(--accent-yellow);
+      color: var(--accent-yellow);
+      background: rgba(247, 166, 0, 0.08);
+    }
+
+    /* Advanced Settings Collapse */
+    .details-toggle {
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      user-select: none;
+      padding: 6px 0;
+    }
+
+    .details-toggle:hover {
+      color: #fff;
+    }
+
+    .collapsible-content {
+      display: none;
+      margin-top: 10px;
+      padding: 14px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: var(--radius-sm);
+      border: 1px dashed var(--input-border);
+    }
+
+    .collapsible-content.open {
+      display: block;
+    }
+
+    /* Output Results Side */
+    .results-card {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .highlight-box {
+      background: linear-gradient(135deg, #1c2331 0%, #151a24 100%);
+      border: 1px solid #2e384d;
+      border-radius: var(--radius-md);
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .highlight-box::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--accent-yellow);
+    }
+
+    .highlight-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .highlight-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .highlight-value-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .highlight-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .highlight-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .highlight-extra-row {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #283347;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #90a4ae;
+    }
+
+    /* Copy Button */
+    .btn-copy {
+      background: #1c2638;
+      border: 1px solid #334460;
+      color: #cfd8dc;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-copy:hover {
+      background: var(--accent-yellow);
+      color: #000;
+      border-color: var(--accent-yellow);
+    }
+
+    /* RRR Dedicated Card */
+    .rrr-hero-card {
+      background: #111722;
+      border: 1px solid #25334a;
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .rrr-hero-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .rrr-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #90caf9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .rrr-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(14, 203, 129, 0.15);
+      color: var(--green);
+      border: 1px solid rgba(14, 203, 129, 0.3);
+    }
+
+    .rrr-value-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .rrr-big-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .rrr-sub-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--green);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* RRR Visual Gauge Bar */
+    .rrr-bar-container {
+      width: 100%;
+      height: 8px;
+      background: #1e2638;
+      border-radius: 4px;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .rrr-risk-bar {
+      height: 100%;
+      background: var(--red);
+      transition: width 0.3s ease;
+    }
+
+    .rrr-reward-bar {
+      height: 100%;
+      background: var(--green);
+      transition: width 0.3s ease;
+    }
+
+    .rrr-winrate-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid #1c2638;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    .rrr-winrate-label {
+      color: #b0bec5;
+      font-weight: 600;
+    }
+
+    .rrr-winrate-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      color: var(--accent-yellow);
+      font-size: 12.5px;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat-item {
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+    }
+
+    .stat-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .stat-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .stat-val.profit { color: var(--green); }
+    .stat-val.loss { color: var(--red); }
+    .stat-val.warning { color: var(--accent-yellow); }
+    .stat-val.liq { color: var(--orange); }
+
+    /* Interactive Vertical Price Ladder */
+    .ladder-card {
+      background: #10141d;
+      border: 1px solid #232d3f;
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+
+    .ladder-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #90caf9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ladder-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-left: 20px;
+    }
+
+    .ladder-line {
+      position: absolute;
+      left: 7px;
+      top: 14px;
+      bottom: 14px;
+      width: 2px;
+      background: #2b3548;
+      z-index: 1;
+    }
+
+    .ladder-node {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      z-index: 2;
+      transition: all 0.2s ease;
+    }
+
+    .ladder-node::before {
+      content: '';
+      position: absolute;
+      left: -17px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--bg-dark);
+      z-index: 3;
+    }
+
+    .ladder-node.tp {
+      background: rgba(14, 203, 129, 0.08);
+      border: 1px solid rgba(14, 203, 129, 0.25);
+    }
+    .ladder-node.tp::before { background: var(--green); }
+
+    .ladder-node.entry {
+      background: rgba(41, 121, 255, 0.08);
+      border: 1px solid rgba(41, 121, 255, 0.25);
+    }
+    .ladder-node.entry::before { background: var(--blue); }
+
+    .ladder-node.sl {
+      background: rgba(246, 70, 93, 0.08);
+      border: 1px solid rgba(246, 70, 93, 0.25);
+    }
+    .ladder-node.sl::before { background: var(--red); }
+
+    .ladder-node.liq {
+      background: rgba(255, 152, 0, 0.08);
+      border: 1px solid rgba(255, 152, 0, 0.25);
+    }
+    .ladder-node.liq::before { background: var(--orange); }
+
+    .node-label {
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .node-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .node-pnl {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      margin-left: 8px;
+    }
+
+    /* Safety Status Box */
+    .safety-status {
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .safety-status.safe {
+      background: var(--green-bg);
+      border: 1px solid rgba(14, 203, 129, 0.35);
+      color: #a7f3d0;
+    }
+
+    .safety-status.danger {
+      background: var(--red-bg);
+      border: 1px solid rgba(246, 70, 93, 0.4);
+      color: #fca5a5;
+    }
+
+    .safety-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .safety-text strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    /* Formula Walkthrough Bottom Card */
+    .math-card {
+      margin-top: 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+    }
+
+    .math-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #cfd8dc;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .formula-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+    }
+
+    .formula-step {
+      background: #0f131a;
+      border: 1px solid #1f2737;
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-size: 12px;
+    }
+
+    .step-header {
+      color: var(--accent-yellow);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .step-code {
+      font-family: 'JetBrains Mono', monospace;
+      color: #eceff1;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    footer {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 12px;
+      color: #546e7a;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge">⚡ Bybit Isolated Margin • Net Risk Mode</div>
+      <h1>Futures Risk, RRR & Position Sizing Calculator</h1>
+      <p class="subtitle">Guarantees your <strong>exact net dollar loss after fees</strong> at Stop Loss, and displays <strong>actual net profits & RRR</strong>.</p>
+    </header>
+
+    <div class="grid">
+      <!-- Input Panel -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left">
+            <span>⚙️</span> Order Parameters
+          </div>
+          <button class="btn-copy" id="copyOrderBtn" onclick="copyOrderDetails()">📋 Copy Order</button>
+        </div>
+
+        <!-- Direction Toggle -->
+        <div class="direction-toggle">
+          <button type="button" class="dir-btn active long" id="btnLong" onclick="setDirection('LONG')">
+            ▲ LONG (Buy)
+          </button>
+          <button type="button" class="dir-btn short" id="btnShort" onclick="setDirection('SHORT')">
+            ▼ SHORT (Sell)
+          </button>
+        </div>
+
+        <!-- Fixed Risk / Loss -->
+        <div class="form-group">
+          <label>
+            <span>Target Net Loss at SL (After Fees)</span>
+            <span class="hint" style="color: #69f0ae;">✨ True Net Risk</span>
+          </label>
+          <div class="input-wrapper">
+            <input type="number" id="riskAmount" step="0.01" value="0.20" oninput="onRiskOrEntryChange()">
+            <span class="unit-badge">USDT</span>
+          </div>
+        </div>
+
+        <!-- Entry & Stop Loss Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>
+              <span>Entry Price</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="number" id="entryPrice" step="0.0001" value="0.5581" oninput="onRiskOrEntryChange()">
+              <span class="unit-badge">USDT</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <span>Stop Loss (SL)</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="number" id="stopLossPrice" step="0.0001" value="0.5426" oninput="onRiskOrEntryChange()">
+              <span class="unit-badge">USDT</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Take Profit Price & Target RRR Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>
+              <span>Take Profit (TP)</span>
+              <span class="hint">Price target</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="number" id="takeProfitPrice" step="0.0001" value="0.6111" oninput="onTakeProfitChange()">
+              <span class="unit-badge">USDT</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <span>Target RRR (Net 1 : X)</span>
+              <span class="hint">Auto-sets TP</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="number" id="targetRrrInput" step="0.1" value="3.25" oninput="onTargetRrrChange()">
+              <span class="unit-badge">R</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick RRR Presets -->
+        <div style="margin-top: -8px; margin-bottom: 16px;">
+          <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px;">Quick Net RRR Presets:</div>
+          <div class="rrr-quick-bar">
+            <button class="btn-pill" onclick="setTargetRrr(1.5)">1 : 1.5</button>
+            <button class="btn-pill" onclick="setTargetRrr(2.0)">1 : 2.0</button>
+            <button class="btn-pill" onclick="setTargetRrr(2.5)">1 : 2.5</button>
+            <button class="btn-pill" onclick="setTargetRrr(3.0)">1 : 3.0</button>
+            <button class="btn-pill" onclick="setTargetRrr(4.0)">1 : 4.0</button>
+            <button class="btn-pill" onclick="setTargetRrr(5.0)">1 : 5.0</button>
+          </div>
+        </div>
+
+        <!-- Lot Step & Precision Rounding -->
+        <div class="form-group">
+          <label>
+            <span>Quantity Precision / Step</span>
+            <span class="hint" id="stepRoundingHint" style="color: #69f0ae;">Whole Number (Default)</span>
+          </label>
+          <div class="step-bar">
+            <button class="btn-step active" onclick="setLotStep('1')">1 (Whole Number)</button>
+            <button class="btn-step" onclick="setLotStep('0.1')">0.1</button>
+            <button class="btn-step" onclick="setLotStep('0.01')">0.01</button>
+            <button class="btn-step" onclick="setLotStep('exact')">Exact Decimals</button>
+          </div>
+        </div>
+
+        <!-- Leverage Slider -->
+        <div class="form-group" style="margin-top: 14px;">
+          <div class="leverage-header">
+            <label style="margin: 0;">Leverage ($L$)</label>
+            <span class="leverage-value-badge" id="leverageBadge">5x</span>
+          </div>
+          <input type="range" id="leverageSlider" min="1" max="100" value="5" class="range-slider" oninput="updateLeverage(this.value)">
+          <div class="quick-lev-buttons">
+            <button class="btn-lev" onclick="updateLeverage(2)">2x</button>
+            <button class="btn-lev active" onclick="updateLeverage(5)">5x</button>
+            <button class="btn-lev" onclick="updateLeverage(10)">10x</button>
+            <button class="btn-lev" onclick="updateLeverage(20)">20x</button>
+            <button class="btn-lev" onclick="updateLeverage(50)">50x</button>
+          </div>
+        </div>
+
+        <!-- Advanced Details (Fees & MMR) -->
+        <div class="details-toggle" onclick="toggleDetails()">
+          <span>⚙️ Bybit Fees & Risk Limit Settings</span>
+          <span id="detailsArrow">▼</span>
+        </div>
+        <div class="collapsible-content" id="detailsSection">
+          <div class="form-row" style="margin-bottom: 12px;">
+            <div class="form-group" style="margin: 0;">
+              <label><span>Fee Rate (Open & Close)</span></label>
+              <div class="input-wrapper">
+                <input type="number" id="feeRateTaker" step="0.005" value="0.055" oninput="calculate()">
+                <span class="unit-badge">%</span>
+              </div>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label><span>Fee Preset</span></label>
+              <div style="display: flex; gap: 4px;">
+                <button class="btn-lev active" style="height: 42px;" id="btnFeeTaker" onclick="setFeePreset(0.055)">VIP0 Taker (0.055%)</button>
+                <button class="btn-lev" style="height: 42px;" id="btnFeeMaker" onclick="setFeePreset(0.020)">VIP0 Maker (0.02%)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="margin: 0;">
+              <label><span>MMR + Fee Reserve Buffer</span></label>
+              <div class="input-wrapper">
+                <input type="number" id="mmrFeeRate" step="0.1" value="2.0" oninput="calculate()">
+                <span class="unit-badge">%</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 4px; align-items: flex-end;">
+              <button class="btn-lev" style="height: 42px;" onclick="setMMR(2.0)">Altcoin (2%)</button>
+              <button class="btn-lev" style="height: 42px;" onclick="setMMR(0.56)">BTC (0.56%)</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Calculation Results Panel -->
+      <div class="card results-card">
+        <div class="card-title">
+          <div class="card-title-left">
+            <span>📊</span> Calculation Output
+          </div>
+        </div>
+
+        <!-- Highlight Box: Recommended Quantity -->
+        <div class="highlight-box">
+          <div class="highlight-label-row">
+            <span class="highlight-label">Recommended Order Quantity</span>
+            <span id="roundedBadge" style="font-size: 11px; background: rgba(247, 166, 0, 0.15); color: var(--accent-yellow); padding: 1px 6px; border-radius: 4px; font-weight: 700;">Whole Units</span>
+          </div>
+          <div class="highlight-value-row">
+            <div class="highlight-value" id="outQuantity">12</div>
+            <div class="highlight-sub" id="outPosValue">≈ 6.70 USDT</div>
+          </div>
+          <div class="highlight-extra-row">
+            <span>Exact Unrounded: <strong id="outExactQty" style="color: #fff;">12.4182</strong></span>
+            <span>Order Margin (Cost): <strong id="outMarginTop" style="color: #fff;">1.34 USDT</strong></span>
+          </div>
+        </div>
+
+        <!-- Dedicated RRR Card with Net Return & Win Rate -->
+        <div class="rrr-hero-card">
+          <div class="rrr-hero-header">
+            <span class="rrr-title">🎯 Actual Net Risk-to-Reward (RRR)</span>
+            <span class="rrr-badge" id="rrrQualityBadge">⭐ Excellent (3.25R)</span>
+          </div>
+          <div class="rrr-value-row">
+            <div class="rrr-big-value" id="outRRR">1 : 3.25</div>
+            <div class="rrr-sub-text" id="outGainMultiple">+0.65 USDT (+325% Net)</div>
+          </div>
+          <!-- Proportional Visual Gauge -->
+          <div class="rrr-bar-container" title="Net Risk (Red) vs Net Reward (Green)">
+            <div class="rrr-risk-bar" id="rrrRiskBar" style="width: 23.5%;"></div>
+            <div class="rrr-reward-bar" id="rrrRewardBar" style="width: 76.5%;"></div>
+          </div>
+          <!-- Min Win Rate Display -->
+          <div class="rrr-winrate-row">
+            <span class="rrr-winrate-label">📊 Min. Win Rate to Break Even:</span>
+            <span class="rrr-winrate-val" id="outWinRate">23.53% (win 1 in 4.3 trades)</span>
+          </div>
+        </div>
+
+        <!-- Interactive Vertical Price Ladder (Shows Actual Net PnL) -->
+        <div class="ladder-card">
+          <div class="ladder-title">
+            <span>🪜 Visual Price Ladder</span>
+            <span style="font-size: 11px; color: #69f0ae; font-weight: 600;" id="ladderDirectionHint">Actual Net P&L</span>
+          </div>
+          <div class="ladder-container" id="ladderContainer">
+            <!-- Dynamically populated by JS based on LONG/SHORT -->
+          </div>
+        </div>
+
+        <!-- Stats Grid with Net PnL & Fee Breakdown -->
+        <div class="stats-grid">
+          <!-- Actual Loss at SL (Net after fees) -->
+          <div class="stat-item" style="border-left: 3px solid var(--red);">
+            <div class="stat-name">Actual Loss at SL (Net)</div>
+            <div class="stat-val loss" id="outActualLoss">-0.2000 USDT</div>
+            <div class="stat-sub" id="outSlFeeSub">Gross: -0.1922 | SL Fees: 0.0075</div>
+          </div>
+
+          <!-- Actual Profit at TP (Net after fees) -->
+          <div class="stat-item" style="border-left: 3px solid var(--green);">
+            <div class="stat-name">Actual Profit at TP (Net)</div>
+            <div class="stat-val profit" id="outProfit">+0.6502 USDT</div>
+            <div class="stat-sub" id="outTpFeeSub">Gross: +0.6572 | TP Fees: 0.0080</div>
+          </div>
+
+          <!-- Margin Required -->
+          <div class="stat-item">
+            <div class="stat-name">Margin Required (Cost)</div>
+            <div class="stat-val" id="outMargin">1.38 USDT</div>
+            <div class="stat-sub" id="outPosValSub">Position: 6.92 USDT</div>
+          </div>
+
+          <!-- Max Safe Leverage -->
+          <div class="stat-item">
+            <div class="stat-name">Max Safe Leverage</div>
+            <div class="stat-val warning" id="outMaxLeverage">21.18x</div>
+            <div class="stat-sub">Before Liq > SL</div>
+          </div>
+
+          <!-- Total Est Fees -->
+          <div class="stat-item">
+            <div class="stat-name">Est. Total Fees (Open+Close)</div>
+            <div class="stat-val" id="outFees" style="color: #b0bec5;">0.0080 USDT</div>
+            <div class="stat-sub" id="outFeeRateSub">0.055% Taker Tier</div>
+          </div>
+
+          <!-- Liquidation Price -->
+          <div class="stat-item">
+            <div class="stat-name">Bybit Liquidation Price</div>
+            <div class="stat-val liq" id="outLiqPrice">0.4556 USDT</div>
+            <div class="stat-sub" id="outLiqDistSub">18.36% from Entry</div>
+          </div>
+        </div>
+
+        <!-- Safety Banner -->
+        <div class="safety-status safe" id="safetyBanner">
+          <div class="safety-icon" id="safetyIcon">🛡️</div>
+          <div class="safety-text" id="safetyText">
+            <strong>Leverage is Safe</strong>
+            <span>Your Stop Loss triggers well before liquidation. Buffer: 16.0% below SL.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Math Logic Reference -->
+    <div class="math-card">
+      <div class="math-title">
+        <span>📐</span> Step-by-Step Mathematical Verification (Net Fee-Adjusted)
+      </div>
+      <div class="formula-steps">
+        <div class="formula-step">
+          <div class="step-header">1. Loss per Unit with Fees</div>
+          <div class="step-code" id="step1Code">ΔP + Fee_open + Fee_sl = 0.0161 USDT</div>
+        </div>
+        <div class="formula-step">
+          <div class="step-header">2. Fee-Adjusted Qty</div>
+          <div class="step-code" id="step2Code">0.20 / 0.0161 = 12.42 units</div>
+        </div>
+        <div class="formula-step">
+          <div class="step-header">3. Net Loss at SL (Guaranteed)</div>
+          <div class="step-code" id="step3Code">Price Loss + Total Fees = -0.2000 USDT</div>
+        </div>
+        <div class="formula-step">
+          <div class="step-header">4. Net Profit at TP</div>
+          <div class="step-code" id="step4Code">Gross (+0.657) - Fees (0.008) = +0.650 USDT</div>
+        </div>
+        <div class="formula-step">
+          <div class="step-header">5. Actual Net RRR</div>
+          <div class="step-code" id="step5Code">0.6502 / 0.2000 = 1 : 3.25 (3.25R)</div>
+        </div>
+        <div class="formula-step">
+          <div class="step-header">6. Min. Win Rate (Net)</div>
+          <div class="step-code" id="step6Code">1 / (1 + 3.25) = 23.53%</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Bybit Isolated Margin Liquidation & Sizing Engine • True Net Risk Management (Fee-Adjusted)
+    </footer>
+  </div>
+
+  <script>
+    let currentDirection = 'LONG';
+    let currentLotStep = '1'; // '1', '0.1', '0.01', 'exact'
+
+    function setDirection(dir) {
+      currentDirection = dir;
+      const btnLong = document.getElementById('btnLong');
+      const btnShort = document.getElementById('btnShort');
+      if (dir === 'LONG') {
+        btnLong.classList.add('active');
+        btnShort.classList.remove('active');
+      } else {
+        btnShort.classList.add('active');
+        btnLong.classList.remove('active');
+      }
+      onRiskOrEntryChange();
+    }
+
+    function setLotStep(step) {
+      currentLotStep = step;
+      const buttons = document.querySelectorAll('.step-bar .btn-step');
+      buttons.forEach(btn => {
+        if (
+          (step === 'exact' && btn.innerText.includes('Exact')) ||
+          (step !== 'exact' && btn.innerText.startsWith(step))
+        ) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      document.getElementById('stepRoundingHint').innerText = step === '1' ? 'Whole Number (Default)' : (step === 'exact' ? 'Exact (No Rounding)' : `Step: ${step}`);
+      document.getElementById('roundedBadge').innerText = step === '1' ? 'Whole Units' : (step === 'exact' ? 'Exact' : `Step: ${step}`);
+      calculate();
+    }
+
+    function setFeePreset(rate) {
+      document.getElementById('feeRateTaker').value = rate;
+      const btnTaker = document.getElementById('btnFeeTaker');
+      const btnMaker = document.getElementById('btnFeeMaker');
+      if (rate === 0.055) {
+        btnTaker.classList.add('active');
+        btnMaker.classList.remove('active');
+      } else {
+        btnMaker.classList.add('active');
+        btnTaker.classList.remove('active');
+      }
+      calculate();
+    }
+
+    function updateLeverage(val) {
+      val = parseInt(val, 10);
+      document.getElementById('leverageSlider').value = val;
+      document.getElementById('leverageBadge').innerText = val + 'x';
+      
+      const buttons = document.querySelectorAll('.quick-lev-buttons .btn-lev');
+      buttons.forEach(btn => {
+        if (btn.innerText === val + 'x') {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      calculate();
+    }
+
+    function toggleDetails() {
+      const section = document.getElementById('detailsSection');
+      const arrow = document.getElementById('detailsArrow');
+      if (section.classList.contains('open')) {
+        section.classList.remove('open');
+        arrow.innerText = '▼';
+      } else {
+        section.classList.add('open');
+        arrow.innerText = '▲';
+      }
+    }
+
+    function setMMR(val) {
+      document.getElementById('mmrFeeRate').value = val;
+      calculate();
+    }
+
+    function setTargetRrr(rrrVal) {
+      document.getElementById('targetRrrInput').value = rrrVal;
+      onTargetRrrChange();
+    }
+
+    function onTargetRrrChange() {
+      const EP = parseFloat(document.getElementById('entryPrice').value) || 0;
+      const SL = parseFloat(document.getElementById('stopLossPrice').value) || 0;
+      const targetRrr = parseFloat(document.getElementById('targetRrrInput').value) || 0;
+      const feePct = parseFloat(document.getElementById('feeRateTaker').value) || 0.055;
+      const f = feePct / 100;
+      const deltaP = Math.abs(EP - SL);
+
+      if (EP > 0 && deltaP > 0 && targetRrr > 0) {
+        // Net Loss per unit at SL = deltaP + (EP * f) + (SL * f)
+        const lossPerUnit = deltaP + (EP * f) + (SL * f);
+        // Desired Net Profit per unit = targetRrr * lossPerUnit
+        // Net Profit per unit = deltaP_TP - (EP * f) - (TP * f)
+        // For LONG: TP - EP - (EP * f) - (TP * f) = targetRrr * lossPerUnit
+        // TP * (1 - f) = targetRrr * lossPerUnit + EP * (1 + f)
+        // TP = (targetRrr * lossPerUnit + EP * (1 + f)) / (1 - f)
+        let tpPrice = 0;
+        if (currentDirection === 'LONG') {
+          tpPrice = (targetRrr * lossPerUnit + EP * (1 + f)) / (1 - f);
+        } else {
+          // For SHORT: EP - TP - (EP * f) - (TP * f) = targetRrr * lossPerUnit
+          // EP * (1 - f) - TP * (1 + f) = targetRrr * lossPerUnit
+          // TP = (EP * (1 - f) - targetRrr * lossPerUnit) / (1 + f)
+          tpPrice = (EP * (1 - f) - targetRrr * lossPerUnit) / (1 + f);
+        }
+        document.getElementById('takeProfitPrice').value = tpPrice > 10 ? tpPrice.toFixed(2) : (tpPrice > 1 ? tpPrice.toFixed(4) : tpPrice.toFixed(5));
+      }
+      calculate();
+    }
+
+    function onTakeProfitChange() {
+      const EP = parseFloat(document.getElementById('entryPrice').value) || 0;
+      const SL = parseFloat(document.getElementById('stopLossPrice').value) || 0;
+      const TP = parseFloat(document.getElementById('takeProfitPrice').value) || 0;
+      const feePct = parseFloat(document.getElementById('feeRateTaker').value) || 0.055;
+      const f = feePct / 100;
+      const deltaP = Math.abs(EP - SL);
+
+      if (EP > 0 && deltaP > 0 && TP > 0) {
+        const lossPerUnit = deltaP + (EP * f) + (SL * f);
+        let netProfitPerUnit = 0;
+        if (currentDirection === 'LONG') {
+          netProfitPerUnit = (TP - EP) - (EP * f) - (TP * f);
+        } else {
+          netProfitPerUnit = (EP - TP) - (EP * f) - (TP * f);
+        }
+        if (netProfitPerUnit > 0 && lossPerUnit > 0) {
+          const netRrr = netProfitPerUnit / lossPerUnit;
+          document.getElementById('targetRrrInput').value = netRrr.toFixed(2);
+        }
+      }
+      calculate();
+    }
+
+    function onRiskOrEntryChange() {
+      const targetRrr = parseFloat(document.getElementById('targetRrrInput').value) || 0;
+      if (targetRrr > 0) {
+        onTargetRrrChange();
+      } else {
+        calculate();
+      }
+    }
+
+    function applyLotStep(exactQty, step) {
+      if (step === 'exact') return exactQty;
+      const s = parseFloat(step);
+      if (s <= 0) return exactQty;
+      return Math.floor(exactQty / s) * s;
+    }
+
+    function copyOrderDetails() {
+      const dir = currentDirection;
+      const qty = document.getElementById('outQuantity').innerText;
+      const ep = document.getElementById('entryPrice').value;
+      const sl = document.getElementById('stopLossPrice').value;
+      const tp = document.getElementById('takeProfitPrice').value;
+      const lev = document.getElementById('leverageSlider').value;
+      const risk = document.getElementById('riskAmount').value;
+      const rrr = document.getElementById('outRRR').innerText;
+      const netProfit = document.getElementById('outProfit').innerText;
+
+      const text = `[Bybit Order Setup - Net Fee Adjusted]\nDirection: ${dir}\nQty: ${qty}\nEntry: ${ep} USDT\nStop Loss: ${sl} USDT\nTake Profit: ${tp} USDT\nLeverage: ${lev}x Isolated\nNet Loss @ SL: -${risk} USDT\nNet Profit @ TP: ${netProfit}\nNet RRR: ${rrr}`;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyOrderBtn');
+        btn.innerText = '✅ Copied!';
+        setTimeout(() => { btn.innerText = '📋 Copy Order'; }, 2000);
+      }).catch(err => {
+        alert('Copied setup to clipboard!');
+      });
+    }
+
+    function calculate() {
+      const R = parseFloat(document.getElementById('riskAmount').value) || 0;
+      const EP = parseFloat(document.getElementById('entryPrice').value) || 0;
+      const SL = parseFloat(document.getElementById('stopLossPrice').value) || 0;
+      const TP = parseFloat(document.getElementById('takeProfitPrice').value) || 0;
+      const L = parseFloat(document.getElementById('leverageSlider').value) || 1;
+      const feePct = parseFloat(document.getElementById('feeRateTaker').value) || 0.055;
+      const f = feePct / 100;
+      const mmrFeePct = parseFloat(document.getElementById('mmrFeeRate').value) || 2.0;
+      const B = mmrFeePct / 100;
+
+      if (EP <= 0 || SL <= 0 || R <= 0) return;
+
+      const deltaP = Math.abs(EP - SL);
+      if (deltaP === 0) return;
+
+      // 1. Fee-Adjusted Loss per Unit at SL
+      // Loss = Qty * [ |EP - SL| + (EP * f) + (SL * f) ]
+      const lossPerUnit = deltaP + (EP * f) + (SL * f);
+      const exactQty = R / lossPerUnit;
+
+      let finalQty = applyLotStep(exactQty, currentLotStep);
+      if (finalQty <= 0) finalQty = exactQty;
+
+      const posValue = finalQty * EP;
+      const IM = posValue / L;
+
+      // 2. Liquidation Price & Max Safe Leverage
+      let LP = 0;
+      let maxL = 0;
+      let isSafe = true;
+      let safetyMsg = '';
+
+      if (currentDirection === 'LONG') {
+        LP = EP * (1 - 1 / L) / (1 - B);
+        const denom = 1 - (1 - B) * (SL / EP);
+        maxL = denom > 0 ? (1 / denom) : 100;
+
+        if (SL <= LP) {
+          isSafe = false;
+          safetyMsg = `<strong>CRITICAL WARNING: Liquidation Price (${LP.toFixed(4)}) is reached BEFORE your Stop Loss (${SL.toFixed(4)})!</strong> Lower your leverage to under ${Math.floor(maxL)}x or you will lose your entire margin.`;
+        } else {
+          const bufferPct = ((SL - LP) / SL) * 100;
+          safetyMsg = `<strong>Leverage is Safe (${L}x ≤ max ${maxL.toFixed(1)}x)</strong><span>Stop Loss (${SL.toFixed(4)}) triggers safely before Liquidation (${LP.toFixed(4)}). Buffer: ${bufferPct.toFixed(1)}% below SL.</span>`;
+        }
+      } else {
+        LP = EP * (1 + 1 / L) / (1 + B);
+        const denom = (1 + B) * (SL / EP) - 1;
+        maxL = denom > 0 ? (1 / denom) : 100;
+
+        if (SL >= LP) {
+          isSafe = false;
+          safetyMsg = `<strong>CRITICAL WARNING: Liquidation Price (${LP.toFixed(4)}) is reached BEFORE your Stop Loss (${SL.toFixed(4)})!</strong> Lower your leverage to under ${Math.floor(maxL)}x.`;
+        } else {
+          const bufferPct = ((LP - SL) / SL) * 100;
+          safetyMsg = `<strong>Leverage is Safe (${L}x ≤ max ${maxL.toFixed(1)}x)</strong><span>Stop Loss (${SL.toFixed(4)}) triggers safely before Liquidation (${LP.toFixed(4)}). Buffer: ${bufferPct.toFixed(1)}% above SL.</span>`;
+        }
+      }
+
+      // 3. Exact Actual Net Loss at SL
+      const grossLoss = finalQty * deltaP;
+      const openFee = posValue * f;
+      const slExitFee = (finalQty * SL) * f;
+      const totalSlFees = openFee + slExitFee;
+      const actualNetLoss = grossLoss + totalSlFees;
+
+      // 4. Exact Actual Net Profit at TP
+      let grossProfit = 0;
+      let tpExitFee = 0;
+      let totalTpFees = 0;
+      let actualNetProfit = 0;
+      let netRrr = 0;
+      let winRate = 0;
+      let oneInX = 0;
+
+      if (TP > 0) {
+        if (currentDirection === 'LONG') {
+          grossProfit = finalQty * (TP - EP);
+        } else {
+          grossProfit = finalQty * (EP - TP);
+        }
+        tpExitFee = (finalQty * TP) * f;
+        totalTpFees = openFee + tpExitFee;
+        actualNetProfit = grossProfit - totalTpFees;
+
+        if (actualNetLoss > 0 && actualNetProfit > 0) {
+          netRrr = actualNetProfit / actualNetLoss;
+          winRate = (1 / (1 + netRrr)) * 100;
+          oneInX = 1 + netRrr;
+        }
+      }
+
+      // Format Qty String
+      let qtyStr = '';
+      if (currentLotStep === '1') {
+        qtyStr = Math.round(finalQty).toString();
+      } else if (currentLotStep === '0.1') {
+        qtyStr = finalQty.toFixed(1);
+      } else if (currentLotStep === '0.01') {
+        qtyStr = finalQty.toFixed(2);
+      } else if (currentLotStep === '0.001') {
+        qtyStr = finalQty.toFixed(3);
+      } else {
+        qtyStr = finalQty < 1 ? finalQty.toFixed(4) : (finalQty < 100 ? finalQty.toFixed(2) : finalQty.toFixed(1));
+      }
+
+      // Update Outputs
+      document.getElementById('outQuantity').innerText = qtyStr;
+      document.getElementById('outExactQty').innerText = exactQty.toFixed(4);
+      document.getElementById('outPosValue').innerText = `≈ ${posValue.toFixed(2)} USDT`;
+      document.getElementById('outMarginTop').innerText = `${IM.toFixed(2)} USDT`;
+      document.getElementById('outMargin').innerText = `${IM.toFixed(2)} USDT`;
+      document.getElementById('outPosValSub').innerText = `Position: ${posValue.toFixed(2)} USDT`;
+
+      // Net Loss Display
+      document.getElementById('outActualLoss').innerText = `-${actualNetLoss.toFixed(4)} USDT`;
+      document.getElementById('outSlFeeSub').innerText = `Price: -${grossLoss.toFixed(4)} | Fees: -${totalSlFees.toFixed(4)}`;
+
+      // Net Profit Display
+      document.getElementById('outProfit').innerText = `+${actualNetProfit.toFixed(4)} USDT`;
+      document.getElementById('outTpFeeSub').innerText = `Price: +${grossProfit.toFixed(4)} | Fees: -${totalTpFees.toFixed(4)}`;
+
+      // Liquidation & Max Leverage
+      document.getElementById('outLiqPrice').innerText = `${LP.toFixed(4)} USDT`;
+      const liqDistPct = Math.abs((EP - LP) / EP) * 100;
+      document.getElementById('outLiqDistSub').innerText = `${liqDistPct.toFixed(2)}% from Entry`;
+      document.getElementById('outMaxLeverage').innerText = maxL > 0 && maxL < 100 ? `${maxL.toFixed(2)}x` : `> 100x`;
+
+      const feePctOfMargin = IM > 0 ? (totalTpFees / IM) * 100 : 0;
+      document.getElementById('outFees').innerText = `${totalTpFees.toFixed(4)} USDT`;
+      document.getElementById('outFeeRateSub').innerText = `${(f * 2 * 100).toFixed(3)}% rate (${feePctOfMargin.toFixed(2)}% of margin @ ${L}x)`;
+
+      // RRR Card & Visual Bar
+      const rrrBadge = document.getElementById('rrrQualityBadge');
+      const rrrRiskBar = document.getElementById('rrrRiskBar');
+      const rrrRewardBar = document.getElementById('rrrRewardBar');
+      const outWinRate = document.getElementById('outWinRate');
+
+      if (netRrr > 0) {
+        document.getElementById('outRRR').innerText = `1 : ${netRrr.toFixed(2)}`;
+        document.getElementById('outGainMultiple').innerText = `+${actualNetProfit.toFixed(2)} USDT (+${(netRrr * 100).toFixed(0)}% Net)`;
+        outWinRate.innerText = `${winRate.toFixed(2)}% (win 1 in ${oneInX.toFixed(1)} trades)`;
+
+        const totalUnits = 1 + netRrr;
+        const riskPct = (1 / totalUnits) * 100;
+        const rewardPct = (netRrr / totalUnits) * 100;
+        rrrRiskBar.style.width = `${riskPct}%`;
+        rrrRewardBar.style.width = `${rewardPct}%`;
+
+        if (netRrr >= 3.0) {
+          rrrBadge.innerText = `⭐ Excellent (${netRrr.toFixed(2)}R Net)`;
+          rrrBadge.style.color = '#0ecb81';
+          rrrBadge.style.background = 'rgba(14, 203, 129, 0.15)';
+        } else if (netRrr >= 2.0) {
+          rrrBadge.innerText = `🟢 Good (${netRrr.toFixed(2)}R Net)`;
+          rrrBadge.style.color = '#0ecb81';
+          rrrBadge.style.background = 'rgba(14, 203, 129, 0.15)';
+        } else if (netRrr >= 1.0) {
+          rrrBadge.innerText = `🟡 Fair (${netRrr.toFixed(2)}R Net)`;
+          rrrBadge.style.color = '#f7a600';
+          rrrBadge.style.background = 'rgba(247, 166, 0, 0.15)';
+        } else {
+          rrrBadge.innerText = `⚠️ Low (< 1R Net)`;
+          rrrBadge.style.color = '#f6465d';
+          rrrBadge.style.background = 'rgba(246, 70, 93, 0.15)';
+        }
+      } else {
+        document.getElementById('outRRR').innerText = `—`;
+        document.getElementById('outGainMultiple').innerText = `0.00 USDT`;
+        outWinRate.innerText = `—`;
+        rrrRiskBar.style.width = `50%`;
+        rrrRewardBar.style.width = `50%`;
+        rrrBadge.innerText = `—`;
+      }
+
+      // Safety Banner
+      const safetyBanner = document.getElementById('safetyBanner');
+      const safetyIcon = document.getElementById('safetyIcon');
+      const safetyText = document.getElementById('safetyText');
+
+      if (isSafe) {
+        safetyBanner.className = 'safety-status safe';
+        safetyIcon.innerText = '🛡️';
+      } else {
+        safetyBanner.className = 'safety-status danger';
+        safetyIcon.innerText = '⚠️';
+      }
+      safetyText.innerHTML = safetyMsg;
+
+      // Update Interactive Visual Ladder (Using Actual Net PnL)
+      updateLadder(EP, SL, TP, LP, actualNetProfit, actualNetLoss, isSafe);
+
+      // Step-by-Step Math Update
+      document.getElementById('step1Code').innerText = `${deltaP.toFixed(4)} + ${(EP * f).toFixed(4)} + ${(SL * f).toFixed(4)} = ${lossPerUnit.toFixed(4)} USDT`;
+      document.getElementById('step2Code').innerText = `${R.toFixed(2)} / ${lossPerUnit.toFixed(4)} = ${exactQty.toFixed(2)} → ${qtyStr}`;
+      document.getElementById('step3Code').innerText = `-${grossLoss.toFixed(4)} (price) + -${totalSlFees.toFixed(4)} (fees) = -${actualNetLoss.toFixed(4)} USDT`;
+      document.getElementById('step4Code').innerText = `+${grossProfit.toFixed(4)} (price) - ${totalTpFees.toFixed(4)} (fees) = +${actualNetProfit.toFixed(4)} USDT`;
+      if (netRrr > 0) {
+        document.getElementById('step5Code').innerText = `${actualNetProfit.toFixed(4)} / ${actualNetLoss.toFixed(4)} = 1 : ${netRrr.toFixed(2)} (${netRrr.toFixed(2)}R Net)`;
+        document.getElementById('step6Code').innerText = `1 / (1 + ${netRrr.toFixed(2)}) = ${winRate.toFixed(2)}%`;
+      } else {
+        document.getElementById('step5Code').innerText = `Set TP to view Net RRR`;
+        document.getElementById('step6Code').innerText = `—`;
+      }
+    }
+
+    function updateLadder(EP, SL, TP, LP, netProfit, netLoss, isSafe) {
+      const container = document.getElementById('ladderContainer');
+      const bufferPct = currentDirection === 'LONG' ? ((SL - LP) / SL * 100) : ((LP - SL) / SL * 100);
+      const bufStr = isSafe ? `(+${bufferPct.toFixed(1)}% buffer)` : `(⚠️ LIQ BEFORE SL)`;
+
+      if (currentDirection === 'LONG') {
+        container.innerHTML = `
+          <div class="ladder-line"></div>
+          <div class="ladder-node tp">
+            <span class="node-label"><span>🎯 Take Profit</span><span class="node-pnl" style="color: var(--green);">+${netProfit.toFixed(4)} USDT (Net)</span></span>
+            <span class="node-price" style="color: var(--green);">${TP > 0 ? TP.toFixed(4) : '—'}</span>
+          </div>
+          <div class="ladder-node entry">
+            <span class="node-label"><span>● Entry Price</span><span class="node-pnl" style="color: #90caf9;">(Long Entry)</span></span>
+            <span class="node-price" style="color: #90caf9;">${EP.toFixed(4)}</span>
+          </div>
+          <div class="ladder-node sl">
+            <span class="node-label"><span>🛑 Stop Loss</span><span class="node-pnl" style="color: var(--red);">-${netLoss.toFixed(4)} USDT (Net)</span></span>
+            <span class="node-price" style="color: var(--red);">${SL.toFixed(4)}</span>
+          </div>
+          <div class="ladder-node liq">
+            <span class="node-label"><span>⚠️ Bybit Liquidation</span><span class="node-pnl" style="color: var(--orange);">${bufStr}</span></span>
+            <span class="node-price" style="color: var(--orange);">${LP.toFixed(4)}</span>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="ladder-line"></div>
+          <div class="ladder-node liq">
+            <span class="node-label"><span>⚠️ Bybit Liquidation</span><span class="node-pnl" style="color: var(--orange);">${bufStr}</span></span>
+            <span class="node-price" style="color: var(--orange);">${LP.toFixed(4)}</span>
+          </div>
+          <div class="ladder-node sl">
+            <span class="node-label"><span>🛑 Stop Loss</span><span class="node-pnl" style="color: var(--red);">-${netLoss.toFixed(4)} USDT (Net)</span></span>
+            <span class="node-price" style="color: var(--red);">${SL.toFixed(4)}</span>
+          </div>
+          <div class="ladder-node entry">
+            <span class="node-label"><span>● Entry Price</span><span class="node-pnl" style="color: #90caf9;">(Short Entry)</span></span>
+            <span class="node-price" style="color: #90caf9;">${EP.toFixed(4)}</span>
+          </div>
+          <div class="ladder-node tp">
+            <span class="node-label"><span>🎯 Take Profit</span><span class="node-pnl" style="color: var(--green);">+${netProfit.toFixed(4)} USDT (Net)</span></span>
+            <span class="node-price" style="color: var(--green);">${TP > 0 ? TP.toFixed(4) : '—'}</span>
+          </div>
+        `;
+      }
+    }
+
+    // Initialize on page load
+    calculate();
+  </script>
+</body>
+</html>
