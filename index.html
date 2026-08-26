@@ -4405,6 +4405,52 @@
     let liveTickerPrice = 0.5581;
     let symbolFetchTimeout = null;
 
+    function saveCalculatorDraft() {
+      try {
+        const symEl = document.getElementById('coinSymbol');
+        const epEl = document.getElementById('entryPrice');
+        const slEl = document.getElementById('stopLossPrice');
+        const tpEl = document.getElementById('takeProfitPrice');
+        const rEl = document.getElementById('riskAmount');
+        const rrrEl = document.getElementById('targetRrrInput');
+        const levEl = document.getElementById('leverageSlider');
+        const feeEl = document.getElementById('feeRateTaker');
+        if (!symEl || !epEl || !slEl) return;
+
+        const draft = {
+          symbol: symEl.value,
+          direction: currentDirection,
+          entryPrice: epEl.value,
+          stopLossPrice: slEl.value,
+          takeProfitPrice: tpEl ? tpEl.value : '',
+          riskAmount: rEl ? rEl.value : '0.20',
+          targetRrr: rrrEl ? rrrEl.value : '2.00',
+          leverage: levEl ? levEl.value : '10',
+          feeRate: feeEl ? feeEl.value : '0.055',
+          lotStep: currentLotStep
+        };
+        localStorage.setItem('bybit_calc_draft_v1', JSON.stringify(draft));
+      } catch (e) {}
+    }
+
+    function restoreCalculatorDraft() {
+      try {
+        const saved = localStorage.getItem('bybit_calc_draft_v1');
+        if (!saved) return;
+        const draft = JSON.parse(saved);
+        if (draft.symbol) document.getElementById('coinSymbol').value = draft.symbol;
+        if (draft.direction) setDirection(draft.direction);
+        if (draft.entryPrice) document.getElementById('entryPrice').value = draft.entryPrice;
+        if (draft.stopLossPrice) document.getElementById('stopLossPrice').value = draft.stopLossPrice;
+        if (draft.takeProfitPrice) document.getElementById('takeProfitPrice').value = draft.takeProfitPrice;
+        if (draft.riskAmount) document.getElementById('riskAmount').value = draft.riskAmount;
+        if (draft.targetRrr) document.getElementById('targetRrrInput').value = draft.targetRrr;
+        if (draft.leverage) updateLeverage(draft.leverage);
+        if (draft.feeRate) setFeePreset(parseFloat(draft.feeRate));
+        if (draft.lotStep) setLotStep(draft.lotStep);
+      } catch (e) {}
+    }
+
     function setDirection(dir) {
       currentDirection = dir;
       const btnLong = document.getElementById('btnLong');
@@ -4855,6 +4901,7 @@
       if (typeof updateChartPriceLines === 'function') {
         updateChartPriceLines();
       }
+      saveCalculatorDraft();
     }
 
     window.setSlToBreakeven = function() {
@@ -8055,6 +8102,7 @@
     }
 
     // Initialize Calculator, Watchlist, WebSocket Stream, Interactive Chart & Journal Database
+    restoreCalculatorDraft();
     calculate();
     initDB();
     renderWatchlist();
