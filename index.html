@@ -2295,7 +2295,360 @@
       padding: 48px 20px;
       color: var(--text-muted);
     }
-    .empty-icon { font-size: 40px; margin-bottom: 10px; }
+    /* ============================================================ */
+    /* LIVE BYBIT WATCHLIST & TICKER STRIP */
+    /* ============================================================ */
+    .watchlist-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .watchlist-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .watchlist-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .watchlist-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ws-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(14, 203, 129, 0.12);
+      border: 1px solid rgba(14, 203, 129, 0.35);
+      color: #6ee7b7;
+      transition: all 0.2s;
+    }
+
+    .ws-status-badge.reconnecting {
+      background: rgba(247, 166, 0, 0.12);
+      border-color: rgba(247, 166, 0, 0.35);
+      color: #fde047;
+    }
+
+    .ws-status-badge.polling {
+      background: rgba(41, 121, 255, 0.12);
+      border-color: rgba(41, 121, 255, 0.35);
+      color: #93c5fd;
+    }
+
+    .watchlist-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .watchlist-filters {
+      display: flex;
+      gap: 4px;
+      background: var(--input-bg);
+      padding: 3px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--input-border);
+    }
+
+    .wl-filter-btn {
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .wl-filter-btn:hover { color: #fff; }
+    .wl-filter-btn.active {
+      background: var(--accent-yellow);
+      color: #000;
+      font-weight: 700;
+    }
+
+    .watchlist-carousel-container {
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scrollbar-width: thin;
+      scrollbar-color: #2b384e transparent;
+    }
+
+    .watchlist-carousel-container::-webkit-scrollbar {
+      height: 5px;
+    }
+    .watchlist-carousel-container::-webkit-scrollbar-thumb {
+      background: #2b384e;
+      border-radius: 4px;
+    }
+
+    .watchlist-cards-grid {
+      display: flex;
+      gap: 12px;
+      min-width: min-content;
+    }
+
+    .wl-card {
+      background: #131822;
+      border: 1px solid #243044;
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      min-width: 210px;
+      width: 210px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .wl-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-yellow);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      background: #171d2b;
+    }
+
+    .wl-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wl-sym-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .wl-sym {
+      font-weight: 800;
+      font-size: 14px;
+      color: #ffffff;
+      letter-spacing: 0.3px;
+    }
+
+    .wl-badge-perp {
+      font-size: 9px;
+      font-weight: 800;
+      background: rgba(0, 229, 255, 0.15);
+      color: var(--cyan);
+      padding: 1px 4px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+    }
+
+    .wl-card-top-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .wl-chg-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .wl-chg-badge.up { background: var(--green-bg); color: var(--green); }
+    .wl-chg-badge.down { background: var(--red-bg); color: var(--red); }
+
+    .wl-btn-del {
+      background: transparent;
+      border: none;
+      color: #546e7a;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 2px;
+      border-radius: 3px;
+      line-height: 1;
+      opacity: 0.6;
+      transition: all 0.15s;
+    }
+    .wl-btn-del:hover {
+      color: #ff8a80;
+      opacity: 1;
+      background: rgba(246, 70, 93, 0.15);
+    }
+
+    .wl-price-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .wl-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      transition: color 0.3s, background-color 0.3s;
+      padding: 1px 4px;
+      border-radius: 4px;
+      margin-left: -4px;
+    }
+
+    .wl-price.tick-up {
+      color: #0ecb81;
+      background: rgba(14, 203, 129, 0.2);
+    }
+
+    .wl-price.tick-down {
+      color: #f6465d;
+      background: rgba(246, 70, 93, 0.2);
+    }
+
+    .wl-currency {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .wl-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .wl-hl-range {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .wl-hl-bar {
+      width: 32px;
+      height: 3px;
+      background: #283448;
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wl-hl-fill {
+      height: 100%;
+      background: var(--accent-yellow);
+      border-radius: 2px;
+    }
+
+    .wl-funding-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--cyan);
+      font-size: 10px;
+    }
+
+    .wl-card-footer {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .btn-wl-load {
+      width: 100%;
+      background: rgba(247, 166, 0, 0.12);
+      border: 1px solid rgba(247, 166, 0, 0.35);
+      color: var(--accent-yellow);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .btn-wl-load:hover {
+      background: var(--accent-yellow);
+      color: #000;
+    }
+
+    /* Popular Quick Coins in Modal */
+    .quick-add-coins-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .btn-quick-coin {
+      padding: 5px 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      color: #90caf9;
+      font-size: 11.5px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-quick-coin:hover {
+      background: rgba(41, 121, 255, 0.18);
+      border-color: #3b82f6;
+      color: #fff;
+    }
+
+    /* Toast Notification */
+    .app-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1a2232;
+      border: 1px solid var(--accent-yellow);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: slideToastUp 0.3s ease-out;
+    }
+
+    @keyframes slideToastUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
 
     footer {
       margin-top: 40px;
@@ -2334,6 +2687,41 @@
       <h1>Futures Position Calculator & Trading Journal</h1>
       <p class="subtitle">Lock your net dollar loss ($R$), monitor live Bybit futures funding rates, and analyze your edge with calendar & session heatmaps.</p>
     </header>
+
+    <!-- ============================================================ -->
+    <!-- LIVE BYBIT FUTURES WATCHLIST & STREAMING HUB -->
+    <!-- ============================================================ -->
+    <div class="watchlist-section" id="watchlistSection">
+      <div class="watchlist-header">
+        <div class="watchlist-title-group">
+          <div class="watchlist-title">
+            <span>⭐</span> Live Bybit Futures Watchlist
+          </div>
+          <span class="ws-status-badge live" id="wsStatusBadge" title="Bybit V5 Linear Perpetual WebSocket Stream">
+            <span class="live-pulse-dot"></span>
+            <span id="wsStatusText">WebSocket Live</span>
+          </span>
+        </div>
+        <div class="watchlist-actions">
+          <div class="watchlist-filters">
+            <button type="button" class="wl-filter-btn active" id="wlFilterAll" onclick="setWatchlistFilter('all', this)">All (<span id="wlCountAll">8</span>)</button>
+            <button type="button" class="wl-filter-btn" onclick="setWatchlistFilter('gainers', this)">🔥 Gainers</button>
+            <button type="button" class="wl-filter-btn" onclick="setWatchlistFilter('losers', this)">❄️ Losers</button>
+            <button type="button" class="wl-filter-btn" onclick="setWatchlistFilter('funding', this)">⚡ Funding</button>
+          </div>
+          <button type="button" class="btn-action primary" onclick="openAddWatchlistModal()" style="font-size: 11.5px; padding: 5px 12px;">
+            <span>➕</span> Add Coin
+          </button>
+        </div>
+      </div>
+
+      <!-- Horizontal Scrollable Cards Strip -->
+      <div class="watchlist-carousel-container">
+        <div class="watchlist-cards-grid" id="watchlistCardsGrid">
+          <!-- Dynamically populated by JS -->
+        </div>
+      </div>
+    </div>
 
     <!-- TOP: CALCULATOR GRID -->
     <div class="grid">
@@ -3128,6 +3516,62 @@
         <button class="lightbox-arrow right" onclick="navigateLightbox(1)">❯</button>
       </div>
     </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL: ADD COIN TO WATCHLIST -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="addWatchlistModal" onclick="closeAddWatchlistModalOnBackdrop(event)">
+      <div class="modal-box" style="max-width: 480px;">
+        <div class="modal-header">
+          <div class="modal-title">
+            <span>➕</span> Add Coin to Watchlist
+          </div>
+          <button class="modal-close" onclick="closeAddWatchlistModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group" style="margin: 0;">
+            <label>
+              <span>Coin Symbol</span>
+              <span class="hint" style="color: #69f0ae;">Bybit Linear USDT Perpetual</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="text" id="addCoinInput" placeholder="e.g. SUI, DOGE, SOL, AVAX..." style="text-transform: uppercase;" onkeydown="if(event.key==='Enter') confirmAddWatchlistCoin()">
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size: 11.5px; color: var(--text-muted); font-weight: 700; margin-bottom: 6px;">🔥 Popular Futures Pairs:</div>
+            <div class="quick-add-coins-grid">
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('BTCUSDT')">+ BTC</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('ETHUSDT')">+ ETH</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('SOLUSDT')">+ SOL</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('SUIUSDT')">+ SUI</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('DOGEUSDT')">+ DOGE</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('XRPUSDT')">+ XRP</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('PEPEUSDT')">+ PEPE</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('NEARUSDT')">+ NEAR</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('AVAXUSDT')">+ AVAX</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('LINKUSDT')">+ LINK</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('INJUSDT')">+ INJ</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('BNBUSDT')">+ BNB</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('ADAUSDT')">+ ADA</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('APTUSDT')">+ APT</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('TIAUSDT')">+ TIA</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('WIFUSDT')">+ WIF</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('RENDERUSDT')">+ RENDER</button>
+              <button type="button" class="btn-quick-coin" onclick="quickAddWatchlist('KASUSDT')">+ KAS</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-action" onclick="closeAddWatchlistModal()">Cancel</button>
+          <button type="button" class="btn-action primary" onclick="confirmAddWatchlistCoin()">➕ Add Coin</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" style="display: none;"></div>
 
     <footer>
       Bybit Isolated Margin Liquidation & Sizing Engine • Live Futures API • Firebase Cloud Sync
@@ -4509,7 +4953,346 @@
 
     /* Global Live Price Store for Bybit Futures */
     window.liveMarketPrices = {};
+    window.userWatchlist = JSON.parse(localStorage.getItem('bybit_watchlist_v1') || '["BTCUSDT", "ETHUSDT", "SOLUSDT", "SUIUSDT", "DOGEUSDT", "XRPUSDT", "PEPEUSDT", "KASUSDT"]');
+    window.activeWatchlistFilter = 'all';
 
+    /* Toast Notification */
+    function showToast(msg) {
+      let toastContainer = document.getElementById('toastContainer');
+      if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        document.body.appendChild(toastContainer);
+      }
+      toastContainer.innerHTML = `<div class="app-toast">${msg}</div>`;
+      toastContainer.style.display = 'block';
+      setTimeout(() => {
+        if (toastContainer) toastContainer.style.display = 'none';
+      }, 2800);
+    }
+
+    /* 7. BYBIT WEBSOCKET STREAMING & WATCHLIST ENGINE */
+    let bybitWs = null;
+    let wsPingInterval = null;
+    let wsReconnectTimeout = null;
+
+    function initBybitWebSocket() {
+      if (bybitWs && (bybitWs.readyState === WebSocket.OPEN || bybitWs.readyState === WebSocket.CONNECTING)) {
+        return;
+      }
+
+      const badge = document.getElementById('wsStatusBadge');
+      const badgeText = document.getElementById('wsStatusText');
+
+      try {
+        bybitWs = new WebSocket('wss://stream.bybit.com/v5/public/linear');
+
+        bybitWs.onopen = () => {
+          if (badge) badge.className = 'ws-status-badge live';
+          if (badgeText) badgeText.innerText = 'WebSocket Live';
+
+          subscribeToBybitWsSymbols();
+
+          // Keep-alive Ping every 20 seconds
+          clearInterval(wsPingInterval);
+          wsPingInterval = setInterval(() => {
+            if (bybitWs && bybitWs.readyState === WebSocket.OPEN) {
+              bybitWs.send(JSON.stringify({ op: "ping" }));
+            }
+          }, 20000);
+        };
+
+        bybitWs.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.ret_msg === 'pong' || msg.op === 'pong') return;
+
+            if (msg.topic && msg.topic.startsWith('tickers.') && msg.data) {
+              const t = msg.data;
+              const sym = (t.symbol || msg.topic.replace('tickers.', '')).toUpperCase();
+
+              if (!window.liveMarketPrices[sym]) {
+                window.liveMarketPrices[sym] = { price: 0, markPrice: 0, chgPct: 0, fundingRate: 0, high24h: 0, low24h: 0 };
+              }
+
+              const prevPrice = window.liveMarketPrices[sym].price;
+              const newPrice = parseFloat(t.lastPrice) || (prevPrice > 0 ? prevPrice : 0);
+
+              if (t.lastPrice) window.liveMarketPrices[sym].price = newPrice;
+              if (t.markPrice) window.liveMarketPrices[sym].markPrice = parseFloat(t.markPrice) || 0;
+              if (t.price24hPcnt) window.liveMarketPrices[sym].chgPct = (parseFloat(t.price24hPcnt) || 0) * 100;
+              if (t.fundingRate) window.liveMarketPrices[sym].fundingRate = (parseFloat(t.fundingRate) || 0) * 100;
+              if (t.highPrice24h) window.liveMarketPrices[sym].high24h = parseFloat(t.highPrice24h) || 0;
+              if (t.lowPrice24h) window.liveMarketPrices[sym].low24h = parseFloat(t.lowPrice24h) || 0;
+
+              // Live Real-Time Flash on Watchlist Card
+              const priceElem = document.getElementById(`wl_price_${sym}`);
+              if (priceElem && newPrice > 0) {
+                const priceStr = newPrice > 1000 ? newPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) :
+                                 (newPrice > 10 ? newPrice.toFixed(2) :
+                                 (newPrice > 1 ? newPrice.toFixed(4) : newPrice.toFixed(5)));
+                priceElem.innerText = priceStr;
+
+                if (prevPrice > 0 && newPrice !== prevPrice) {
+                  priceElem.classList.remove('tick-up', 'tick-down');
+                  void priceElem.offsetWidth; // Reflow
+                  priceElem.classList.add(newPrice > prevPrice ? 'tick-up' : 'tick-down');
+                  setTimeout(() => priceElem.classList.remove('tick-up', 'tick-down'), 600);
+                }
+              }
+
+              const chgElem = document.getElementById(`wl_chg_${sym}`);
+              if (chgElem && t.price24hPcnt !== undefined) {
+                const chgPct = window.liveMarketPrices[sym].chgPct;
+                chgElem.innerText = `${chgPct >= 0 ? '+' : ''}${chgPct.toFixed(2)}%`;
+                chgElem.className = `wl-chg-badge ${chgPct >= 0 ? 'up' : 'down'}`;
+              }
+
+              const fundElem = document.getElementById(`wl_fund_${sym}`);
+              if (fundElem && t.fundingRate !== undefined) {
+                const fr = window.liveMarketPrices[sym].fundingRate;
+                fundElem.innerText = `⚡ ${fr >= 0 ? '+' : ''}${fr.toFixed(4)}%`;
+              }
+
+              // Update active calculator live banner if matching
+              const activeSym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
+              const fmtActive = activeSym.endsWith('USDT') ? activeSym : `${activeSym}USDT`;
+              if (sym === fmtActive && newPrice > 0) {
+                liveTickerPrice = newPrice;
+                document.getElementById('livePriceDisplay').innerText = `${newPrice > 10 ? newPrice.toFixed(2) : newPrice.toFixed(4)} USDT`;
+                const chgBadge = document.getElementById('liveChgDisplay');
+                const chgPct = window.liveMarketPrices[sym].chgPct;
+                chgBadge.innerText = `${chgPct >= 0 ? '+' : ''}${chgPct.toFixed(2)}%`;
+                chgBadge.className = `live-chg-badge ${chgPct >= 0 ? 'up' : 'down'}`;
+                const fr = window.liveMarketPrices[sym].fundingRate;
+                document.getElementById('liveFundingDisplay').innerText = `⚡ ${fr >= 0 ? '+' : ''}${fr.toFixed(4)}%`;
+              }
+
+              // Re-render open trades in journal if this symbol is open
+              if (window.tradesData && window.tradesData.some(tr => tr.status === 'OPEN' && (tr.symbol.toUpperCase() === sym || `${tr.symbol.toUpperCase()}USDT` === sym))) {
+                if (window.currentJournalView === 'table' || window.currentJournalView === 'gallery') {
+                  renderJournal();
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('WS parse error:', e);
+          }
+        };
+
+        bybitWs.onerror = (err) => {
+          console.warn('Bybit WebSocket note, fallback active:', err);
+          if (badge) badge.className = 'ws-status-badge polling';
+          if (badgeText) badgeText.innerText = 'Polling Fallback';
+        };
+
+        bybitWs.onclose = () => {
+          if (badge) badge.className = 'ws-status-badge reconnecting';
+          if (badgeText) badgeText.innerText = 'Reconnecting WS...';
+          clearInterval(wsPingInterval);
+          clearTimeout(wsReconnectTimeout);
+          wsReconnectTimeout = setTimeout(initBybitWebSocket, 4000);
+        };
+      } catch (err) {
+        console.warn('WS Init failed:', err);
+        if (badge) badge.className = 'ws-status-badge polling';
+        if (badgeText) badgeText.innerText = 'Polling Fallback';
+      }
+    }
+
+    function subscribeToBybitWsSymbols() {
+      if (!bybitWs || bybitWs.readyState !== WebSocket.OPEN) return;
+      const activeSym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
+      const fmtActive = activeSym.endsWith('USDT') ? activeSym : `${activeSym}USDT`;
+      const allSymbols = Array.from(new Set([...window.userWatchlist, fmtActive]));
+      const subTopics = allSymbols.map(s => `tickers.${s}`);
+
+      bybitWs.send(JSON.stringify({
+        op: "subscribe",
+        args: subTopics
+      }));
+    }
+
+    /* Watchlist UI Rendering & Management */
+    function renderWatchlist() {
+      const countElem = document.getElementById('wlCountAll');
+      if (countElem) countElem.innerText = window.userWatchlist.length;
+
+      const grid = document.getElementById('watchlistCardsGrid');
+      if (!grid) return;
+
+      let list = [...window.userWatchlist];
+
+      if (window.activeWatchlistFilter === 'gainers') {
+        list = list.filter(sym => {
+          const d = window.liveMarketPrices[sym];
+          return d && d.chgPct > 0;
+        }).sort((a, b) => {
+          const da = window.liveMarketPrices[a] ? window.liveMarketPrices[a].chgPct : 0;
+          const db = window.liveMarketPrices[b] ? window.liveMarketPrices[b].chgPct : 0;
+          return db - da;
+        });
+      } else if (window.activeWatchlistFilter === 'losers') {
+        list = list.filter(sym => {
+          const d = window.liveMarketPrices[sym];
+          return d && d.chgPct < 0;
+        }).sort((a, b) => {
+          const da = window.liveMarketPrices[a] ? window.liveMarketPrices[a].chgPct : 0;
+          const db = window.liveMarketPrices[b] ? window.liveMarketPrices[b].chgPct : 0;
+          return da - db;
+        });
+      } else if (window.activeWatchlistFilter === 'funding') {
+        list.sort((a, b) => {
+          const fa = window.liveMarketPrices[a] ? window.liveMarketPrices[a].fundingRate : 0;
+          const fb = window.liveMarketPrices[b] ? window.liveMarketPrices[b].fundingRate : 0;
+          return fb - fa;
+        });
+      }
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div style="padding: 16px; color: var(--text-muted); font-size: 13px;">
+            No coins found for this filter. Click <strong>+ Add Coin</strong> to add more.
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = list.map(sym => {
+        const d = window.liveMarketPrices[sym] || { price: 0, chgPct: 0, fundingRate: 0, high24h: 0, low24h: 0 };
+        const priceStr = d.price > 1000 ? d.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) :
+                         (d.price > 10 ? d.price.toFixed(2) :
+                         (d.price > 1 ? d.price.toFixed(4) : (d.price > 0 ? d.price.toFixed(5) : '—')));
+        const chgStr = `${d.chgPct >= 0 ? '+' : ''}${d.chgPct.toFixed(2)}%`;
+        const chgClass = d.chgPct >= 0 ? 'up' : 'down';
+        const fundingStr = `${d.fundingRate >= 0 ? '+' : ''}${d.fundingRate.toFixed(4)}%`;
+
+        let hlPct = 50;
+        if (d.high24h > d.low24h && d.price >= d.low24h) {
+          hlPct = Math.min(100, Math.max(0, ((d.price - d.low24h) / (d.high24h - d.low24h)) * 100));
+        }
+        const lowStr = d.low24h > 1000 ? (d.low24h / 1000).toFixed(1) + 'k' : (d.low24h > 1 ? d.low24h.toFixed(2) : d.low24h.toFixed(4));
+        const highStr = d.high24h > 1000 ? (d.high24h / 1000).toFixed(1) + 'k' : (d.high24h > 1 ? d.high24h.toFixed(2) : d.high24h.toFixed(4));
+
+        return `
+          <div class="wl-card" id="wl_card_${sym}" onclick="loadCoinToCalculator('${sym}')" title="Click to load into calculator">
+            <div class="wl-card-top">
+              <div class="wl-sym-group">
+                <span class="wl-sym">${sym}</span>
+                <span class="wl-badge-perp">PERP</span>
+              </div>
+              <div class="wl-card-top-right">
+                <span class="wl-chg-badge ${chgClass}" id="wl_chg_${sym}">${chgStr}</span>
+                <button type="button" class="wl-btn-del" onclick="removeWatchlistCoin(event, '${sym}')" title="Remove ${sym} from watchlist">✕</button>
+              </div>
+            </div>
+
+            <div class="wl-price-row">
+              <div class="wl-price" id="wl_price_${sym}">${priceStr}</div>
+              <span class="wl-currency">USDT</span>
+            </div>
+
+            <div class="wl-meta-row">
+              <div class="wl-hl-range" title="24h Low: ${d.low24h} | High: ${d.high24h}">
+                <span>L:${lowStr}</span>
+                <div class="wl-hl-bar"><div class="wl-hl-fill" id="wl_hl_fill_${sym}" style="width: ${hlPct}%;"></div></div>
+                <span>H:${highStr}</span>
+              </div>
+              <span class="wl-funding-tag" id="wl_fund_${sym}" title="8h Funding Rate">⚡ ${fundingStr}</span>
+            </div>
+
+            <div class="wl-card-footer">
+              <button type="button" class="btn-wl-load" onclick="loadCoinToCalculator('${sym}', event)">⚡ Load in Calc</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setWatchlistFilter(filter, btn) {
+      window.activeWatchlistFilter = filter;
+      document.querySelectorAll('.wl-filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderWatchlist();
+    }
+
+    window.loadCoinToCalculator = function(symbol, event) {
+      if (event) event.stopPropagation();
+      const cleanSym = symbol.toUpperCase().trim();
+      document.getElementById('coinSymbol').value = cleanSym;
+
+      const liveData = window.liveMarketPrices[cleanSym];
+      if (liveData && liveData.price > 0) {
+        document.getElementById('entryPrice').value = liveData.price > 10 ? liveData.price.toFixed(2) : (liveData.price > 1 ? liveData.price.toFixed(4) : liveData.price.toFixed(5));
+      }
+
+      onRiskOrEntryChange();
+      fetchBybitTicker();
+      subscribeToBybitWsSymbols();
+      showToast(`⚡ Loaded <strong>${cleanSym}</strong> into Position Calculator!`);
+
+      const calcBox = document.getElementById('coinSymbol');
+      if (calcBox) {
+        calcBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        calcBox.focus();
+      }
+    };
+
+    function openAddWatchlistModal() {
+      document.getElementById('addWatchlistModal').classList.add('active');
+      const input = document.getElementById('addCoinInput');
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 100);
+      }
+    }
+
+    function closeAddWatchlistModal() {
+      document.getElementById('addWatchlistModal').classList.remove('active');
+    }
+
+    function closeAddWatchlistModalOnBackdrop(e) {
+      if (e.target.id === 'addWatchlistModal') closeAddWatchlistModal();
+    }
+
+    function quickAddWatchlist(sym) {
+      addWatchlistSymbol(sym);
+      closeAddWatchlistModal();
+    }
+
+    function confirmAddWatchlistCoin() {
+      const input = document.getElementById('addCoinInput');
+      if (!input) return;
+      const val = input.value.toUpperCase().trim();
+      if (!val) return;
+      const sym = val.endsWith('USDT') ? val : `${val}USDT`;
+      addWatchlistSymbol(sym);
+      closeAddWatchlistModal();
+    }
+
+    function addWatchlistSymbol(sym) {
+      const clean = sym.toUpperCase().trim();
+      if (!window.userWatchlist.includes(clean)) {
+        window.userWatchlist.push(clean);
+        localStorage.setItem('bybit_watchlist_v1', JSON.stringify(window.userWatchlist));
+        subscribeToBybitWsSymbols();
+        fetchGlobalBybitPrices();
+        renderWatchlist();
+        showToast(`➕ Added <strong>${clean}</strong> to Watchlist!`);
+      } else {
+        showToast(`ℹ️ <strong>${clean}</strong> is already in your Watchlist.`);
+      }
+    }
+
+    function removeWatchlistCoin(event, sym) {
+      if (event) event.stopPropagation();
+      window.userWatchlist = window.userWatchlist.filter(s => s !== sym);
+      localStorage.setItem('bybit_watchlist_v1', JSON.stringify(window.userWatchlist));
+      renderWatchlist();
+      showToast(`🗑️ Removed <strong>${sym}</strong> from Watchlist.`);
+    }
+
+    /* REST Polling Fallback & Full Market Cache */
     async function fetchGlobalBybitPrices() {
       try {
         const res = await fetch('https://api.bybit.com/v5/market/tickers?category=linear');
@@ -4527,6 +5310,9 @@
               low24h: parseFloat(t.lowPrice24h) || 0
             };
           });
+
+          // Render Watchlist with loaded data
+          renderWatchlist();
 
           // Update active calculator live banner
           const activeSym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
@@ -5658,13 +6444,15 @@
       });
     }
 
-    // Initialize Calculator, Live Ticker & Journal Database
+    // Initialize Calculator, Watchlist, WebSocket Stream & Journal Database
     calculate();
     initDB();
+    renderWatchlist();
+    initBybitWebSocket();
     fetchBybitTicker();
     fetchGlobalBybitPrices();
-    setInterval(fetchBybitTicker, 8000);
-    setInterval(fetchGlobalBybitPrices, 8000); // Live sync all open trades every 8s
+    setInterval(fetchBybitTicker, 6000);
+    setInterval(fetchGlobalBybitPrices, 6000); // Live sync all open trades & tickers every 6s
   </script>
 </body>
 </html>
