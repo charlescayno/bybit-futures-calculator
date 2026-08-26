@@ -2905,10 +2905,161 @@
       border: 1px solid rgba(247, 166, 0, 0.4);
     }
 
+    .chart-pill.be {
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
     .chart-pill.liq {
       background: rgba(168, 85, 247, 0.12);
       color: #c084fc;
       border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    /* Chart Drag-and-Drop HUD Tooltip */
+    .chart-drag-tooltip {
+      position: absolute;
+      display: none;
+      z-index: 50;
+      pointer-events: none;
+      background: rgba(13, 17, 23, 0.95);
+      border: 1px solid #00e5ff;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      white-space: nowrap;
+      transition: opacity 0.1s ease;
+    }
+
+    .drag-active-line {
+      cursor: ns-resize !important;
+    }
+
+    /* Trailing Stop & Breakeven Safety Cockpit Card */
+    .breakeven-cockpit-card {
+      background: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .breakeven-cockpit-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: #38bdf8;
+    }
+
+    .be-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .be-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .be-icon {
+      font-size: 20px;
+    }
+
+    .be-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 0.3px;
+    }
+
+    .be-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+    }
+
+    .btn-set-be {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-set-be:hover {
+      background: #38bdf8;
+      color: #0b0e14;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .be-body-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .be-body-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .be-stat-col {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .be-stat-lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .be-stat-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+
+    .be-stat-val.trigger {
+      color: #0ecb81;
+    }
+
+    .be-stat-hint {
+      font-size: 9.5px;
+      color: #8b98af;
+      margin-top: 3px;
+      line-height: 1.3;
     }
 
     .chart-section.collapsed .chart-body-wrapper,
@@ -3050,19 +3201,21 @@
         </div>
       </div>
 
-      <!-- Live Setup Legend Bar (Entry, SL, TP1, TP2, TP3, Target TP, Liq) -->
+      <!-- Live Setup Legend Bar (Entry, SL, TP1, TP2, TP3, Target TP, Breakeven, Liq) -->
       <div class="chart-setup-legend-bar" id="chartSetupLegendBar">
         <div class="chart-setup-pills">
           <span class="chart-pill entry" id="pillEntry">🔵 Entry: <strong id="pillEntryVal">—</strong></span>
           <span class="chart-pill sl" id="pillSl">🔴 Stop Loss: <strong id="pillSlVal">—</strong></span>
+          <span class="chart-pill be" id="pillBe" title="Fee-Covered Breakeven Price">🛡️ Breakeven: <strong id="pillBeVal">—</strong></span>
           <span class="chart-pill tp1" id="pillTp1">🟢 TP 1R: <strong id="pillTp1Val">—</strong></span>
           <span class="chart-pill tp2" id="pillTp2">🟢 TP 2R: <strong id="pillTp2Val">—</strong></span>
           <span class="chart-pill tp3" id="pillTp3">🟢 TP 3R: <strong id="pillTp3Val">—</strong></span>
           <span class="chart-pill target-tp" id="pillTargetTp">🎯 Target TP: <strong id="pillTargetTpVal">—</strong></span>
           <span class="chart-pill liq" id="pillLiq">⚡ Liq: <strong id="pillLiqVal">—</strong></span>
         </div>
-        <div style="font-size: 11px; color: var(--text-muted);">
-          <span>💡 Lines update live as you adjust parameters</span>
+        <div style="font-size: 11px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <span style="color: #00e5ff; font-weight: 700;">🖱️ Drag & Drop Entry / SL / TP lines on chart</span>
+          <span style="color: var(--text-muted);">• Dynamic RRR & Lot Sync</span>
         </div>
       </div>
     </div>
@@ -3301,6 +3454,34 @@
           <div class="rrr-winrate-row">
             <span class="rrr-winrate-label">📊 Min. Win Rate to Break Even:</span>
             <span class="rrr-winrate-val" id="outWinRate">23.53% (win 1 in 4.3 trades)</span>
+          </div>
+        </div>
+
+        <!-- Trailing Stop & Breakeven Safety Cockpit Card -->
+        <div class="breakeven-cockpit-card">
+          <div class="be-header">
+            <div class="be-header-left">
+              <span class="be-icon">🛡️</span>
+              <div>
+                <div class="be-title">Trailing Stop & Breakeven Trigger</div>
+                <div class="be-sub">True $0.00 Net Risk (Covers Entry + Exit Taker Fees)</div>
+              </div>
+            </div>
+            <button type="button" class="btn-set-be" onclick="setSlToBreakeven()" title="Set Stop Loss input directly to calculated Breakeven price">
+              ⚡ Set SL to Breakeven
+            </button>
+          </div>
+          <div class="be-body-grid">
+            <div class="be-stat-col">
+              <div class="be-stat-lbl">Exact Breakeven SL Price:</div>
+              <div class="be-stat-val" id="outBePrice">0.5587 USDT</div>
+              <div class="be-stat-hint">Guarantees $0.0000 net loss after all Bybit trading fees</div>
+            </div>
+            <div class="be-stat-col">
+              <div class="be-stat-lbl">Move-to-BE Trigger Rule:</div>
+              <div class="be-stat-val trigger" id="outBeTrigger">@ 1R Hit (0.5736 USDT)</div>
+              <div class="be-stat-hint">Once price reaches 1R profit, lock trade risk-free</div>
+            </div>
           </div>
         </div>
 
@@ -4495,6 +4676,25 @@
         rrrBadge.innerText = `—`;
       }
 
+      // Trailing Stop & True Fee-Covered Breakeven SL Calculation
+      let P_BE = 0;
+      let P_Trigger = 0;
+      if (currentDirection === 'LONG') {
+        P_BE = EP * (1 + f) / (1 - f);
+        P_Trigger = (1 * lossPerUnit + EP * (1 + f)) / (1 - f);
+      } else {
+        P_BE = EP * (1 - f) / (1 + f);
+        P_Trigger = (EP * (1 - f) - 1 * lossPerUnit) / (1 + f);
+      }
+      window.currentBreakevenPrice = P_BE;
+
+      const fmtPrice = (p) => p > 1000 ? p.toFixed(2) : (p > 10 ? p.toFixed(2) : (p > 1 ? p.toFixed(4) : p.toFixed(5)));
+      const beElem = document.getElementById('outBePrice');
+      if (beElem) beElem.innerText = `${fmtPrice(P_BE)} USDT`;
+
+      const beTrigElem = document.getElementById('outBeTrigger');
+      if (beTrigElem) beTrigElem.innerText = `@ 1R Hit (${fmtPrice(P_Trigger)} USDT)`;
+
       const safetyBanner = document.getElementById('safetyBanner');
       const safetyIcon = document.getElementById('safetyIcon');
       const safetyText = document.getElementById('safetyText');
@@ -4513,6 +4713,24 @@
         updateChartPriceLines();
       }
     }
+
+    window.setSlToBreakeven = function() {
+      if (!window.currentBreakevenPrice || window.currentBreakevenPrice <= 0) return;
+      const bePrice = window.currentBreakevenPrice;
+      let dec = 4;
+      if (bePrice > 1000) dec = 2;
+      else if (bePrice > 10) dec = 2;
+      else if (bePrice > 1) dec = 4;
+      else dec = 5;
+
+      const formatted = bePrice.toFixed(dec);
+      const slInput = document.getElementById('stopLossPrice');
+      if (slInput) {
+        slInput.value = formatted;
+        onRiskOrEntryChange();
+        showToast(`🛡️ Stop Loss set to Breakeven (<strong>${formatted} USDT</strong>) — Trade is 100% Risk-Free!`);
+      }
+    };
 
     function updateLadder(EP, SL, TP, LP, netProfit, netLoss, isSafe) {
       const container = document.getElementById('ladderContainer');
@@ -5826,6 +6044,8 @@
           updateChartLegend(param);
         });
 
+        setupChartDragAndDrop(container);
+
         fetchChartKlines(currentChartSymbol, currentChartTimeframe);
       } catch (err) {
         console.warn('Lightweight chart init note:', err);
@@ -6043,7 +6263,26 @@
         chartPriceLines.push(lineTargetTp);
       }
 
-      // 7. Liquidation Line (Purple, Dotted, Width 1)
+      // 7. Fee-Covered Breakeven Line (Sky Blue, Dotted, Width 1)
+      let P_BE = 0;
+      if (currentDirection === 'LONG') {
+        P_BE = EP * (1 + f) / (1 - f);
+      } else {
+        P_BE = EP * (1 - f) / (1 + f);
+      }
+      if (P_BE > 0) {
+        const lineBe = candleSeries.createPriceLine({
+          price: P_BE,
+          color: '#38bdf8',
+          lineWidth: 1,
+          lineStyle: LightweightCharts.LineStyle.Dotted,
+          axisLabelVisible: true,
+          title: `🛡️ BREAKEVEN ${fmt(P_BE)}`
+        });
+        chartPriceLines.push(lineBe);
+      }
+
+      // 8. Liquidation Line (Purple, Dotted, Width 1)
       if (LP > 0 && LP < 10000000) {
         const lineLiq = candleSeries.createPriceLine({
           price: LP,
@@ -6063,6 +6302,9 @@
       const pSl = document.getElementById('pillSlVal');
       if (pSl) pSl.innerText = `${fmt(SL)} USDT (-$${R.toFixed(2)})`;
 
+      const pBe = document.getElementById('pillBeVal');
+      if (pBe) pBe.innerText = `${fmt(P_BE)} USDT`;
+
       const pTp1 = document.getElementById('pillTp1Val');
       if (pTp1) pTp1.innerText = `${fmt(tp1)} USDT (+$${R.toFixed(2)})`;
 
@@ -6077,6 +6319,156 @@
 
       const pLiq = document.getElementById('pillLiqVal');
       if (pLiq) pLiq.innerText = `${fmt(LP)} USDT`;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* INTERACTIVE DRAG-AND-DROP ON CANDLESTICK CHART CANVAS        */
+    /* ------------------------------------------------------------ */
+    let isDraggingLine = null; // 'entry' | 'sl' | 'tp' | null
+    let dragTooltipEl = null;
+
+    function setupChartDragAndDrop(container) {
+      if (!container) return;
+
+      const bodyWrapper = document.getElementById('chartBodyWrapper') || container;
+      dragTooltipEl = document.getElementById('chartDragTooltip');
+      if (!dragTooltipEl) {
+        dragTooltipEl = document.createElement('div');
+        dragTooltipEl.id = 'chartDragTooltip';
+        dragTooltipEl.className = 'chart-drag-tooltip';
+        bodyWrapper.appendChild(dragTooltipEl);
+      }
+
+      function getRelativeCoords(e) {
+        const rect = container.getBoundingClientRect();
+        const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+        const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
+        return {
+          x: clientX - rect.left,
+          y: clientY - rect.top,
+          clientX,
+          clientY
+        };
+      }
+
+      function checkHoverLine(y) {
+        if (!candleSeries) return null;
+        const EP = parseFloat(document.getElementById('entryPrice').value) || 0;
+        const SL = parseFloat(document.getElementById('stopLossPrice').value) || 0;
+        const TP = parseFloat(document.getElementById('takeProfitPrice').value) || 0;
+
+        const yEP = candleSeries.priceToCoordinate(EP);
+        const ySL = candleSeries.priceToCoordinate(SL);
+        const yTP = candleSeries.priceToCoordinate(TP);
+
+        const hitDist = 14; // 14px grab tolerance
+        if (yEP !== null && Math.abs(y - yEP) <= hitDist) return { type: 'entry', price: EP, coord: yEP };
+        if (ySL !== null && Math.abs(y - ySL) <= hitDist) return { type: 'sl', price: SL, coord: ySL };
+        if (yTP !== null && Math.abs(y - yTP) <= hitDist) return { type: 'tp', price: TP, coord: yTP };
+        return null;
+      }
+
+      container.addEventListener('mousemove', (e) => {
+        if (currentChartMode !== 'visual' || isDraggingLine) return;
+        const { x, y } = getRelativeCoords(e);
+        const hover = checkHoverLine(y);
+
+        if (hover) {
+          container.style.cursor = 'ns-resize';
+          const color = hover.type === 'entry' ? '#00e5ff' : (hover.type === 'sl' ? '#f6465d' : '#0ecb81');
+          const label = hover.type === 'entry' ? '🔵 Drag Entry Price' : (hover.type === 'sl' ? '🔴 Drag Stop Loss' : '🟢 Drag Take Profit');
+          dragTooltipEl.style.display = 'block';
+          dragTooltipEl.style.left = `${Math.min(x + 18, container.clientWidth - 180)}px`;
+          dragTooltipEl.style.top = `${Math.max(10, y - 14)}px`;
+          dragTooltipEl.style.borderColor = color;
+          dragTooltipEl.innerHTML = `<span style="color:${color}; font-weight:700;">${label}</span> (${hover.price})`;
+        } else {
+          container.style.cursor = 'crosshair';
+          dragTooltipEl.style.display = 'none';
+        }
+      });
+
+      const onDragStart = (e) => {
+        if (currentChartMode !== 'visual') return;
+        const { y } = getRelativeCoords(e);
+        const hover = checkHoverLine(y);
+        if (hover) {
+          isDraggingLine = hover.type;
+          container.style.cursor = 'grabbing';
+          if (tvChart) {
+            tvChart.applyOptions({
+              handleScroll: false,
+              handleScale: false
+            });
+          }
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
+
+      const onDragMove = (e) => {
+        if (!isDraggingLine || !candleSeries) return;
+        const { x, y } = getRelativeCoords(e);
+        const price = candleSeries.coordinateToPrice(y);
+        if (!price || price <= 0) return;
+
+        let dec = 4;
+        if (price > 1000) dec = 2;
+        else if (price > 10) dec = 2;
+        else if (price > 1) dec = 4;
+        else dec = 5;
+
+        const formatted = price.toFixed(dec);
+
+        if (isDraggingLine === 'entry') {
+          document.getElementById('entryPrice').value = formatted;
+          onRiskOrEntryChange();
+        } else if (isDraggingLine === 'sl') {
+          document.getElementById('stopLossPrice').value = formatted;
+          onRiskOrEntryChange();
+        } else if (isDraggingLine === 'tp') {
+          document.getElementById('takeProfitPrice').value = formatted;
+          onTakeProfitChange();
+        }
+
+        const color = isDraggingLine === 'entry' ? '#00e5ff' : (isDraggingLine === 'sl' ? '#f6465d' : '#0ecb81');
+        const label = isDraggingLine === 'entry' ? '🔵 Moving Entry' : (isDraggingLine === 'sl' ? '🔴 Moving Stop Loss' : '🟢 Moving Take Profit');
+        const rrrText = document.getElementById('outRRR').innerText;
+        const netProfitText = document.getElementById('outProfit').innerText;
+        const netLossText = document.getElementById('outActualLoss').innerText;
+
+        dragTooltipEl.style.display = 'block';
+        dragTooltipEl.style.left = `${Math.min(x + 20, container.clientWidth - 220)}px`;
+        dragTooltipEl.style.top = `${Math.max(10, y - 20)}px`;
+        dragTooltipEl.style.borderColor = color;
+        dragTooltipEl.innerHTML = `
+          <div style="color:${color}; font-weight:800; font-size:11px;">${label}: <strong>${formatted} USDT</strong></div>
+          <div style="color:#fff; font-size:10px; margin-top:3px;">Net RRR: <strong>${rrrText}</strong> | Risk: <span style="color:#f6465d">${netLossText}</span></div>
+        `;
+        e.preventDefault();
+      };
+
+      const onDragEnd = (e) => {
+        if (isDraggingLine) {
+          isDraggingLine = null;
+          container.style.cursor = 'crosshair';
+          if (dragTooltipEl) dragTooltipEl.style.display = 'none';
+          if (tvChart) {
+            tvChart.applyOptions({
+              handleScroll: true,
+              handleScale: true
+            });
+          }
+        }
+      };
+
+      container.addEventListener('mousedown', onDragStart);
+      window.addEventListener('mousemove', onDragMove);
+      window.addEventListener('mouseup', onDragEnd);
+
+      container.addEventListener('touchstart', onDragStart, { passive: false });
+      window.addEventListener('touchmove', onDragMove, { passive: false });
+      window.addEventListener('touchend', onDragEnd);
     }
 
     function setChartTimeframe(tf, btn) {
