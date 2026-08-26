@@ -3,10 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bybit Futures Risk, RRR Calculator & Multi-Timeframe Trading Journal</title>
+  <meta name="theme-color" content="#f7a600">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Bybit Futures Risk Cockpit, Visual Analytics & Multi-Timeframe Trading Journal</title>
+  
+  <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
     :root {
       --bg-dark: #0b0e14;
@@ -62,6 +68,23 @@
     header {
       text-align: center;
       margin-bottom: 24px;
+      position: relative;
+    }
+
+    .header-top-actions {
+      position: absolute;
+      right: 0;
+      top: 0;
+      display: flex;
+      gap: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .header-top-actions {
+        position: static;
+        justify-content: center;
+        margin-bottom: 12px;
+      }
     }
 
     .badge {
@@ -79,6 +102,23 @@
       letter-spacing: 0.5px;
       margin-bottom: 12px;
     }
+
+    .btn-install-pwa {
+      background: linear-gradient(135deg, #f7a600 0%, #ffb726 100%);
+      color: #000;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(247, 166, 0, 0.3);
+      transition: transform 0.2s;
+    }
+    .btn-install-pwa:hover { transform: scale(1.05); }
 
     h1 {
       font-size: 28px;
@@ -194,14 +234,8 @@
       gap: 12px;
     }
 
-    .form-row-4 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 10px;
-    }
-
     @media (max-width: 640px) {
-      .form-row, .form-row-3, .form-row-4 {
+      .form-row, .form-row-3 {
         grid-template-columns: 1fr;
       }
     }
@@ -912,7 +946,7 @@
     .j-stat-num.red { color: var(--red); }
     .j-stat-num.yellow { color: var(--accent-yellow); }
 
-    /* Category & Filter Pills */
+    /* Filter & Search Bar */
     .filter-bar {
       display: flex;
       justify-content: space-between;
@@ -1030,7 +1064,6 @@
       background: rgba(255, 255, 255, 0.02);
     }
 
-    /* Multi-Thumbnail Strip in Table Cell */
     .multi-thumb-strip {
       display: flex;
       gap: 4px;
@@ -1083,7 +1116,6 @@
       font-family: 'Inter', sans-serif;
     }
 
-    /* Status Badges */
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -1129,7 +1161,6 @@
     .dir-tag.long { background: var(--green-bg); color: var(--green); }
     .dir-tag.short { background: var(--red-bg); color: var(--red); }
 
-    /* Strategy Tags */
     .strategy-badge-container {
       display: flex;
       flex-wrap: wrap;
@@ -1154,6 +1185,8 @@
     .strat-badge.bounce618 { background: rgba(247, 166, 0, 0.15); color: #fde047; border: 1px solid rgba(247, 166, 0, 0.3); }
     .strat-badge.parabolic { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.3); }
     .strat-badge.custom { background: #1f293d; color: #cfd8dc; border: 1px solid #334360; }
+    .strat-badge.psycho { background: rgba(246, 70, 93, 0.12); color: #fca5a5; border: 1px dashed rgba(246, 70, 93, 0.3); }
+    .strat-badge.disciplined { background: rgba(14, 203, 129, 0.12); color: #6ee7b7; border: 1px dashed rgba(14, 203, 129, 0.3); }
 
     /* GALLERY / CARDS VIEW (NOTION STYLE) */
     .gallery-grid {
@@ -1178,7 +1211,6 @@
       border-color: #3b4863;
     }
 
-    /* Card Image Viewer with Before/After Timeframe Tabs */
     .card-img-container {
       width: 100%;
       background: #0f131a;
@@ -1206,9 +1238,7 @@
       transition: all 0.15s;
     }
 
-    .card-tf-tab:hover {
-      color: #fff;
-    }
+    .card-tf-tab:hover { color: #fff; }
 
     .card-tf-tab.active {
       color: var(--accent-yellow);
@@ -1367,7 +1397,146 @@
       margin-top: auto;
     }
 
-    /* Modal Dialog (Add / Edit Trade) */
+    /* ============================================================ */
+    /* VIEW 3: VISUAL ANALYTICS & EQUITY GROWTH CURVE */
+    /* ============================================================ */
+    .analytics-dashboard-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .chart-container-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chart-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      background: #0f131a;
+      border: 1px solid #1e2637;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    canvas#equityCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .chart-tooltip {
+      position: absolute;
+      display: none;
+      background: rgba(15, 20, 28, 0.95);
+      border: 1px solid var(--accent-yellow);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 11px;
+      color: #fff;
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Strategy Matrix & Psychology Matrix Grid */
+    .matrix-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 860px) {
+      .matrix-two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .matrix-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .matrix-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .matrix-table th {
+      text-align: left;
+      color: var(--text-muted);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      padding: 6px 8px;
+      border-bottom: 1px solid #232c3d;
+    }
+
+    .matrix-table td {
+      padding: 8px;
+      border-bottom: 1px solid #1c2434;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .win-progress-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: #1e2638;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .win-progress-bar-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 3px;
+    }
+
+    /* Modal Dialog */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -1441,7 +1610,7 @@
       border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
 
-    /* Multi-Strategy Selector in Modal */
+    /* Multi-Strategy & Psychology Selector */
     .strategy-select-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -1475,6 +1644,18 @@
       border-color: var(--accent-yellow);
       color: var(--accent-yellow);
       font-weight: 700;
+    }
+
+    .strat-select-btn.psycho.active {
+      background: rgba(246, 70, 93, 0.15);
+      border-color: var(--red);
+      color: #fca5a5;
+    }
+
+    .strat-select-btn.good.active {
+      background: rgba(14, 203, 129, 0.15);
+      border-color: var(--green);
+      color: #a7f3d0;
     }
 
     /* 4-Slot Multi-Timeframe Image Dropzone Grid */
@@ -1705,9 +1886,15 @@
 
   <div class="container">
     <header>
-      <div class="badge">⚡ Bybit Isolated Margin • Multi-Timeframe Journal</div>
+      <div class="header-top-actions">
+        <button class="btn-install-pwa" id="btnPwaInstall" style="display: none;" onclick="triggerPwaInstall()">
+          <span>📲</span> Install App
+        </button>
+      </div>
+
+      <div class="badge">⚡ Bybit Isolated Margin • Risk Engine & Analytics</div>
       <h1>Futures Position Calculator & Trading Journal</h1>
-      <p class="subtitle">Lock your net dollar loss ($R$), verify Bybit liquidation safety, and attach Before/After (1H & 4H) chart screenshots.</p>
+      <p class="subtitle">Lock your net dollar loss ($R$), visualize Before/After 1H & 4H confluence, and track cumulative equity growth.</p>
     </header>
 
     <!-- TOP: CALCULATOR GRID -->
@@ -1922,67 +2109,59 @@
             <div class="rrr-big-value" id="outRRR">1 : 3.25</div>
             <div class="rrr-sub-text" id="outGainMultiple">+0.65 USDT (+325% Net)</div>
           </div>
-          <!-- Proportional Visual Gauge -->
           <div class="rrr-bar-container" title="Net Risk (Red) vs Net Reward (Green)">
             <div class="rrr-risk-bar" id="rrrRiskBar" style="width: 23.5%;"></div>
             <div class="rrr-reward-bar" id="rrrRewardBar" style="width: 76.5%;"></div>
           </div>
-          <!-- Min Win Rate Display -->
           <div class="rrr-winrate-row">
             <span class="rrr-winrate-label">📊 Min. Win Rate to Break Even:</span>
             <span class="rrr-winrate-val" id="outWinRate">23.53% (win 1 in 4.3 trades)</span>
           </div>
         </div>
 
-        <!-- Interactive Vertical Price Ladder (Shows Actual Net PnL) -->
+        <!-- Interactive Vertical Price Ladder -->
         <div class="ladder-card">
           <div class="ladder-title">
             <span>🪜 Visual Price Ladder</span>
             <span style="font-size: 11px; color: #69f0ae; font-weight: 600;" id="ladderDirectionHint">Actual Net P&L</span>
           </div>
           <div class="ladder-container" id="ladderContainer">
-            <!-- Dynamically populated by JS based on LONG/SHORT -->
+            <!-- Dynamically populated by JS -->
           </div>
         </div>
 
         <!-- Stats Grid with Net PnL & Fee Breakdown -->
         <div class="stats-grid">
-          <!-- Actual Loss at SL (Net after fees) -->
           <div class="stat-item" style="border-left: 3px solid var(--red);">
             <div class="stat-name">Actual Loss at SL (Net)</div>
             <div class="stat-val loss" id="outActualLoss">-0.1933 USDT</div>
             <div class="stat-sub" id="outSlFeeSub">Price: -0.1860 | Fees: -0.0073</div>
           </div>
 
-          <!-- Actual Profit at TP (Net after fees) -->
           <div class="stat-item" style="border-left: 3px solid var(--green);">
             <div class="stat-name">Actual Profit at TP (Net)</div>
             <div class="stat-val profit" id="outProfit">+0.6280 USDT</div>
             <div class="stat-sub" id="outTpFeeSub">Price: +0.6360 | Fees: -0.0080</div>
           </div>
 
-          <!-- Margin Required -->
           <div class="stat-item">
             <div class="stat-name">Margin Required (Cost)</div>
             <div class="stat-val" id="outMargin">1.34 USDT</div>
             <div class="stat-sub" id="outPosValSub">Position: 6.70 USDT</div>
           </div>
 
-          <!-- Max Safe Leverage -->
           <div class="stat-item">
             <div class="stat-name">Max Safe Leverage</div>
             <div class="stat-val warning" id="outMaxLeverage">21.18x</div>
             <div class="stat-sub">Before Liq > SL</div>
           </div>
 
-          <!-- Total Est Fees -->
           <div class="stat-item">
             <div class="stat-name">Est. Total Fees (Open+Close)</div>
             <div class="stat-val" id="outFees" style="color: #b0bec5;">0.0080 USDT</div>
             <div class="stat-sub" id="outFeeRateSub">0.110% rate (0.60% of margin @ 5x)</div>
           </div>
 
-          <!-- Liquidation Price -->
           <div class="stat-item">
             <div class="stat-name">Bybit Liquidation Price</div>
             <div class="stat-val liq" id="outLiqPrice">0.4556 USDT</div>
@@ -2003,14 +2182,14 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- NOTION-STYLE TRADING JOURNAL & LOG (MULTI-TIMEFRAME) -->
+    <!-- NOTION-STYLE TRADING JOURNAL & VISUAL ANALYTICS -->
     <!-- ============================================================ -->
     <div class="journal-section" id="journalSection">
       <div class="journal-header-card">
         <div class="journal-top-bar">
           <div class="journal-title-group">
             <div class="journal-main-title">
-              <span>📓</span> Trade Journal & Visual Log
+              <span>📓</span> Trade Journal & Analytics
             </div>
             <!-- Notion View Switcher -->
             <div class="view-switcher">
@@ -2018,7 +2197,10 @@
                 <span>📋</span> Table View
               </button>
               <button class="view-btn" id="btnGalleryView" onclick="switchView('gallery')">
-                <span>🖼️</span> Images / Cards View
+                <span>🖼️</span> Images View
+              </button>
+              <button class="view-btn" id="btnAnalyticsView" onclick="switchView('analytics')">
+                <span>📈</span> Visual Analytics
               </button>
             </div>
           </div>
@@ -2056,8 +2238,8 @@
           </div>
         </div>
 
-        <!-- Filter & Search Bar -->
-        <div class="filter-bar">
+        <!-- Filter & Search Bar (Visible in Table and Gallery) -->
+        <div class="filter-bar" id="journalFilterBar">
           <div class="category-pills">
             <button class="cat-pill active" onclick="setCategoryFilter('ALL')">All (<span id="countAll">0</span>)</button>
             <button class="cat-pill win" onclick="setCategoryFilter('WIN')">🟢 Wins (<span id="countWin">0</span>)</button>
@@ -2092,7 +2274,7 @@
               <th>Entry / SL / TP</th>
               <th>Lev & Qty</th>
               <th>Net RRR</th>
-              <th>Strategy Setup</th>
+              <th>Strategy & Discipline</th>
               <th>Status</th>
               <th>Net P&L</th>
               <th>Actions</th>
@@ -2108,10 +2290,76 @@
       <div class="gallery-grid" id="galleryViewContainer" style="display: none;">
         <!-- Populated by JS -->
       </div>
+
+      <!-- VIEW 3: VISUAL ANALYTICS & EQUITY GROWTH CURVE -->
+      <div class="analytics-dashboard-grid" id="analyticsViewContainer" style="display: none;">
+        <!-- Interactive Equity Growth Curve Chart -->
+        <div class="chart-container-card">
+          <div class="chart-header">
+            <div class="chart-title">
+              <span>📈</span> Cumulative Equity Curve ($ USDT)
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted);">
+              Hover over points for trade details & balance
+            </div>
+          </div>
+          <div class="canvas-wrap" id="canvasWrap">
+            <canvas id="equityCanvas"></canvas>
+            <div id="chartTooltip" class="chart-tooltip"></div>
+          </div>
+        </div>
+
+        <!-- Strategy Win-Rate Matrix & Psychology Tracker Matrix -->
+        <div class="matrix-two-col">
+          <!-- Strategy Matrix -->
+          <div class="matrix-card">
+            <div class="matrix-title">
+              <span>🎯 Strategy Performance Matrix</span>
+              <span style="font-size: 11px; color: var(--accent-yellow); font-weight: 600;">Edge Breakdown</span>
+            </div>
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th>Strategy</th>
+                  <th>Trades</th>
+                  <th>Win Rate %</th>
+                  <th>Net P&L</th>
+                  <th>Profit Factor</th>
+                </tr>
+              </thead>
+              <tbody id="strategyMatrixBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Psychology & Execution Mistakes Tracker -->
+          <div class="matrix-card">
+            <div class="matrix-title">
+              <span>🧠 Discipline & Mistakes Tracker</span>
+              <span style="font-size: 11px; color: #6ee7b7; font-weight: 600;" id="disciplineScoreBadge">Discipline: 100%</span>
+            </div>
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th>Execution / Habit</th>
+                  <th>Count</th>
+                  <th>Frequency</th>
+                  <th>Net P&L Impact</th>
+                </tr>
+              </thead>
+              <tbody id="psychologyMatrixBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ============================================================ -->
-    <!-- MODAL: ADD / EDIT TRADE (MULTI-TIMEFRAME & STRATEGIES) -->
+    <!-- MODAL: ADD / EDIT TRADE (MULTI-TIMEFRAME & PSYCHOLOGY) -->
     <!-- ============================================================ -->
     <div class="modal-overlay" id="tradeModal">
       <div class="modal-box">
@@ -2175,7 +2423,7 @@
             </div>
           </div>
 
-          <!-- Strategy Selection (Multiple Selection Dropdown/Pills) -->
+          <!-- Strategy Selection (Multiple Selection) -->
           <div class="form-group" style="margin: 0;">
             <label>
               <span>Strategy Confluence</span>
@@ -2188,6 +2436,22 @@
               <button type="button" class="strat-select-btn" onclick="toggleModalStrategy('0.5 Bounce', this)"><span>📊</span> 0.5 Bounce</button>
               <button type="button" class="strat-select-btn" onclick="toggleModalStrategy('0.618 Bounce', this)"><span>🎯</span> 0.618 Bounce</button>
               <button type="button" class="strat-select-btn" onclick="toggleModalStrategy('Parabolic Play', this)"><span>🚀</span> Parabolic Play</button>
+            </div>
+          </div>
+
+          <!-- Psychology & Execution Tracker -->
+          <div class="form-group" style="margin: 0;">
+            <label>
+              <span>Psychology & Discipline Tracking</span>
+              <span class="hint" style="color: #f7a600;">Track your discipline</span>
+            </label>
+            <div class="strategy-select-grid" id="modalPsychologyGrid">
+              <button type="button" class="strat-select-btn good active" onclick="toggleModalPsychology('Followed Plan 100%', this)"><span>✅</span> Followed Plan 100%</button>
+              <button type="button" class="strat-select-btn psycho" onclick="toggleModalPsychology('FOMO / Chased Entry', this)"><span>⚡</span> FOMO / Chased Entry</button>
+              <button type="button" class="strat-select-btn psycho" onclick="toggleModalPsychology('Moved SL Too Early', this)"><span>🛑</span> Moved SL Too Early</button>
+              <button type="button" class="strat-select-btn psycho" onclick="toggleModalPsychology('Exited Too Early', this)"><span>🏃</span> Exited Too Early</button>
+              <button type="button" class="strat-select-btn psycho" onclick="toggleModalPsychology('Over-leveraged', this)"><span>💣</span> Over-leveraged</button>
+              <button type="button" class="strat-select-btn psycho" onclick="toggleModalPsychology('Hesitated Entry', this)"><span>🐢</span> Hesitated Entry</button>
             </div>
             <input type="text" id="mCustomTags" placeholder="Additional custom tags (comma separated, e.g. 15m Retest, S/R Flip)" style="margin-top: 8px; font-size: 12px;">
           </div>
@@ -2226,7 +2490,6 @@
             </label>
 
             <div class="timeframe-slots-grid">
-              <!-- Slot 1: Before 1H -->
               <div class="tf-slot-box" id="slot_before_1h" onclick="selectSlotToUpload('before_1h')">
                 <button type="button" class="tf-slot-del-btn" id="del_before_1h" onclick="removeSlotImage(event, 'before_1h')">✕</button>
                 <div class="tf-slot-title">Before (1h)</div>
@@ -2235,7 +2498,6 @@
                 <img class="tf-slot-preview" id="preview_before_1h" alt="Before 1H">
               </div>
 
-              <!-- Slot 2: Before 4H -->
               <div class="tf-slot-box" id="slot_before_4h" onclick="selectSlotToUpload('before_4h')">
                 <button type="button" class="tf-slot-del-btn" id="del_before_4h" onclick="removeSlotImage(event, 'before_4h')">✕</button>
                 <div class="tf-slot-title">Before (4h)</div>
@@ -2244,7 +2506,6 @@
                 <img class="tf-slot-preview" id="preview_before_4h" alt="Before 4H">
               </div>
 
-              <!-- Slot 3: After 1H -->
               <div class="tf-slot-box" id="slot_after_1h" onclick="selectSlotToUpload('after_1h')">
                 <button type="button" class="tf-slot-del-btn" id="del_after_1h" onclick="removeSlotImage(event, 'after_1h')">✕</button>
                 <div class="tf-slot-title">After (1h)</div>
@@ -2253,7 +2514,6 @@
                 <img class="tf-slot-preview" id="preview_after_1h" alt="After 1H">
               </div>
 
-              <!-- Slot 4: After 4H -->
               <div class="tf-slot-box" id="slot_after_4h" onclick="selectSlotToUpload('after_4h')">
                 <button type="button" class="tf-slot-del-btn" id="del_after_4h" onclick="removeSlotImage(event, 'after_4h')">✕</button>
                 <div class="tf-slot-title">After (4h)</div>
@@ -2263,7 +2523,6 @@
               </div>
             </div>
 
-            <!-- Hidden File Input -->
             <input type="file" id="modalSlotFileInput" accept="image/*" style="display: none;" onchange="handleSlotFileSelect(event)">
           </div>
 
@@ -2297,7 +2556,7 @@
     </div>
 
     <footer>
-      Bybit Isolated Margin Liquidation & Sizing Engine • Multi-Timeframe Visual Trading Journal
+      Bybit Isolated Margin Liquidation & Sizing Engine • Multi-Timeframe Visual Trading Journal & Analytics
     </footer>
   </div>
 
@@ -2502,7 +2761,6 @@
       const posValue = finalQty * EP;
       const IM = posValue / L;
 
-      // Liquidation & Max Leverage
       let LP = 0;
       let maxL = 0;
       let isSafe = true;
@@ -2534,14 +2792,12 @@
         }
       }
 
-      // Exact Actual Net Loss at SL
       const grossLoss = finalQty * deltaP;
       const openFee = posValue * f;
       const slExitFee = (finalQty * SL) * f;
       const totalSlFees = openFee + slExitFee;
       const actualNetLoss = grossLoss + totalSlFees;
 
-      // Exact Actual Net Profit at TP
       let grossProfit = 0;
       let tpExitFee = 0;
       let totalTpFees = 0;
@@ -2567,7 +2823,6 @@
         }
       }
 
-      // Format Qty String
       let qtyStr = '';
       if (currentLotStep === '1') {
         qtyStr = Math.round(finalQty).toString();
@@ -2581,7 +2836,6 @@
         qtyStr = finalQty < 1 ? finalQty.toFixed(4) : (finalQty < 100 ? finalQty.toFixed(2) : finalQty.toFixed(1));
       }
 
-      // Update Outputs
       document.getElementById('outQuantity').innerText = qtyStr;
       document.getElementById('outExactQty').innerText = exactQty.toFixed(4);
       document.getElementById('outPosValue').innerText = `≈ ${posValue.toFixed(2)} USDT`;
@@ -2589,15 +2843,12 @@
       document.getElementById('outMargin').innerText = `${IM.toFixed(2)} USDT`;
       document.getElementById('outPosValSub').innerText = `Position: ${posValue.toFixed(2)} USDT`;
 
-      // Net Loss Display
       document.getElementById('outActualLoss').innerText = `-${actualNetLoss.toFixed(4)} USDT`;
       document.getElementById('outSlFeeSub').innerText = `Price: -${grossLoss.toFixed(4)} | Fees: -${totalSlFees.toFixed(4)}`;
 
-      // Net Profit Display
       document.getElementById('outProfit').innerText = `+${actualNetProfit.toFixed(4)} USDT`;
       document.getElementById('outTpFeeSub').innerText = `Price: +${grossProfit.toFixed(4)} | Fees: -${totalTpFees.toFixed(4)}`;
 
-      // Liquidation & Max Leverage
       document.getElementById('outLiqPrice').innerText = `${LP.toFixed(4)} USDT`;
       const liqDistPct = Math.abs((EP - LP) / EP) * 100;
       document.getElementById('outLiqDistSub').innerText = `${liqDistPct.toFixed(2)}% from Entry`;
@@ -2607,7 +2858,6 @@
       document.getElementById('outFees').innerText = `${totalTpFees.toFixed(4)} USDT`;
       document.getElementById('outFeeRateSub').innerText = `${(f * 2 * 100).toFixed(3)}% rate (${feePctOfMargin.toFixed(2)}% of margin @ ${L}x)`;
 
-      // RRR Card & Visual Bar
       const rrrBadge = document.getElementById('rrrQualityBadge');
       const rrrRiskBar = document.getElementById('rrrRiskBar');
       const rrrRewardBar = document.getElementById('rrrRewardBar');
@@ -2650,7 +2900,6 @@
         rrrBadge.innerText = `—`;
       }
 
-      // Safety Banner
       const safetyBanner = document.getElementById('safetyBanner');
       const safetyIcon = document.getElementById('safetyIcon');
       const safetyText = document.getElementById('safetyText');
@@ -2664,7 +2913,6 @@
       }
       safetyText.innerHTML = safetyMsg;
 
-      // Update Interactive Visual Ladder
       updateLadder(EP, SL, TP, LP, actualNetProfit, actualNetLoss, isSafe);
     }
 
@@ -2717,15 +2965,15 @@
     }
 
     /* ============================================================ */
-    /* 2. NOTION-STYLE TRADING JOURNAL (MULTI-TIMEFRAME & STRATEGY) */
+    /* 2. NOTION-STYLE TRADING JOURNAL STATE & STORAGE */
     /* ============================================================ */
-    let currentJournalView = 'table'; // 'table' or 'gallery'
-    let currentCategoryFilter = 'ALL'; // 'ALL', 'WIN', 'LOSS', 'OPEN', 'BREAKEVEN'
+    let currentJournalView = 'table'; // 'table', 'gallery', 'analytics'
+    let currentCategoryFilter = 'ALL';
     let currentStrategyFilter = 'ALL';
     let tradesData = [];
 
-    // Active modal state
     let modalSelectedStrategies = [];
+    let modalSelectedPsychology = [];
     let modalAttachedImages = {
       before_1h: null,
       before_4h: null,
@@ -2734,7 +2982,6 @@
     };
     let activeUploadSlot = 'before_1h';
 
-    // Lightbox carousel state
     let lightboxCurrentTrade = null;
     let lightboxCurrentKey = 'before_1h';
     const TF_KEYS = ['before_1h', 'before_4h', 'after_1h', 'after_4h'];
@@ -2745,8 +2992,7 @@
       after_4h: 'After (4h)'
     };
 
-    // IndexedDB Setup
-    const DB_NAME = 'BybitTradingJournalDB_v2';
+    const DB_NAME = 'BybitTradingJournalDB_v3';
     const DB_VERSION = 1;
     let dbInstance = null;
 
@@ -2827,7 +3073,7 @@
 
     function loadTradesFromLocalStorage() {
       try {
-        const stored = localStorage.getItem('bybit_journal_trades_v2');
+        const stored = localStorage.getItem('bybit_journal_trades_v3');
         tradesData = stored ? JSON.parse(stored) : [];
         if (tradesData.length === 0) loadDefaultSampleTrades();
       } catch (e) {
@@ -2838,40 +3084,83 @@
 
     function saveTradesToLocalStorage() {
       try {
-        localStorage.setItem('bybit_journal_trades_v2', JSON.stringify(tradesData));
+        localStorage.setItem('bybit_journal_trades_v3', JSON.stringify(tradesData));
       } catch (e) {
         console.warn('LocalStorage limit reached.');
       }
     }
 
     function loadDefaultSampleTrades() {
-      const sampleTrade = {
-        id: 'trade_' + Date.now(),
-        date: new Date().toISOString(),
-        symbol: 'KASUSDT',
-        direction: 'LONG',
-        entry: 0.5581,
-        stopLoss: 0.5426,
-        takeProfit: 0.6111,
-        leverage: 5,
-        quantity: 12,
-        risk: 0.20,
-        netRrr: 3.25,
-        status: 'OPEN',
-        realizedPnl: 0,
-        strategies: ['0.618 Bounce', 'Breakout'],
-        customTags: '4H Support Flip',
-        notes: 'Clean Fibonacci 0.618 golden pocket confluence with 1H breakout structure. Strict 0.20 USDT net risk.',
-        images: {
-          before_1h: null,
-          before_4h: null,
-          after_1h: null,
-          after_4h: null
+      const now = Date.now();
+      const sampleTrades = [
+        {
+          id: 'trade_' + (now - 86400000 * 3),
+          date: new Date(now - 86400000 * 3).toISOString(),
+          symbol: 'BTCUSDT',
+          direction: 'LONG',
+          entry: 64200,
+          stopLoss: 63800,
+          takeProfit: 65400,
+          leverage: 10,
+          quantity: 1,
+          risk: 0.20,
+          netRrr: 3.00,
+          status: 'WIN',
+          realizedPnl: 0.60,
+          strategies: ['0.618 Bounce'],
+          psychology: ['Followed Plan 100%'],
+          customTags: 'Daily Support',
+          notes: 'Textbook bounce off 0.618 Fibonacci retracement level.',
+          images: { before_1h: null, before_4h: null, after_1h: null, after_4h: null }
+        },
+        {
+          id: 'trade_' + (now - 86400000 * 2),
+          date: new Date(now - 86400000 * 2).toISOString(),
+          symbol: 'SOLUSDT',
+          direction: 'SHORT',
+          entry: 145.5,
+          stopLoss: 147.2,
+          takeProfit: 140.4,
+          leverage: 5,
+          quantity: 2,
+          risk: 0.20,
+          netRrr: 3.00,
+          status: 'LOSS',
+          realizedPnl: -0.198,
+          strategies: ['Breakdown'],
+          psychology: ['FOMO / Chased Entry'],
+          customTags: 'Resistance Rejection',
+          notes: 'Chased entry after breakdown candle closed. Got stopped out on retest wick.',
+          images: { before_1h: null, before_4h: null, after_1h: null, after_4h: null }
+        },
+        {
+          id: 'trade_' + (now - 86400000 * 1),
+          date: new Date(now - 86400000 * 1).toISOString(),
+          symbol: 'KASUSDT',
+          direction: 'LONG',
+          entry: 0.5581,
+          stopLoss: 0.5426,
+          takeProfit: 0.6111,
+          leverage: 5,
+          quantity: 12,
+          risk: 0.20,
+          netRrr: 3.25,
+          status: 'WIN',
+          realizedPnl: 0.628,
+          strategies: ['Breakout', '0.618 Bounce'],
+          psychology: ['Followed Plan 100%'],
+          customTags: '4H Support Flip',
+          notes: 'Confluence of 0.618 Fib + 1H breakout structure. Hit full target!',
+          images: { before_1h: null, before_4h: null, after_1h: null, after_4h: null }
         }
-      };
-      tradesData = [sampleTrade];
-      if (dbInstance) saveTradeToDB(sampleTrade);
-      else saveTradesToLocalStorage();
+      ];
+
+      tradesData = sampleTrades;
+      if (dbInstance) {
+        sampleTrades.forEach(t => saveTradeToDB(t));
+      } else {
+        saveTradesToLocalStorage();
+      }
     }
 
     /* Notion View Switcher */
@@ -2879,19 +3168,31 @@
       currentJournalView = viewName;
       const btnTable = document.getElementById('btnTableView');
       const btnGallery = document.getElementById('btnGalleryView');
+      const btnAnalytics = document.getElementById('btnAnalyticsView');
       const tableContainer = document.getElementById('tableViewContainer');
       const galleryContainer = document.getElementById('galleryViewContainer');
+      const analyticsContainer = document.getElementById('analyticsViewContainer');
+      const filterBar = document.getElementById('journalFilterBar');
+
+      btnTable.classList.remove('active');
+      btnGallery.classList.remove('active');
+      btnAnalytics.classList.remove('active');
+      tableContainer.style.display = 'none';
+      galleryContainer.style.display = 'none';
+      analyticsContainer.style.display = 'none';
+      filterBar.style.display = 'flex';
 
       if (viewName === 'table') {
         btnTable.classList.add('active');
-        btnGallery.classList.remove('active');
         tableContainer.style.display = 'block';
-        galleryContainer.style.display = 'none';
-      } else {
+      } else if (viewName === 'gallery') {
         btnGallery.classList.add('active');
-        btnTable.classList.remove('active');
-        tableContainer.style.display = 'none';
         galleryContainer.style.display = 'grid';
+      } else {
+        btnAnalytics.classList.add('active');
+        analyticsContainer.style.display = 'flex';
+        filterBar.style.display = 'none';
+        renderAnalyticsView();
       }
       renderJournal();
     }
@@ -2909,7 +3210,6 @@
       renderJournal();
     }
 
-    /* Strategy Selection Toggle inside Modal */
     function toggleModalStrategy(stratName, btnElem) {
       const idx = modalSelectedStrategies.indexOf(stratName);
       if (idx > -1) {
@@ -2921,17 +3221,33 @@
       }
     }
 
-    function resetModalStrategyButtons() {
-      const buttons = document.querySelectorAll('#modalStrategyGrid .strat-select-btn');
-      buttons.forEach(btn => {
+    function toggleModalPsychology(psyName, btnElem) {
+      const idx = modalSelectedPsychology.indexOf(psyName);
+      if (idx > -1) {
+        modalSelectedPsychology.splice(idx, 1);
+        btnElem.classList.remove('active');
+      } else {
+        modalSelectedPsychology.push(psyName);
+        btnElem.classList.add('active');
+      }
+    }
+
+    function resetModalButtons() {
+      document.querySelectorAll('#modalStrategyGrid .strat-select-btn').forEach(btn => {
         const text = btn.innerText.trim();
         const match = modalSelectedStrategies.some(s => text.includes(s));
         if (match) btn.classList.add('active');
         else btn.classList.remove('active');
       });
+
+      document.querySelectorAll('#modalPsychologyGrid .strat-select-btn').forEach(btn => {
+        const text = btn.innerText.trim();
+        const match = modalSelectedPsychology.some(s => text.includes(s));
+        if (match) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
     }
 
-    /* 4-Slot Image Attachment Handling */
     function selectSlotToUpload(slotKey) {
       activeUploadSlot = slotKey;
       document.querySelectorAll('.tf-slot-box').forEach(el => el.classList.remove('focused'));
@@ -2985,12 +3301,9 @@
     }
 
     function resetAllModalSlots() {
-      TF_KEYS.forEach(k => {
-        setSlotImageData(k, null);
-      });
+      TF_KEYS.forEach(k => setSlotImageData(k, null));
     }
 
-    // Direct Ctrl+V Paste Listener across Slots
     window.addEventListener('paste', (e) => {
       const modal = document.getElementById('tradeModal');
       if (!modal.classList.contains('active')) return;
@@ -2999,7 +3312,6 @@
       for (let item of items) {
         if (item.type.indexOf('image') === 0) {
           const blob = item.getAsFile();
-          // Paste to focused or first empty slot
           let targetSlot = activeUploadSlot;
           if (modalAttachedImages[targetSlot]) {
             const emptySlot = TF_KEYS.find(k => !modalAttachedImages[k]);
@@ -3012,7 +3324,6 @@
       }
     });
 
-    /* Modal Open / Edit / Save */
     function openNewTradeModal() {
       document.getElementById('modalTitle').innerHTML = '<span>📝</span> Log New Trade';
       document.getElementById('modalTradeId').value = '';
@@ -3031,7 +3342,8 @@
       document.getElementById('mNotes').value = '';
       
       modalSelectedStrategies = ['Breakout'];
-      resetModalStrategyButtons();
+      modalSelectedPsychology = ['Followed Plan 100%'];
+      resetModalButtons();
       resetAllModalSlots();
 
       activeUploadSlot = 'before_1h';
@@ -3041,7 +3353,7 @@
     function openLogModalFromCurrentCalc() {
       openNewTradeModal();
       const symbol = document.getElementById('coinSymbol').value.toUpperCase() || 'TRADE';
-      document.getElementById('mCustomTags').value = `${symbol}, ${document.getElementById('leverageSlider').value}x Lev, Net Risk Lock`;
+      document.getElementById('mCustomTags').value = `${symbol}, ${document.getElementById('leverageSlider').value}x Lev`;
     }
 
     function editTrade(id) {
@@ -3065,7 +3377,8 @@
       document.getElementById('mNotes').value = t.notes || '';
 
       modalSelectedStrategies = Array.isArray(t.strategies) ? [...t.strategies] : [];
-      resetModalStrategyButtons();
+      modalSelectedPsychology = Array.isArray(t.psychology) ? [...t.psychology] : ['Followed Plan 100%'];
+      resetModalButtons();
 
       resetAllModalSlots();
       if (t.images) {
@@ -3120,6 +3433,7 @@
         status: document.getElementById('mStatus').value,
         realizedPnl: parseFloat(document.getElementById('mRealizedPnl').value) || 0,
         strategies: [...modalSelectedStrategies],
+        psychology: [...modalSelectedPsychology],
         customTags: document.getElementById('mCustomTags').value.trim(),
         notes: document.getElementById('mNotes').value.trim(),
         images: { ...modalAttachedImages }
@@ -3135,6 +3449,7 @@
       saveTradeToDB(trade);
       closeTradeModal();
       renderJournal();
+      if (currentJournalView === 'analytics') renderAnalyticsView();
     }
 
     function deleteTrade(id) {
@@ -3142,6 +3457,7 @@
       tradesData = tradesData.filter(x => x.id !== id);
       deleteTradeFromDB(id);
       renderJournal();
+      if (currentJournalView === 'analytics') renderAnalyticsView();
     }
 
     function quickSetStatus(id, newStatus) {
@@ -3157,18 +3473,15 @@
       }
       saveTradeToDB(t);
       renderJournal();
+      if (currentJournalView === 'analytics') renderAnalyticsView();
     }
 
-    /* ============================================================ */
-    /* 3. LIGHTBOX MULTI-IMAGE CAROUSEL */
-    /* ============================================================ */
+    /* Lightbox */
     function openLightbox(tradeId, startKey = 'before_1h') {
       const trade = tradesData.find(x => x.id === tradeId);
       if (!trade || !trade.images) return;
 
       lightboxCurrentTrade = trade;
-      
-      // If startKey doesn't have image, pick first available
       if (!trade.images[startKey]) {
         const firstAvail = TF_KEYS.find(k => trade.images[k]);
         if (firstAvail) lightboxCurrentKey = firstAvail;
@@ -3188,7 +3501,6 @@
 
       document.getElementById('lightboxTitle').innerHTML = `<span>📸</span> <strong>${trade.symbol}</strong> • ${TF_LABELS[lightboxCurrentKey]} • <span style="font-size: 12px; color: var(--text-muted);">${trade.direction} @ ${trade.entry}</span>`;
 
-      // Render tab buttons
       const tabContainer = document.getElementById('lightboxNavTabs');
       tabContainer.innerHTML = TF_KEYS.map(k => {
         const hasImg = trade.images && trade.images[k];
@@ -3224,9 +3536,7 @@
     }
 
     function closeLightboxOnBackdrop(e) {
-      if (e.target.id === 'lightboxOverlay') {
-        closeLightbox();
-      }
+      if (e.target.id === 'lightboxOverlay') closeLightbox();
     }
 
     document.addEventListener('keydown', (e) => {
@@ -3240,7 +3550,6 @@
       }
     });
 
-    /* Card Timeframe Switcher in Gallery View */
     function setCardActiveTimeframe(tradeId, slotKey, tabElem) {
       const card = tabElem.closest('.trade-card');
       card.querySelectorAll('.card-tf-tab').forEach(b => b.classList.remove('active'));
@@ -3266,7 +3575,6 @@
       }
     }
 
-    /* Helper: Strategy Class name */
     function getStrategyBadgeClass(strat) {
       if (strat.includes('Breakout')) return 'breakout';
       if (strat.includes('Breakdown')) return 'breakdown';
@@ -3278,12 +3586,11 @@
     }
 
     /* ============================================================ */
-    /* 4. RENDER JOURNAL (TABLE + GALLERY + METRICS) */
+    /* 3. RENDER JOURNAL (TABLE & GALLERY) */
     /* ============================================================ */
     function renderJournal() {
       const search = (document.getElementById('tradeSearchInput').value || '').toLowerCase();
 
-      // Counts
       const totalAll = tradesData.length;
       const countWins = tradesData.filter(x => x.status === 'WIN').length;
       const countLosses = tradesData.filter(x => x.status === 'LOSS').length;
@@ -3296,7 +3603,6 @@
       document.getElementById('countOpen').innerText = countOpens;
       document.getElementById('countBE').innerText = countBE;
 
-      // Stats Calculations
       const closedTrades = tradesData.filter(x => x.status === 'WIN' || x.status === 'LOSS' || x.status === 'BREAKEVEN');
       const totalPnl = closedTrades.reduce((acc, x) => acc + (parseFloat(x.realizedPnl) || 0), 0);
       const winRate = closedTrades.length > 0 ? ((countWins / closedTrades.length) * 100) : 0;
@@ -3314,7 +3620,6 @@
       document.getElementById('statWinLossRatio').innerText = `${countWins}W / ${countLosses}L (${countOpens} Open)`;
       document.getElementById('statProfitFactor').innerText = profitFactor;
 
-      // Filter Trades
       let filtered = tradesData.filter(t => {
         if (currentCategoryFilter !== 'ALL' && t.status !== currentCategoryFilter) return false;
         
@@ -3344,7 +3649,6 @@
           const pnlColor = pnlVal > 0 ? 'var(--green)' : (pnlVal < 0 ? 'var(--red)' : '#90a4ae');
           const pnlText = t.status === 'OPEN' ? '<span style="color: var(--text-muted);">In Progress</span>' : `<span style="color: ${pnlColor}; font-weight: 700;">${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)}</span>`;
 
-          // Multi-Thumb Strip for Table (Before 1h, Before 4h, After 1h, After 4h)
           const thumbStrip = `
             <div class="multi-thumb-strip">
               <div class="tf-thumb-badge ${t.images && t.images.before_1h ? 'has-img' : ''}" onclick="openLightbox('${t.id}', 'before_1h')" title="Before (1h)">
@@ -3366,9 +3670,13 @@
             </div>
           `;
 
-          // Strategy badges
           const stratList = Array.isArray(t.strategies) ? t.strategies : [];
           const stratBadges = stratList.map(s => `<span class="strat-badge ${getStrategyBadgeClass(s)}">${s}</span>`).join(' ');
+          const psychoList = Array.isArray(t.psychology) ? t.psychology : [];
+          const psychoBadges = psychoList.map(p => {
+            const isGood = p.includes('100%');
+            return `<span class="strat-badge ${isGood ? 'disciplined' : 'psycho'}">${isGood ? '✅' : '⚠️'} ${p}</span>`;
+          }).join(' ');
 
           return `
             <tr>
@@ -3385,7 +3693,8 @@
               <td style="color: var(--accent-yellow); font-weight: 700;">1 : ${t.netRrr}</td>
               <td>
                 <div class="strategy-badge-container">
-                  ${stratBadges || '<span style="color: var(--text-muted); font-size: 11px;">—</span>'}
+                  ${stratBadges}
+                  ${psychoBadges}
                   ${t.customTags ? `<span class="strat-badge custom">#${t.customTags}</span>` : ''}
                 </div>
               </td>
@@ -3409,7 +3718,7 @@
         }).join('');
       }
 
-      // Render Gallery View (Images View)
+      // Render Gallery View
       const gallery = document.getElementById('galleryViewContainer');
       if (filtered.length === 0) {
         gallery.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><div class="empty-icon">📭</div><div>No trades found. Click <strong>"+ New Trade"</strong> to log one!</div></div>`;
@@ -3420,7 +3729,6 @@
           const pnlColor = pnlVal > 0 ? 'var(--green)' : (pnlVal < 0 ? 'var(--red)' : '#90a4ae');
           const pnlText = t.status === 'OPEN' ? 'Open Position' : `${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)} USDT`;
 
-          // Determine first available active image or default to before_1h
           const firstKey = TF_KEYS.find(k => t.images && t.images[k]) || 'before_1h';
           const currentImg = t.images ? t.images[firstKey] : null;
 
@@ -3438,7 +3746,6 @@
 
           return `
             <div class="trade-card">
-              <!-- Multi-Timeframe Tabs Header -->
               <div class="card-img-container">
                 <div class="card-tf-tabs">
                   <button class="card-tf-tab ${firstKey === 'before_1h' ? 'active' : ''} ${t.images && t.images.before_1h ? 'has-data' : ''}" onclick="setCardActiveTimeframe('${t.id}', 'before_1h', this)">B-1H</button>
@@ -3482,7 +3789,6 @@
                   </div>
                 </div>
 
-                <!-- Strategy Badges -->
                 <div class="strategy-badge-container">
                   ${stratBadges}
                   ${t.customTags ? `<span class="strat-badge custom">#${t.customTags}</span>` : ''}
@@ -3504,13 +3810,288 @@
       }
     }
 
+    /* ============================================================ */
+    /* 4. VISUAL ANALYTICS, EQUITY CURVE & MATRICES */
+    /* ============================================================ */
+    function renderAnalyticsView() {
+      renderEquityChart();
+      renderStrategyMatrix();
+      renderPsychologyMatrix();
+    }
+
+    function renderEquityChart() {
+      const canvas = document.getElementById('equityCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+
+      // Handle Resize
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const width = rect.width;
+      const height = rect.height;
+      const padLeft = 60;
+      const padRight = 30;
+      const padTop = 30;
+      const padBottom = 40;
+
+      // Sort closed trades chronologically
+      const closed = tradesData
+        .filter(t => t.status === 'WIN' || t.status === 'LOSS' || t.status === 'BREAKEVEN')
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      ctx.clearRect(0, 0, width, height);
+
+      if (closed.length === 0) {
+        ctx.fillStyle = '#8b98af';
+        ctx.font = '14px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('No closed trades yet to plot equity curve.', width / 2, height / 2);
+        return;
+      }
+
+      // Compute cumulative equity points
+      let cumPnl = 0;
+      const points = [{ index: 0, date: 'Start', cum: 0, pnl: 0, trade: null }];
+      closed.forEach((t, i) => {
+        cumPnl += (parseFloat(t.realizedPnl) || 0);
+        points.push({
+          index: i + 1,
+          date: new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+          cum: cumPnl,
+          pnl: parseFloat(t.realizedPnl) || 0,
+          trade: t
+        });
+      });
+
+      const values = points.map(p => p.cum);
+      let minVal = Math.min(0, ...values);
+      let maxVal = Math.max(0, ...values);
+      if (minVal === maxVal) { minVal -= 0.5; maxVal += 0.5; }
+      const range = (maxVal - minVal) * 1.15;
+      const baselineVal = 0;
+
+      const getX = (idx) => padLeft + (idx / (points.length - 1)) * (width - padLeft - padRight);
+      const getY = (val) => padTop + (1 - (val - minVal) / range) * (height - padTop - padBottom);
+
+      // Grid Lines
+      ctx.strokeStyle = '#1a2230';
+      ctx.lineWidth = 1;
+      const gridSteps = 4;
+      for (let i = 0; i <= gridSteps; i++) {
+        const val = minVal + (i / gridSteps) * range;
+        const y = getY(val);
+        ctx.beginPath();
+        ctx.moveTo(padLeft, y);
+        ctx.lineTo(width - padRight, y);
+        ctx.stroke();
+
+        ctx.fillStyle = '#607d8b';
+        ctx.font = '10px JetBrains Mono';
+        ctx.textAlign = 'right';
+        ctx.fillText(`${val >= 0 ? '+' : ''}${val.toFixed(2)}`, padLeft - 8, y + 3);
+      }
+
+      // Zero Baseline
+      const zeroY = getY(0);
+      ctx.strokeStyle = '#37474f';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(padLeft, zeroY);
+      ctx.lineTo(width - padRight, zeroY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Fill Gradient Area
+      const isProfitable = cumPnl >= 0;
+      const grad = ctx.createLinearGradient(0, padTop, 0, height - padBottom);
+      if (isProfitable) {
+        grad.addColorStop(0, 'rgba(14, 203, 129, 0.35)');
+        grad.addColorStop(1, 'rgba(14, 203, 129, 0.0)');
+      } else {
+        grad.addColorStop(0, 'rgba(246, 70, 93, 0.35)');
+        grad.addColorStop(1, 'rgba(246, 70, 93, 0.0)');
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(getX(0), zeroY);
+      points.forEach(p => {
+        ctx.lineTo(getX(p.index), getY(p.cum));
+      });
+      ctx.lineTo(getX(points.length - 1), zeroY);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Draw Main Spline Line
+      ctx.strokeStyle = isProfitable ? '#0ecb81' : '#f6465d';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      points.forEach((p, i) => {
+        const x = getX(p.index);
+        const y = getY(p.cum);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Draw Points
+      points.forEach(p => {
+        const x = getX(p.index);
+        const y = getY(p.cum);
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#0b0e14';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = isProfitable ? '#0ecb81' : '#f6465d';
+        ctx.stroke();
+      });
+
+      // Hover Tooltip Interaction
+      canvas.onmousemove = (e) => {
+        const cRect = canvas.getBoundingClientRect();
+        const mx = e.clientX - cRect.left;
+        const tooltip = document.getElementById('chartTooltip');
+
+        let closest = null;
+        let minDist = Infinity;
+        points.forEach(p => {
+          const px = getX(p.index);
+          const dist = Math.abs(px - mx);
+          if (dist < minDist) {
+            minDist = dist;
+            closest = p;
+          }
+        });
+
+        if (closest && minDist < 30) {
+          const cx = getX(closest.index);
+          const cy = getY(closest.cum);
+          tooltip.style.display = 'block';
+          tooltip.style.left = `${cx + 10}px`;
+          tooltip.style.top = `${cy - 20}px`;
+          
+          if (closest.trade) {
+            tooltip.innerHTML = `
+              <strong>Trade #${closest.index}: ${closest.trade.symbol} (${closest.trade.direction})</strong><br>
+              Realized PnL: <span style="color: ${closest.pnl >= 0 ? '#0ecb81' : '#f6465d'}; font-weight: 700;">${closest.pnl >= 0 ? '+' : ''}${closest.pnl.toFixed(4)} USDT</span><br>
+              Balance: <strong>${closest.cum >= 0 ? '+' : ''}${closest.cum.toFixed(4)} USDT</strong><br>
+              Date: ${closest.date}
+            `;
+          } else {
+            tooltip.innerHTML = `<strong>Initial Starting Point</strong><br>Balance: 0.00 USDT`;
+          }
+        } else {
+          tooltip.style.display = 'none';
+        }
+      };
+
+      canvas.onmouseleave = () => {
+        document.getElementById('chartTooltip').style.display = 'none';
+      };
+    }
+
+    function renderStrategyMatrix() {
+      const predefined = ['0.618 Bounce', 'Breakout', 'Breakdown', '0.382 Bounce', '0.5 Bounce', 'Parabolic Play'];
+      const tbody = document.getElementById('strategyMatrixBody');
+      const closed = tradesData.filter(t => t.status === 'WIN' || t.status === 'LOSS' || t.status === 'BREAKEVEN');
+
+      const rowsHtml = predefined.map(strat => {
+        const stratTrades = closed.filter(t => Array.isArray(t.strategies) && t.strategies.includes(strat));
+        const count = stratTrades.length;
+        if (count === 0) {
+          return `
+            <tr>
+              <td><span class="strat-badge ${getStrategyBadgeClass(strat)}">${strat}</span></td>
+              <td style="color: var(--text-muted);">0</td>
+              <td style="color: var(--text-muted);">—</td>
+              <td style="color: var(--text-muted);">0.00 USDT</td>
+              <td style="color: var(--text-muted);">—</td>
+            </tr>
+          `;
+        }
+
+        const wins = stratTrades.filter(t => t.status === 'WIN').length;
+        const winRate = (wins / count) * 100;
+        const netPnl = stratTrades.reduce((acc, t) => acc + (parseFloat(t.realizedPnl) || 0), 0);
+        const winPnl = stratTrades.filter(t => t.status === 'WIN').reduce((acc, t) => acc + (parseFloat(t.realizedPnl) || 0), 0);
+        const lossPnl = Math.abs(stratTrades.filter(t => t.status === 'LOSS').reduce((acc, t) => acc + (parseFloat(t.realizedPnl) || 0), 0));
+        const pf = lossPnl > 0 ? (winPnl / lossPnl).toFixed(2) : (winPnl > 0 ? '∞' : '—');
+
+        return `
+          <tr>
+            <td><span class="strat-badge ${getStrategyBadgeClass(strat)}">${strat}</span></td>
+            <td><strong>${count}</strong> (${wins}W / ${count - wins}L)</td>
+            <td>
+              <div><strong>${winRate.toFixed(1)}%</strong></div>
+              <div class="win-progress-bar-wrap"><div class="win-progress-bar-fill" style="width: ${winRate}%;"></div></div>
+            </td>
+            <td style="color: ${netPnl >= 0 ? 'var(--green)' : 'var(--red)'}; font-weight: 700;">
+              ${netPnl >= 0 ? '+' : ''}${netPnl.toFixed(4)} USDT
+            </td>
+            <td style="color: var(--accent-yellow); font-weight: 700;">${pf}</td>
+          </tr>
+        `;
+      }).join('');
+
+      tbody.innerHTML = rowsHtml;
+    }
+
+    function renderPsychologyMatrix() {
+      const habits = [
+        { name: 'Followed Plan 100%', good: true },
+        { name: 'FOMO / Chased Entry', good: false },
+        { name: 'Moved SL Too Early', good: false },
+        { name: 'Exited Too Early', good: false },
+        { name: 'Over-leveraged', good: false },
+        { name: 'Hesitated Entry', good: false }
+      ];
+
+      const tbody = document.getElementById('psychologyMatrixBody');
+      const closed = tradesData.filter(t => t.status === 'WIN' || t.status === 'LOSS' || t.status === 'BREAKEVEN');
+      const totalClosed = closed.length;
+
+      let followedCount = 0;
+
+      const rowsHtml = habits.map(h => {
+        const matches = closed.filter(t => Array.isArray(t.psychology) && t.psychology.includes(h.name));
+        const count = matches.length;
+        if (h.good) followedCount = count;
+
+        const freqPct = totalClosed > 0 ? ((count / totalClosed) * 100) : 0;
+        const impactPnl = matches.reduce((acc, t) => acc + (parseFloat(t.realizedPnl) || 0), 0);
+
+        return `
+          <tr>
+            <td><span class="strat-badge ${h.good ? 'disciplined' : 'psycho'}">${h.good ? '✅' : '⚠️'} ${h.name}</span></td>
+            <td><strong>${count}</strong></td>
+            <td style="color: var(--text-muted);">${freqPct.toFixed(0)}% of trades</td>
+            <td style="color: ${impactPnl >= 0 ? 'var(--green)' : 'var(--red)'}; font-weight: 700;">
+              ${impactPnl >= 0 ? '+' : ''}${impactPnl.toFixed(4)} USDT
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      tbody.innerHTML = rowsHtml;
+
+      const disciplineScore = totalClosed > 0 ? ((followedCount / totalClosed) * 100).toFixed(0) : 100;
+      const badge = document.getElementById('disciplineScoreBadge');
+      badge.innerText = `Discipline Score: ${disciplineScore}%`;
+      badge.style.color = disciplineScore >= 80 ? '#6ee7b7' : '#fca5a5';
+    }
+
     /* CSV Export & JSON Backup / Restore */
     function exportTradesToCSV() {
       if (tradesData.length === 0) {
         alert('No trades in journal to export.');
         return;
       }
-      const headers = ['ID', 'Date', 'Symbol', 'Direction', 'Leverage', 'Entry', 'StopLoss', 'TakeProfit', 'Quantity', 'Risk_USDT', 'Net_RRR', 'Status', 'Realized_PnL_USDT', 'Strategies', 'CustomTags', 'Notes'];
+      const headers = ['ID', 'Date', 'Symbol', 'Direction', 'Leverage', 'Entry', 'StopLoss', 'TakeProfit', 'Quantity', 'Risk_USDT', 'Net_RRR', 'Status', 'Realized_PnL_USDT', 'Strategies', 'Psychology', 'CustomTags', 'Notes'];
       const rows = tradesData.map(t => [
         t.id,
         t.date,
@@ -3526,6 +4107,7 @@
         t.status,
         t.realizedPnl,
         `"${(Array.isArray(t.strategies) ? t.strategies.join(', ') : '').replace(/"/g, '""')}"`,
+        `"${(Array.isArray(t.psychology) ? t.psychology.join(', ') : '').replace(/"/g, '""')}"`,
         `"${(t.customTags || '').replace(/"/g, '""')}"`,
         `"${(t.notes || '').replace(/"/g, '""')}"`
       ]);
@@ -3567,6 +4149,7 @@
             }
             saveTradesToLocalStorage();
             renderJournal();
+            if (currentJournalView === 'analytics') renderAnalyticsView();
             alert(`Successfully restored ${imported.length} trades!`);
           }
         } catch (err) {
@@ -3574,6 +4157,37 @@
         }
       };
       reader.readAsText(file);
+    }
+
+    /* ============================================================ */
+    /* 5. PWA (SERVICE WORKER & INSTALL PROMPT) */
+    /* ============================================================ */
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('btnPwaInstall');
+      if (btn) btn.style.display = 'inline-flex';
+    });
+
+    function triggerPwaInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('btnPwaInstall').style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      }
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+          console.log('Service Worker registration skipped:', err);
+        });
+      });
     }
 
     // Initialize Calculator & Journal Database
