@@ -64,7 +64,7 @@
 
     .container {
       width: 100%;
-      max-width: 1280px;
+      max-width: 1420px;
     }
 
     /* Header */
@@ -1192,13 +1192,23 @@
       border-radius: var(--radius-lg);
       overflow-x: auto;
       box-shadow: var(--shadow);
+      scrollbar-width: thin;
+      scrollbar-color: #2b384e transparent;
+    }
+
+    .table-container::-webkit-scrollbar {
+      height: 5px;
+    }
+    .table-container::-webkit-scrollbar-thumb {
+      background: #2b384e;
+      border-radius: 4px;
     }
 
     table.journal-table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-      font-size: 13px;
+      font-size: 12px;
     }
 
     table.journal-table th {
@@ -1206,19 +1216,19 @@
       color: var(--text-muted);
       font-weight: 700;
       text-transform: uppercase;
-      font-size: 11px;
+      font-size: 10px;
       letter-spacing: 0.5px;
-      padding: 12px 14px;
+      padding: 10px 8px;
       border-bottom: 1px solid var(--card-border);
       white-space: nowrap;
     }
 
     table.journal-table td {
-      padding: 12px 14px;
+      padding: 7px 8px;
       border-bottom: 1px solid #1c2331;
       vertical-align: middle;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-size: 11.5px;
     }
 
     table.journal-table tr:hover td {
@@ -1227,13 +1237,14 @@
 
     .multi-thumb-strip {
       display: flex;
-      gap: 4px;
+      gap: 3px;
       align-items: center;
+      white-space: nowrap;
     }
 
     .tf-thumb-badge {
-      width: 38px;
-      height: 30px;
+      width: 32px;
+      height: 25px;
       border-radius: 4px;
       overflow: hidden;
       background: #10141d;
@@ -1242,12 +1253,13 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       color: var(--text-muted);
       cursor: pointer;
       position: relative;
       transition: all 0.15s;
+      flex-shrink: 0;
     }
 
     .tf-thumb-badge:hover {
@@ -1268,23 +1280,26 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(0, 0, 0, 0.75);
-      font-size: 8px;
+      background: rgba(0, 0, 0, 0.82);
+      font-size: 7.5px;
       text-align: center;
       color: #fff;
       font-family: 'Inter', sans-serif;
+      line-height: 1;
+      padding: 1px 0;
     }
 
     .status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 11px;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 10.5px;
       font-weight: 700;
       text-transform: uppercase;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .status-badge.win {
@@ -1313,9 +1328,11 @@
 
     .dir-tag {
       font-weight: 800;
-      padding: 2px 6px;
+      padding: 1px 5px;
       border-radius: 4px;
-      font-size: 10.5px;
+      font-size: 9.5px;
+      display: inline-block;
+      line-height: 1.2;
     }
     .dir-tag.long { background: var(--green-bg); color: var(--green); }
     .dir-tag.short { background: var(--red-bg); color: var(--red); }
@@ -1323,18 +1340,21 @@
     .strategy-badge-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
+      gap: 3px;
+      max-width: 170px;
     }
 
     .strat-badge {
-      font-size: 10.5px;
+      font-size: 9.5px;
       font-weight: 700;
-      padding: 2px 7px;
+      padding: 1px 6px;
       border-radius: 4px;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+      line-height: 1.2;
     }
 
     .strat-badge.breakout { background: rgba(14, 203, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(14, 203, 129, 0.3); }
@@ -3888,14 +3908,14 @@
         <table class="journal-table">
           <thead>
             <tr>
-              <th>Charts (1H & 4H)</th>
+              <th>Charts</th>
               <th>Date</th>
               <th>Symbol & Side</th>
               <th>Entry / SL / TP</th>
               <th>Live Price</th>
               <th>Lev & Qty</th>
               <th>Net RRR</th>
-              <th>Strategy & Discipline</th>
+              <th>Strategy</th>
               <th>Status / Trigger</th>
               <th>Live / Realized P&L</th>
               <th>Actions</th>
@@ -7421,7 +7441,9 @@
         tbody.innerHTML = `<tr><td colspan="12" class="empty-state"><div class="empty-icon">📭</div><div>No trades found in this view. Click <strong>"+ New Trade"</strong> to log one!</div></td></tr>`;
       } else {
         tbody.innerHTML = filtered.map(t => {
-          const dStr = new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+          const dObj = new Date(t.date);
+          const dDate = dObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          const dTime = dObj.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
           const liveInfo = computeTradeLiveStatus(t);
 
           // Live Price Cell
@@ -7438,7 +7460,7 @@
               const isProfit = (t.direction === 'LONG' && p >= ep) || (t.direction === 'SHORT' && p <= ep);
               dotColor = isProfit ? 'var(--green)' : 'var(--red)';
             }
-            livePriceHtml = `<span style="color: #fff; font-weight: 700; font-family: 'JetBrains Mono'; font-size: 12.5px;"><span style="color: ${dotColor}; font-size: 9px; margin-right: 3px;">●</span>${pStr}</span>`;
+            livePriceHtml = `<div style="white-space: nowrap; color: #fff; font-weight: 800; font-family: 'JetBrains Mono'; font-size: 12px;"><span style="color: ${dotColor}; font-size: 8px; margin-right: 3px;">●</span>${pStr}</div>`;
           }
 
           // Live PnL or Realized PnL Cell
@@ -7448,23 +7470,23 @@
               const uPnl = liveInfo.unrealizedPnl;
               const uColor = uPnl >= 0 ? 'var(--green)' : 'var(--red)';
               pnlCellHtml = `
-                <div>
-                  <span style="color: ${uColor}; font-weight: 800; font-family: 'JetBrains Mono';">${uPnl >= 0 ? '+' : ''}${uPnl.toFixed(4)} USDT</span>
-                  <div style="font-size: 10px; color: ${uColor}; font-weight: 600;">${liveInfo.roePct >= 0 ? '+' : ''}${liveInfo.roePct.toFixed(1)}% ROE</div>
+                <div style="white-space: nowrap;">
+                  <div style="color: ${uColor}; font-weight: 800; font-family: 'JetBrains Mono'; font-size: 11.5px;">${uPnl >= 0 ? '+' : ''}${uPnl.toFixed(4)} USDT</div>
+                  <div style="font-size: 9.5px; color: ${uColor}; font-weight: 700; font-family: 'JetBrains Mono';">${liveInfo.roePct >= 0 ? '+' : ''}${liveInfo.roePct.toFixed(1)}% ROE</div>
                 </div>
               `;
             } else {
-              pnlCellHtml = '<span style="color: #90caf9; font-weight: 600;">⏳ Open</span>';
+              pnlCellHtml = '<span style="color: #90caf9; font-weight: 600; white-space: nowrap;">⏳ Open</span>';
             }
           } else {
             const pnlVal = parseFloat(t.realizedPnl) || 0;
             const pnlColor = pnlVal > 0 ? 'var(--green)' : (pnlVal < 0 ? 'var(--red)' : '#90a4ae');
-            pnlCellHtml = `<span style="color: ${pnlColor}; font-weight: 800; font-family: 'JetBrains Mono';">${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)} USDT</span>`;
+            pnlCellHtml = `<div style="color: ${pnlColor}; font-weight: 800; font-family: 'JetBrains Mono'; font-size: 11.5px; white-space: nowrap;">${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)} USDT</div>`;
           }
 
           // Trigger Alert or Status Badge
           let statusBlock = `
-            <select class="status-badge ${t.status.toLowerCase()}" onchange="quickSetStatus('${t.id}', this.value)" style="border: none; padding: 3px 6px; font-weight: 700;">
+            <select class="status-badge ${t.status.toLowerCase()}" onchange="quickSetStatus('${t.id}', this.value)" style="border: none; padding: 2px 6px; font-weight: 700;">
               <option value="OPEN" ${t.status === 'OPEN' ? 'selected' : ''}>⏳ OPEN</option>
               <option value="WIN" ${t.status === 'WIN' ? 'selected' : ''}>🟢 WIN</option>
               <option value="LOSS" ${t.status === 'LOSS' ? 'selected' : ''}>🔴 LOSS</option>
@@ -7475,11 +7497,11 @@
           if (t.status === 'OPEN' && liveInfo.triggered) {
             const isTp = liveInfo.triggerType === 'TP';
             statusBlock = `
-              <div style="display: flex; flex-direction: column; gap: 4px;">
-                <span class="status-badge ${isTp ? 'win' : 'loss'}" style="font-size: 10px; animation: pulse 1.2s infinite;" title="Price crossed trigger level!">
+              <div style="display: flex; flex-direction: column; gap: 3px; white-space: nowrap;">
+                <span class="status-badge ${isTp ? 'win' : 'loss'}" style="font-size: 9.5px; animation: pulse 1.2s infinite;" title="Price crossed trigger level!">
                   ${liveInfo.triggered}
                 </span>
-                <button class="btn-action ${isTp ? 'green' : ''}" style="padding: 2px 6px; font-size: 10px; font-weight: 700;" onclick="closeTriggeredTrade('${t.id}', '${liveInfo.triggerType}')">
+                <button class="btn-action ${isTp ? 'green' : ''}" style="padding: 1px 5px; font-size: 9.5px; font-weight: 700;" onclick="closeTriggeredTrade('${t.id}', '${liveInfo.triggerType}')">
                   ${isTp ? '✅ Lock WIN' : '🛑 Close LOSS'}
                 </button>
               </div>
@@ -7518,22 +7540,30 @@
           return `
             <tr>
               <td>${thumbStrip}</td>
-              <td style="color: var(--text-muted); font-size: 11px;">${dStr}</td>
-              <td>
-                <div style="font-weight: 800; color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" onclick="loadChartCoin('${t.symbol}', event)" title="Click to open ${t.symbol} Chart & Calculator">
+              <td style="white-space: nowrap;">
+                <div style="font-weight: 700; color: #cfd8dc; font-size: 11.5px;">${dDate}</div>
+                <div style="color: var(--text-muted); font-size: 10px;">${dTime}</div>
+              </td>
+              <td style="white-space: nowrap;">
+                <div style="font-weight: 800; color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" onclick="loadChartCoin('${t.symbol}', event)" title="Click to open ${t.symbol} Chart & Calculator">
                   <span>${t.symbol}</span>
-                  <span style="font-size: 11px; opacity: 0.7;">📈</span>
+                  <span style="font-size: 10px; opacity: 0.7;">📈</span>
                 </div>
-                <div><span class="dir-tag ${t.direction.toLowerCase()}" style="font-size: 9.5px;">${t.direction}</span></div>
+                <div><span class="dir-tag ${t.direction.toLowerCase()}">${t.direction}</span></div>
               </td>
-              <td>
-                <span style="color: #90caf9;">${t.entry}</span> / 
-                <span style="color: var(--red);">${t.stopLoss}</span> / 
-                <span style="color: var(--green);">${t.takeProfit}</span>
+              <td style="white-space: nowrap;">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.35;">
+                  <div><span style="color: #60a5fa; font-size: 9px; font-weight: 600; font-family: 'Inter';">E:</span> <span style="color: #90caf9; font-weight: 700;">${t.entry}</span></div>
+                  <div><span style="color: var(--red); font-size: 9px; font-weight: 600; font-family: 'Inter';">SL:</span> <span style="color: #fca5a5;">${t.stopLoss}</span></div>
+                  <div><span style="color: var(--green); font-size: 9px; font-weight: 600; font-family: 'Inter';">TP:</span> <span style="color: #6ee7b7;">${t.takeProfit}</span></div>
+                </div>
               </td>
-              <td>${livePriceHtml}</td>
-              <td>${t.leverage}x (${t.quantity})</td>
-              <td style="color: var(--accent-yellow); font-weight: 700;">1 : ${t.netRrr}</td>
+              <td style="white-space: nowrap;">${livePriceHtml}</td>
+              <td style="white-space: nowrap;">
+                <span style="font-weight: 800; color: #fff; font-size: 11.5px;">${t.leverage}x</span>
+                <span style="color: var(--text-muted); font-size: 10.5px;">(${t.quantity})</span>
+              </td>
+              <td style="color: var(--accent-yellow); font-weight: 800; white-space: nowrap; font-size: 11.5px;">1 : ${t.netRrr}</td>
               <td>
                 <div class="strategy-badge-container">
                   ${stratBadges}
@@ -7541,12 +7571,12 @@
                   ${t.customTags ? `<span class="strat-badge custom">#${t.customTags}</span>` : ''}
                 </div>
               </td>
-              <td>${statusBlock}</td>
-              <td>${pnlCellHtml}</td>
-              <td>
+              <td style="white-space: nowrap;">${statusBlock}</td>
+              <td style="white-space: nowrap;">${pnlCellHtml}</td>
+              <td style="white-space: nowrap;">
                 <div style="display: flex; gap: 4px;">
-                  <button class="btn-action" style="padding: 3px 8px; font-size: 11px;" onclick="editTrade('${t.id}')">✏️</button>
-                  <button class="btn-action" style="padding: 3px 8px; font-size: 11px; color: #ff8a80;" onclick="deleteTrade('${t.id}')">🗑️</button>
+                  <button class="btn-action" style="padding: 3px 6px; font-size: 11px;" onclick="editTrade('${t.id}')">✏️</button>
+                  <button class="btn-action" style="padding: 3px 6px; font-size: 11px; color: #ff8a80;" onclick="deleteTrade('${t.id}')">🗑️</button>
                 </div>
               </td>
             </tr>
