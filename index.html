@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f7a600">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Bybit Futures Risk Cockpit, Cloud Sync & Multi-Timeframe Trading Journal</title>
+  <title>Bybit Futures Risk Cockpit, Cloud Sync & Pro Trading Journal</title>
   
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,6 +34,7 @@
       --purple-bg: rgba(168, 85, 247, 0.12);
       --orange: #ff9800;
       --orange-bg: rgba(255, 152, 0, 0.12);
+      --cyan: #00e5ff;
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 16px;
@@ -59,7 +60,7 @@
 
     .container {
       width: 100%;
-      max-width: 1240px;
+      max-width: 1280px;
     }
 
     /* Header */
@@ -240,6 +241,98 @@
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+    }
+
+    /* Live Bybit Ticker Widget */
+    .bybit-live-banner {
+      background: #0f141e;
+      border: 1px solid #25334a;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .bybit-live-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .live-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .live-symbol-badge {
+      font-weight: 800;
+      color: #ffffff;
+      font-size: 14px;
+    }
+
+    .live-price-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .live-chg-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .live-chg-badge.up { background: var(--green-bg); color: var(--green); }
+    .live-chg-badge.down { background: var(--red-bg); color: var(--red); }
+
+    .bybit-live-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .funding-rate-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(0, 229, 255, 0.1);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 229, 255, 0.25);
+    }
+
+    .btn-use-live-price {
+      background: rgba(247, 166, 0, 0.18);
+      border: 1px solid rgba(247, 166, 0, 0.4);
+      color: var(--accent-yellow);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-use-live-price:hover {
+      background: var(--accent-yellow);
+      color: #000;
     }
 
     /* Direction Toggle */
@@ -951,20 +1044,21 @@
       padding: 4px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--input-border);
+      flex-wrap: wrap;
     }
 
     .view-btn {
-      padding: 6px 14px;
+      padding: 6px 12px;
       background: transparent;
       border: none;
       color: var(--text-muted);
       border-radius: 6px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       transition: all 0.2s;
     }
 
@@ -1249,7 +1343,7 @@
     .strat-badge.psycho { background: rgba(246, 70, 93, 0.12); color: #fca5a5; border: 1px dashed rgba(246, 70, 93, 0.3); }
     .strat-badge.disciplined { background: rgba(14, 203, 129, 0.12); color: #6ee7b7; border: 1px dashed rgba(14, 203, 129, 0.3); }
 
-    /* GALLERY / CARDS VIEW (NOTION STYLE) */
+    /* GALLERY / CARDS VIEW */
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -1459,12 +1553,53 @@
     }
 
     /* ============================================================ */
-    /* VIEW 3: VISUAL ANALYTICS & EQUITY GROWTH CURVE */
+    /* VIEW 3: VISUAL ANALYTICS & ADVANCED DRAWDOWN DASHBOARD */
     /* ============================================================ */
     .analytics-dashboard-grid {
       display: flex;
       flex-direction: column;
       gap: 24px;
+    }
+
+    /* Advanced Risk & Drawdown Analytics 4-Card Ribbon */
+    .risk-analytics-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .risk-stat-card {
+      background: #0f141e;
+      border: 1px solid #232e42;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .risk-stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .risk-stat-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .risk-stat-sub {
+      font-size: 11.5px;
+      color: #90a4ae;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .chart-container-card {
@@ -1594,6 +1729,234 @@
       height: 100%;
       background: var(--green);
       border-radius: 3px;
+    }
+
+    /* ============================================================ */
+    /* VIEW 4: MONTHLY P&L CALENDAR VIEW */
+    /* ============================================================ */
+    .calendar-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .calendar-nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .cal-month-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cal-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .cal-kpi-summary-ribbon {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      background: #0f131a;
+      border: 1px solid #1f2737;
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+    }
+
+    .cal-kpi-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cal-kpi-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .cal-kpi-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .calendar-grid {
+        gap: 4px;
+      }
+    }
+
+    .cal-day-header {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      padding: 8px 4px;
+    }
+
+    .cal-day-cell {
+      background: #0f141e;
+      border: 1px solid #1e2638;
+      border-radius: var(--radius-sm);
+      min-height: 95px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+
+    .cal-day-cell:hover {
+      border-color: #3b4d6d;
+      transform: translateY(-2px);
+    }
+
+    .cal-day-cell.other-month {
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    .cal-day-cell.profit-day {
+      background: rgba(14, 203, 129, 0.08);
+      border-color: rgba(14, 203, 129, 0.35);
+    }
+
+    .cal-day-cell.loss-day {
+      background: rgba(246, 70, 93, 0.08);
+      border-color: rgba(246, 70, 93, 0.35);
+    }
+
+    .cal-day-cell.breakeven-day {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .cal-day-cell.today {
+      box-shadow: 0 0 0 2px var(--accent-yellow);
+    }
+
+    .cal-day-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cal-day-num {
+      font-size: 12px;
+      font-weight: 700;
+      color: #b0bec5;
+    }
+
+    .cal-trade-count-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: #1c2536;
+      color: #90caf9;
+    }
+
+    .cal-day-pnl {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 800;
+      margin: 4px 0;
+    }
+
+    .cal-day-tally {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ============================================================ */
+    /* VIEW 5: TIME-OF-DAY & SESSION HEATMAP VIEW */
+    /* ============================================================ */
+    .session-view-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .session-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .session-kpi-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .session-kpi-box::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+    }
+
+    .session-kpi-box.asian::before { background: #00e5ff; }
+    .session-kpi-box.london::before { background: #f7a600; }
+    .session-kpi-box.newyork::before { background: #a855f7; }
+    .session-kpi-box.late::before { background: #607d8b; }
+
+    .session-kpi-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .session-time-range {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .session-stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 12.5px;
     }
 
     /* Modal Dialog */
@@ -1967,9 +2330,9 @@
         </button>
       </div>
 
-      <div class="badge">⚡ Bybit Isolated Margin • Firebase Cloud Sync & Analytics</div>
+      <div class="badge">⚡ Bybit Isolated Margin • Live API • Calendar P&L & Heatmaps</div>
       <h1>Futures Position Calculator & Trading Journal</h1>
-      <p class="subtitle">Lock your net dollar loss ($R$), visualize Before/After 1H & 4H confluence, and auto-sync trades to Firebase Cloud.</p>
+      <p class="subtitle">Lock your net dollar loss ($R$), monitor live Bybit futures funding rates, and analyze your edge with calendar & session heatmaps.</p>
     </header>
 
     <!-- TOP: CALCULATOR GRID -->
@@ -1983,6 +2346,20 @@
           <div class="card-title-actions">
             <button class="btn-action green" onclick="openLogModalFromCurrentCalc()">💾 Log Trade</button>
             <button class="btn-action" id="copyOrderBtn" onclick="copyOrderDetails()">📋 Copy</button>
+          </div>
+        </div>
+
+        <!-- Live Bybit Ticker Banner -->
+        <div class="bybit-live-banner" id="bybitLiveBanner">
+          <div class="bybit-live-left">
+            <span class="live-pulse-dot"></span>
+            <span class="live-symbol-badge" id="liveSymbolDisplay">KASUSDT</span>
+            <span class="live-price-val" id="livePriceDisplay">0.5581 USDT</span>
+            <span class="live-chg-badge up" id="liveChgDisplay">+0.00%</span>
+          </div>
+          <div class="bybit-live-right">
+            <span class="funding-rate-tag" id="liveFundingDisplay" title="Current 8h Bybit Funding Rate">⚡ +0.0100% (4h)</span>
+            <button type="button" class="btn-use-live-price" onclick="useLivePriceAsEntry()">⚡ Use as Entry</button>
           </div>
         </div>
 
@@ -2001,9 +2378,10 @@
           <div class="form-group">
             <label>
               <span>Coin / Symbol</span>
+              <span class="hint" id="liveStatusHint" style="color: #69f0ae;">Live Bybit Ticker</span>
             </label>
             <div class="input-wrapper">
-              <input type="text" id="coinSymbol" value="KASUSDT" style="text-transform: uppercase;">
+              <input type="text" id="coinSymbol" value="KASUSDT" style="text-transform: uppercase;" oninput="onSymbolChange()">
             </div>
           </div>
           <div class="form-group">
@@ -2257,32 +2635,38 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- NOTION-STYLE TRADING JOURNAL & VISUAL ANALYTICS -->
+    <!-- NOTION-STYLE TRADING JOURNAL, CALENDAR & HEATMAPS -->
     <!-- ============================================================ -->
     <div class="journal-section" id="journalSection">
       <div class="journal-header-card">
         <div class="journal-top-bar">
           <div class="journal-title-group">
             <div class="journal-main-title">
-              <span>📓</span> Trade Journal & Analytics
+              <span>📓</span> Trade Journal & Pro Analytics
             </div>
             <!-- Notion View Switcher -->
             <div class="view-switcher">
               <button class="view-btn active" id="btnTableView" onclick="switchView('table')">
-                <span>📋</span> Table View
+                <span>📋</span> Table
               </button>
               <button class="view-btn" id="btnGalleryView" onclick="switchView('gallery')">
-                <span>🖼️</span> Images View
+                <span>🖼️</span> Images
               </button>
               <button class="view-btn" id="btnAnalyticsView" onclick="switchView('analytics')">
-                <span>📈</span> Visual Analytics
+                <span>📈</span> Analytics
+              </button>
+              <button class="view-btn" id="btnCalendarView" onclick="switchView('calendar')">
+                <span>🗓️</span> Monthly Calendar
+              </button>
+              <button class="view-btn" id="btnSessionView" onclick="switchView('session')">
+                <span>🕒</span> Session Heatmap
               </button>
             </div>
           </div>
 
           <div class="card-title-actions">
             <button class="btn-action primary" onclick="openNewTradeModal()">+ New Trade</button>
-            <button class="btn-action purple" onclick="scanAndRecoverAllLegacyTrades(true)" title="Deep-scans browser IndexedDB and LocalStorage for past trades">🔄 Recover Old Logs</button>
+            <button class="btn-action purple" onclick="scanAndRecoverAllLegacyTrades(true)" title="Deep-scans browser storage for past trades">🔄 Recover Old Logs</button>
             <button class="btn-action" onclick="exportTradesToCSV()">📥 Export CSV</button>
             <button class="btn-action" onclick="exportBackupJSON()">💾 Backup</button>
             <button class="btn-action" onclick="document.getElementById('importFileInput').click()">📂 Restore</button>
@@ -2367,8 +2751,47 @@
         <!-- Populated by JS -->
       </div>
 
-      <!-- VIEW 3: VISUAL ANALYTICS & EQUITY GROWTH CURVE -->
+      <!-- VIEW 3: VISUAL ANALYTICS & ADVANCED DRAWDOWN DASHBOARD -->
       <div class="analytics-dashboard-grid" id="analyticsViewContainer" style="display: none;">
+        <!-- Advanced Risk & Drawdown Analytics Ribbon (Image Feature 4) -->
+        <div class="risk-analytics-row">
+          <div class="risk-stat-card" style="border-left: 3px solid var(--red);">
+            <div class="risk-stat-header">
+              <span>🌊 Max Drawdown ($MDD$)</span>
+              <span>Peak Drop</span>
+            </div>
+            <div class="risk-stat-val" id="advStatMdd" style="color: var(--red);">-0.00 USDT</div>
+            <div class="risk-stat-sub" id="advStatMddSub">0.0% of Peak Equity</div>
+          </div>
+
+          <div class="risk-stat-card" style="border-left: 3px solid var(--accent-yellow);">
+            <div class="risk-stat-header">
+              <span>🔥 Current Streak</span>
+              <span id="advStatStreakTag">Active</span>
+            </div>
+            <div class="risk-stat-val" id="advStatStreak" style="color: var(--accent-yellow);">0 Trades</div>
+            <div class="risk-stat-sub" id="advStatStreakSub">Best: 0W | Worst: 0L</div>
+          </div>
+
+          <div class="risk-stat-card" style="border-left: 3px solid var(--cyan);">
+            <div class="risk-stat-header">
+              <span>📊 Trade Expectancy</span>
+              <span>Per Trade Edge</span>
+            </div>
+            <div class="risk-stat-val" id="advStatExpectancy" style="color: var(--cyan);">+0.00 USDT</div>
+            <div class="risk-stat-sub" id="advStatExpectancySub">Avg Win: +0.00 | Avg Loss: -0.00</div>
+          </div>
+
+          <div class="risk-stat-card" style="border-left: 3px solid var(--green);">
+            <div class="risk-stat-header">
+              <span>⚖️ Win/Loss Payoff</span>
+              <span>Reward/Risk</span>
+            </div>
+            <div class="risk-stat-val" id="advStatPayoff" style="color: var(--green);">0.00x</div>
+            <div class="risk-stat-sub" id="advStatPayoffSub">Profit Factor: 0.00</div>
+          </div>
+        </div>
+
         <!-- Interactive Equity Growth Curve Chart -->
         <div class="chart-container-card">
           <div class="chart-header">
@@ -2376,7 +2799,7 @@
               <span>📈</span> Cumulative Equity Curve ($ USDT)
             </div>
             <div style="font-size: 12px; color: var(--text-muted);">
-              Hover over points for trade details & balance
+              Hover over points for trade details & running balance
             </div>
           </div>
           <div class="canvas-wrap" id="canvasWrap">
@@ -2427,6 +2850,83 @@
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: MONTHLY P&L CALENDAR VIEW -->
+      <div class="calendar-card" id="calendarViewContainer" style="display: none;">
+        <div class="calendar-nav-bar">
+          <div class="cal-month-title">
+            <span>🗓️</span> <span id="calCurrentMonthLabel">August 2026</span>
+          </div>
+          <div class="cal-controls">
+            <button class="btn-action" onclick="navigateCalendarMonth(-1)">◀ Prev</button>
+            <button class="btn-action" onclick="jumpCalendarToCurrentMonth()">Today</button>
+            <button class="btn-action" onclick="navigateCalendarMonth(1)">Next ▶</button>
+          </div>
+        </div>
+
+        <div class="cal-kpi-summary-ribbon">
+          <div class="cal-kpi-item">
+            <span class="cal-kpi-label">Month Net P&L</span>
+            <span class="cal-kpi-val" id="calMonthNetPnl">+0.00 USDT</span>
+          </div>
+          <div class="cal-kpi-item">
+            <span class="cal-kpi-label">Month Win Rate</span>
+            <span class="cal-kpi-val yellow" id="calMonthWinRate">0.0%</span>
+          </div>
+          <div class="cal-kpi-item">
+            <span class="cal-kpi-label">Days Traded</span>
+            <span class="cal-kpi-val" id="calMonthDaysTraded">0 / 0</span>
+          </div>
+          <div class="cal-kpi-item">
+            <span class="cal-kpi-label">Best Day</span>
+            <span class="cal-kpi-val green" id="calMonthBestDay">+0.00</span>
+          </div>
+          <div class="cal-kpi-item">
+            <span class="cal-kpi-label">Worst Day</span>
+            <span class="cal-kpi-val red" id="calMonthWorstDay">-0.00</span>
+          </div>
+        </div>
+
+        <div class="calendar-grid" id="calendarDaysGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- VIEW 5: TIME-OF-DAY & SESSION HEATMAP VIEW -->
+      <div class="session-view-grid" id="sessionViewContainer" style="display: none;">
+        <div class="card-title" style="margin-bottom: 0;">
+          <div class="card-title-left">
+            <span>🕒</span> Global Trading Sessions Performance
+          </div>
+          <span style="font-size: 12px; color: var(--text-muted);">Based on Trade Open / Execution Timestamps</span>
+        </div>
+
+        <div class="session-card-grid" id="sessionCardsGrid">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Day of Week Performance Heatmap Table -->
+        <div class="matrix-card">
+          <div class="matrix-title">
+            <span>📅 Day of Week Performance</span>
+            <span style="font-size: 11px; color: var(--cyan); font-weight: 600;">Optimal Trading Days</span>
+          </div>
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Trades</th>
+                <th>Win Rate %</th>
+                <th>Net Realized P&L</th>
+                <th>Profit Factor</th>
+              </tr>
+            </thead>
+            <tbody id="dayOfWeekMatrixBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -2513,7 +3013,7 @@
             </div>
           </div>
 
-          <!-- Psychology & Execution Tracker -->
+          <!-- Psychology & Discipline Tracker -->
           <div class="form-group" style="margin: 0;">
             <label>
               <span>Psychology & Discipline Tracking</span>
@@ -2630,7 +3130,7 @@
     </div>
 
     <footer>
-      Bybit Isolated Margin Liquidation & Sizing Engine • Firebase Cloud Sync & Analytics
+      Bybit Isolated Margin Liquidation & Sizing Engine • Live Futures API • Firebase Cloud Sync
     </footer>
   </div>
 
@@ -2729,7 +3229,7 @@
         const cloudTrades = [];
         snapshot.forEach(d => cloudTrades.push(d.data()));
 
-        // Merge local trades into Firestore if local has more trades
+        // Merge local trades into Firestore if local has trades
         if (window.tradesData && window.tradesData.length > 0) {
           for (let localTrade of window.tradesData) {
             const existsInCloud = cloudTrades.some(ct => ct.id === localTrade.id);
@@ -2785,11 +3285,13 @@
     };
   </script>
 
-  <!-- APP ENGINE, RECOVERY & EVENT HANDLERS -->
+  <!-- APP ENGINE, LIVE BYBIT TICKER, CALENDAR & HEATMAPS -->
   <script>
     /* 1. CALCULATOR LOGIC & STATE */
     let currentDirection = 'LONG';
     let currentLotStep = '1';
+    let liveTickerPrice = 0.5581;
+    let symbolFetchTimeout = null;
 
     function setDirection(dir) {
       currentDirection = dir;
@@ -2935,6 +3437,65 @@
       const s = parseFloat(step);
       if (s <= 0) return exactQty;
       return Math.floor(exactQty / s) * s;
+    }
+
+    /* Bybit Real-Time Ticker & Funding Rate Fetcher */
+    function onSymbolChange() {
+      clearTimeout(symbolFetchTimeout);
+      symbolFetchTimeout = setTimeout(fetchBybitTicker, 400);
+    }
+
+    async function fetchBybitTicker() {
+      const sym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
+      if (!sym) return;
+
+      const formattedSym = sym.endsWith('USDT') ? sym : `${sym}USDT`;
+      document.getElementById('liveSymbolDisplay').innerText = formattedSym;
+
+      try {
+        const res = await fetch(`https://api.bybit.com/v5/market/tickers?category=linear&symbol=${formattedSym}`);
+        if (!res.ok) throw new Error('API offline');
+        const data = await res.json();
+
+        if (data.retCode === 0 && data.result && data.result.list && data.result.list.length > 0) {
+          const t = data.result.list[0];
+          const lastPrice = parseFloat(t.lastPrice) || 0;
+          const chgPct = (parseFloat(t.price24hPcnt) || 0) * 100;
+          const fundingRate = (parseFloat(t.fundingRate) || 0) * 100;
+          const nextFundingTime = parseInt(t.nextFundingTime, 10);
+
+          liveTickerPrice = lastPrice;
+          document.getElementById('livePriceDisplay').innerText = `${lastPrice > 10 ? lastPrice.toFixed(2) : lastPrice.toFixed(4)} USDT`;
+
+          const chgBadge = document.getElementById('liveChgDisplay');
+          chgBadge.innerText = `${chgPct >= 0 ? '+' : ''}${chgPct.toFixed(2)}%`;
+          chgBadge.className = `live-chg-badge ${chgPct >= 0 ? 'up' : 'down'}`;
+
+          let hrsLeft = '4h';
+          if (nextFundingTime > 0) {
+            const diffMs = nextFundingTime - Date.now();
+            if (diffMs > 0) {
+              const h = Math.floor(diffMs / (1000 * 60 * 60));
+              const m = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+              hrsLeft = `${h}h:${m}m`;
+            }
+          }
+
+          document.getElementById('liveFundingDisplay').innerText = `⚡ ${fundingRate >= 0 ? '+' : ''}${fundingRate.toFixed(4)}% (${hrsLeft})`;
+          document.getElementById('liveStatusHint').innerText = '🟢 Bybit Live';
+          document.getElementById('liveStatusHint').style.color = '#0ecb81';
+        }
+      } catch (err) {
+        document.getElementById('liveStatusHint').innerText = 'Manual Mode';
+        document.getElementById('liveStatusHint').style.color = '#8b98af';
+      }
+    }
+
+    function useLivePriceAsEntry() {
+      if (liveTickerPrice > 0) {
+        document.getElementById('entryPrice').value = liveTickerPrice > 10 ? liveTickerPrice.toFixed(2) : liveTickerPrice.toFixed(4);
+        onRiskOrEntryChange();
+      }
     }
 
     function copyOrderDetails() {
@@ -3214,32 +3775,30 @@
       after_4h: 'After (4h)'
     };
 
+    // Calendar state
+    let calCurrentDate = new Date();
+
     const MAIN_DB_NAME = 'BybitTradingJournalDB_v4';
     let mainDbInstance = null;
 
-    // Helper: Merge new trade array into window.tradesData and save
     window.mergeAndSaveTrades = function(newTradesList) {
       if (!Array.isArray(newTradesList) || newTradesList.length === 0) return;
       const tradeMap = new Map();
       
-      // Keep existing
       window.tradesData.forEach(t => tradeMap.set(t.id, t));
-      
-      // Add or update from list
       newTradesList.forEach(t => {
-        if (t && t.id) {
-          tradeMap.set(t.id, t);
-        }
+        if (t && t.id) tradeMap.set(t.id, t);
       });
 
       window.tradesData = Array.from(tradeMap.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
       window.saveTradesToAllLocal();
       renderJournal();
       if (window.currentJournalView === 'analytics') renderAnalyticsView();
+      if (window.currentJournalView === 'calendar') renderCalendarView();
+      if (window.currentJournalView === 'session') renderSessionView();
     };
 
     window.saveTradesToAllLocal = function() {
-      // 1. Save to Main IndexedDB
       if (mainDbInstance) {
         try {
           const tx = mainDbInstance.transaction('trades', 'readwrite');
@@ -3250,7 +3809,6 @@
         }
       }
 
-      // 2. Save to LocalStorage across all common legacy keys as safety mirror
       try {
         const jsonStr = JSON.stringify(window.tradesData);
         localStorage.setItem('bybit_journal_trades_v4', jsonStr);
@@ -3259,11 +3817,10 @@
         localStorage.setItem('bybit_journal_trades', jsonStr);
         localStorage.setItem('bybit_trades', jsonStr);
       } catch (e) {
-        console.warn('LocalStorage mirror note (quota):', e);
+        console.warn('LocalStorage mirror note:', e);
       }
     };
 
-    // Deep-scan IndexedDB database
     function readAllFromIndexedDb(dbName) {
       return new Promise((resolve) => {
         if (!window.indexedDB) return resolve([]);
@@ -3297,11 +3854,9 @@
       });
     }
 
-    // Auto-scan ALL legacy versions of IndexedDB & LocalStorage
     async function scanAndRecoverAllLegacyTrades(isUserInitiated = false) {
       const recoveredMap = new Map();
 
-      // 1. Scan all known LocalStorage keys
       const lsKeys = [
         'bybit_journal_trades_v4',
         'bybit_journal_trades_v3',
@@ -3327,7 +3882,6 @@
         } catch (e) {}
       });
 
-      // 2. Scan all known IndexedDB DB names
       const knownDbs = [
         'BybitTradingJournalDB_v4',
         'BybitTradingJournalDB_v3',
@@ -3337,7 +3891,6 @@
         'BybitTradingJournalDB'
       ];
 
-      // If browser supports indexedDB.databases(), grab everything
       if (indexedDB.databases) {
         try {
           const dbs = await indexedDB.databases();
@@ -3359,12 +3912,9 @@
       }
 
       const allRecovered = Array.from(recoveredMap.values());
-      const initialCount = window.tradesData.length;
-
       if (allRecovered.length > 0) {
         window.mergeAndSaveTrades(allRecovered);
 
-        // Push recovered trades to Cloud if user is signed into Firebase
         if (window.cloudSaveTrade) {
           allRecovered.forEach(t => window.cloudSaveTrade(t));
         }
@@ -3397,14 +3947,11 @@
         req.onsuccess = async (e) => {
           mainDbInstance = e.target.result;
           
-          // Initial read from Main DB
           const tx = mainDbInstance.transaction('trades', 'readonly');
           const store = tx.objectStore('trades');
           const getReq = store.getAll();
           getReq.onsuccess = async () => {
             window.tradesData = getReq.result || [];
-            
-            // Run deep scan to merge all legacy v1/v2/v3 or localStorage trades
             await scanAndRecoverAllLegacyTrades();
 
             if (window.tradesData.length === 0) {
@@ -3530,34 +4077,35 @@
 
     function switchView(viewName) {
       window.currentJournalView = viewName;
-      const btnTable = document.getElementById('btnTableView');
-      const btnGallery = document.getElementById('btnGalleryView');
-      const btnAnalytics = document.getElementById('btnAnalyticsView');
-      const tableContainer = document.getElementById('tableViewContainer');
-      const galleryContainer = document.getElementById('galleryViewContainer');
-      const analyticsContainer = document.getElementById('analyticsViewContainer');
+      const views = ['Table', 'Gallery', 'Analytics', 'Calendar', 'Session'];
+
+      views.forEach(v => {
+        const btn = document.getElementById(`btn${v}View`);
+        const container = document.getElementById(`${v.toLowerCase()}ViewContainer`);
+        if (btn) btn.classList.remove('active');
+        if (container) container.style.display = 'none';
+      });
+
+      const activeBtn = document.getElementById(`btn${viewName.charAt(0).toUpperCase() + viewName.slice(1)}View`);
+      const activeContainer = document.getElementById(`${viewName}ViewContainer`);
       const filterBar = document.getElementById('journalFilterBar');
 
-      btnTable.classList.remove('active');
-      btnGallery.classList.remove('active');
-      btnAnalytics.classList.remove('active');
-      tableContainer.style.display = 'none';
-      galleryContainer.style.display = 'none';
-      analyticsContainer.style.display = 'none';
-      filterBar.style.display = 'flex';
-
-      if (viewName === 'table') {
-        btnTable.classList.add('active');
-        tableContainer.style.display = 'block';
-      } else if (viewName === 'gallery') {
-        btnGallery.classList.add('active');
-        galleryContainer.style.display = 'grid';
-      } else {
-        btnAnalytics.classList.add('active');
-        analyticsContainer.style.display = 'flex';
-        filterBar.style.display = 'none';
-        renderAnalyticsView();
+      if (activeBtn) activeBtn.classList.add('active');
+      if (activeContainer) {
+        if (viewName === 'gallery') activeContainer.style.display = 'grid';
+        else if (viewName === 'analytics' || viewName === 'session') activeContainer.style.display = 'flex';
+        else activeContainer.style.display = 'block';
       }
+
+      if (viewName === 'table' || viewName === 'gallery') {
+        filterBar.style.display = 'flex';
+      } else {
+        filterBar.style.display = 'none';
+      }
+
+      if (viewName === 'analytics') renderAnalyticsView();
+      if (viewName === 'calendar') renderCalendarView();
+      if (viewName === 'session') renderSessionView();
       renderJournal();
     }
 
@@ -3816,6 +4364,8 @@
       closeTradeModal();
       renderJournal();
       if (window.currentJournalView === 'analytics') renderAnalyticsView();
+      if (window.currentJournalView === 'calendar') renderCalendarView();
+      if (window.currentJournalView === 'session') renderSessionView();
     }
 
     function deleteTrade(id) {
@@ -3825,6 +4375,8 @@
       if (window.cloudDeleteTrade) window.cloudDeleteTrade(id);
       renderJournal();
       if (window.currentJournalView === 'analytics') renderAnalyticsView();
+      if (window.currentJournalView === 'calendar') renderCalendarView();
+      if (window.currentJournalView === 'session') renderSessionView();
     }
 
     function quickSetStatus(id, newStatus) {
@@ -3842,6 +4394,8 @@
       if (window.cloudSaveTrade) window.cloudSaveTrade(t);
       renderJournal();
       if (window.currentJournalView === 'analytics') renderAnalyticsView();
+      if (window.currentJournalView === 'calendar') renderCalendarView();
+      if (window.currentJournalView === 'session') renderSessionView();
     }
 
     /* Lightbox */
@@ -4176,12 +4730,126 @@
       }
     };
 
-    /* 4. VISUAL ANALYTICS, EQUITY CURVE & MATRICES */
+    /* 4. VISUAL ANALYTICS, ADVANCED DRAWDOWN & MATRICES */
     window.renderAnalyticsView = function() {
+      renderAdvancedDrawdownStats();
       renderEquityChart();
       renderStrategyMatrix();
       renderPsychologyMatrix();
     };
+
+    function renderAdvancedDrawdownStats() {
+      const closed = window.tradesData
+        .filter(t => t.status === 'WIN' || t.status === 'LOSS' || t.status === 'BREAKEVEN')
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      if (closed.length === 0) {
+        document.getElementById('advStatMdd').innerText = '-0.00 USDT';
+        document.getElementById('advStatMddSub').innerText = '0.0% of Peak Equity';
+        document.getElementById('advStatStreak').innerText = '0 Trades';
+        document.getElementById('advStatStreakSub').innerText = 'Best: 0W | Worst: 0L';
+        document.getElementById('advStatExpectancy').innerText = '+0.00 USDT';
+        document.getElementById('advStatExpectancySub').innerText = 'Avg Win: +0.00 | Avg Loss: -0.00';
+        document.getElementById('advStatPayoff').innerText = '0.00x';
+        document.getElementById('advStatPayoffSub').innerText = 'Profit Factor: —';
+        return;
+      }
+
+      // 1. Max Drawdown Calculation
+      let cumPnl = 0;
+      let peak = 0;
+      let maxDrawdown = 0;
+      let maxDdPct = 0;
+
+      closed.forEach(t => {
+        cumPnl += (parseFloat(t.realizedPnl) || 0);
+        if (cumPnl > peak) peak = cumPnl;
+        const dd = peak - cumPnl;
+        if (dd > maxDrawdown) {
+          maxDrawdown = dd;
+          maxDdPct = peak > 0 ? (dd / peak) * 100 : 0;
+        }
+      });
+
+      document.getElementById('advStatMdd').innerText = `-${maxDrawdown.toFixed(4)} USDT`;
+      document.getElementById('advStatMddSub').innerText = `Peak Equity: +${peak.toFixed(2)} USDT`;
+
+      // 2. Streaks Calculation
+      let currentStreak = 0;
+      let currentStreakType = null;
+      let maxWinStreak = 0;
+      let maxLossStreak = 0;
+      let tempWin = 0;
+      let tempLoss = 0;
+
+      closed.forEach(t => {
+        if (t.status === 'WIN') {
+          tempWin++;
+          tempLoss = 0;
+          if (tempWin > maxWinStreak) maxWinStreak = tempWin;
+        } else if (t.status === 'LOSS') {
+          tempLoss++;
+          tempWin = 0;
+          if (tempLoss > maxLossStreak) maxLossStreak = tempLoss;
+        }
+      });
+
+      // Active current streak
+      for (let i = closed.length - 1; i >= 0; i--) {
+        const s = closed[i].status;
+        if (s === 'BREAKEVEN') continue;
+        if (!currentStreakType) {
+          currentStreakType = s;
+          currentStreak = 1;
+        } else if (s === currentStreakType) {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+
+      const streakBadge = document.getElementById('advStatStreak');
+      if (currentStreakType === 'WIN') {
+        streakBadge.innerText = `${currentStreak} Win${currentStreak > 1 ? 's' : ''} 🔥`;
+        streakBadge.style.color = 'var(--green)';
+      } else if (currentStreakType === 'LOSS') {
+        streakBadge.innerText = `${currentStreak} Loss${currentStreak > 1 ? 'es' : ''} 🧊`;
+        streakBadge.style.color = 'var(--red)';
+      } else {
+        streakBadge.innerText = '0 Trades';
+        streakBadge.style.color = 'var(--text-muted)';
+      }
+      document.getElementById('advStatStreakSub').innerText = `Best: ${maxWinStreak}W Streak | Worst: ${maxLossStreak}L Streak`;
+
+      // 3. Mathematical Expectancy Calculation
+      const wins = closed.filter(t => t.status === 'WIN');
+      const losses = closed.filter(t => t.status === 'LOSS');
+      const winCount = wins.length;
+      const lossCount = losses.length;
+      const totalCount = closed.length;
+
+      const winRate = totalCount > 0 ? (winCount / totalCount) : 0;
+      const lossRate = totalCount > 0 ? (lossCount / totalCount) : 0;
+
+      const totalWinDollar = wins.reduce((acc, t) => acc + (parseFloat(t.realizedPnl) || 0), 0);
+      const totalLossDollar = Math.abs(losses.reduce((acc, t) => acc + (parseFloat(t.realizedPnl) || 0), 0));
+
+      const avgWin = winCount > 0 ? (totalWinDollar / winCount) : 0;
+      const avgLoss = lossCount > 0 ? (totalLossDollar / lossCount) : 0;
+
+      // Expectancy = (WinRate * AvgWin) - (LossRate * AvgLoss)
+      const expectancy = (winRate * avgWin) - (lossRate * avgLoss);
+      const payoffRatio = avgLoss > 0 ? (avgWin / avgLoss) : (avgWin > 0 ? 99 : 0);
+      const profitFactor = totalLossDollar > 0 ? (totalWinDollar / totalLossDollar).toFixed(2) : (totalWinDollar > 0 ? '∞' : '—');
+
+      const expElem = document.getElementById('advStatExpectancy');
+      expElem.innerText = `${expectancy >= 0 ? '+' : ''}${expectancy.toFixed(4)} USDT`;
+      expElem.style.color = expectancy >= 0 ? 'var(--green)' : 'var(--red)';
+      document.getElementById('advStatExpectancySub').innerText = `Avg Win: +${avgWin.toFixed(2)} | Avg Loss: -${avgLoss.toFixed(2)}`;
+
+      document.getElementById('advStatPayoff').innerText = `${payoffRatio.toFixed(2)} : 1`;
+      document.getElementById('advStatPayoffSub').innerText = `Profit Factor: ${profitFactor}`;
+    }
 
     function renderEquityChart() {
       const canvas = document.getElementById('equityCanvas');
@@ -4333,7 +5001,7 @@
             tooltip.innerHTML = `
               <strong>Trade #${closest.index}: ${closest.trade.symbol} (${closest.trade.direction})</strong><br>
               Realized PnL: <span style="color: ${closest.pnl >= 0 ? '#0ecb81' : '#f6465d'}; font-weight: 700;">${closest.pnl >= 0 ? '+' : ''}${closest.pnl.toFixed(4)} USDT</span><br>
-              Balance: <strong>${closest.cum >= 0 ? '+' : ''}${closest.cum.toFixed(4)} USDT</strong><br>
+              Running Balance: <strong>${closest.cum >= 0 ? '+' : ''}${closest.cum.toFixed(4)} USDT</strong><br>
               Date: ${closest.date}
             `;
           } else {
@@ -4439,6 +5107,256 @@
       badge.style.color = disciplineScore >= 80 ? '#6ee7b7' : '#fca5a5';
     }
 
+    /* 5. MONTHLY P&L CALENDAR VIEW LOGIC */
+    function navigateCalendarMonth(dir) {
+      calCurrentDate.setMonth(calCurrentDate.getMonth() + dir);
+      renderCalendarView();
+    }
+
+    function jumpCalendarToCurrentMonth() {
+      calCurrentDate = new Date();
+      renderCalendarView();
+    }
+
+    function renderCalendarView() {
+      const year = calCurrentDate.getFullYear();
+      const month = calCurrentDate.getMonth();
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      
+      document.getElementById('calCurrentMonthLabel').innerText = `${monthNames[month]} ${year}`;
+
+      const firstDayOfMonth = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const startDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday
+
+      const prevMonthDays = new Date(year, month, 0).getDate();
+
+      // Group trades by YYYY-MM-DD
+      const tradesByDay = {};
+      let monthTotalPnl = 0;
+      let monthWins = 0;
+      let monthLosses = 0;
+      let daysTradedCount = 0;
+      let bestDayPnl = -Infinity;
+      let worstDayPnl = Infinity;
+
+      window.tradesData.forEach(t => {
+        const d = new Date(t.date);
+        if (d.getFullYear() === year && d.getMonth() === month) {
+          const dayKey = d.getDate();
+          if (!tradesByDay[dayKey]) {
+            tradesByDay[dayKey] = { trades: [], netPnl: 0, wins: 0, losses: 0, opens: 0, be: 0 };
+          }
+          tradesByDay[dayKey].trades.push(t);
+          if (t.status === 'WIN') {
+            tradesByDay[dayKey].wins++;
+            monthWins++;
+          } else if (t.status === 'LOSS') {
+            tradesByDay[dayKey].losses++;
+            monthLosses++;
+          } else if (t.status === 'OPEN') {
+            tradesByDay[dayKey].opens++;
+          } else if (t.status === 'BREAKEVEN') {
+            tradesByDay[dayKey].be++;
+          }
+
+          if (t.status !== 'OPEN') {
+            const p = parseFloat(t.realizedPnl) || 0;
+            tradesByDay[dayKey].netPnl += p;
+            monthTotalPnl += p;
+          }
+        }
+      });
+
+      Object.keys(tradesByDay).forEach(dKey => {
+        daysTradedCount++;
+        const pnl = tradesByDay[dKey].netPnl;
+        if (pnl > bestDayPnl) bestDayPnl = pnl;
+        if (pnl < worstDayPnl) worstDayPnl = pnl;
+      });
+
+      const totalClosedMonth = monthWins + monthLosses;
+      const monthWinRate = totalClosedMonth > 0 ? ((monthWins / totalClosedMonth) * 100) : 0;
+
+      const pnlElem = document.getElementById('calMonthNetPnl');
+      pnlElem.innerText = `${monthTotalPnl >= 0 ? '+' : ''}${monthTotalPnl.toFixed(2)} USDT`;
+      pnlElem.className = `cal-kpi-val ${monthTotalPnl >= 0 ? 'green' : 'red'}`;
+
+      document.getElementById('calMonthWinRate').innerText = `${monthWinRate.toFixed(1)}%`;
+      document.getElementById('calMonthDaysTraded').innerText = `${daysTradedCount} Days (${window.tradesData.filter(t => new Date(t.date).getFullYear() === year && new Date(t.date).getMonth() === month).length} Trades)`;
+      document.getElementById('calMonthBestDay').innerText = bestDayPnl !== -Infinity ? `+${bestDayPnl.toFixed(2)} USDT` : '—';
+      document.getElementById('calMonthWorstDay').innerText = worstDayPnl !== Infinity ? `${worstDayPnl.toFixed(2)} USDT` : '—';
+
+      const grid = document.getElementById('calendarDaysGrid');
+      const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      let html = dayHeaders.map(h => `<div class="cal-day-header">${h}</div>`).join('');
+
+      // Leading days from previous month
+      for (let i = startDayOfWeek - 1; i >= 0; i--) {
+        const dNum = prevMonthDays - i;
+        html += `<div class="cal-day-cell other-month"><div class="cal-day-top"><span class="cal-day-num">${dNum}</span></div></div>`;
+      }
+
+      const today = new Date();
+      const isCurrentMonthNow = today.getFullYear() === year && today.getMonth() === month;
+
+      // Current month days
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayData = tradesByDay[day];
+        const isToday = isCurrentMonthNow && today.getDate() === day;
+        let cellClass = 'cal-day-cell';
+        if (isToday) cellClass += ' today';
+
+        if (dayData && (dayData.wins > 0 || dayData.losses > 0 || dayData.be > 0)) {
+          if (dayData.netPnl > 0) cellClass += ' profit-day';
+          else if (dayData.netPnl < 0) cellClass += ' loss-day';
+          else cellClass += ' breakeven-day';
+        }
+
+        let pnlDisplay = '';
+        let tallyDisplay = '';
+        let countBadge = '';
+
+        if (dayData) {
+          countBadge = `<span class="cal-trade-count-badge">${dayData.trades.length}T</span>`;
+          const pnlColor = dayData.netPnl > 0 ? 'var(--green)' : (dayData.netPnl < 0 ? 'var(--red)' : '#90a4ae');
+          pnlDisplay = `<div class="cal-day-pnl" style="color: ${pnlColor};">${dayData.netPnl >= 0 ? '+' : ''}${dayData.netPnl.toFixed(2)}</div>`;
+          tallyDisplay = `<div class="cal-day-tally">${dayData.wins}W • ${dayData.losses}L</div>`;
+        }
+
+        html += `
+          <div class="${cellClass}" onclick="filterTableByDay(${year}, ${month}, ${day})">
+            <div class="cal-day-top">
+              <span class="cal-day-num">${day}</span>
+              ${countBadge}
+            </div>
+            ${pnlDisplay}
+            ${tallyDisplay}
+          </div>
+        `;
+      }
+
+      // Trailing days from next month to fill grid
+      const totalCells = startDayOfWeek + daysInMonth;
+      const trailingDays = (7 - (totalCells % 7)) % 7;
+      for (let day = 1; day <= trailingDays; day++) {
+        html += `<div class="cal-day-cell other-month"><div class="cal-day-top"><span class="cal-day-num">${day}</span></div></div>`;
+      }
+
+      grid.innerHTML = html;
+    }
+
+    function filterTableByDay(year, month, day) {
+      const pad = (n) => n.toString().padStart(2, '0');
+      const targetStr = `${year}-${pad(month + 1)}-${pad(day)}`;
+      document.getElementById('tradeSearchInput').value = targetStr;
+      switchView('table');
+      renderJournal();
+    }
+
+    /* 6. TIME-OF-DAY & SESSION HEATMAP LOGIC */
+    function renderSessionView() {
+      const closed = window.tradesData.filter(t => t.status === 'WIN' || t.status === 'LOSS' || t.status === 'BREAKEVEN');
+
+      const sessions = [
+        { id: 'asian', name: '🌏 Asian Session', time: '00:00 - 08:00 UTC (Tokyo/Sydney)', startH: 0, endH: 8, color: '#00e5ff' },
+        { id: 'london', name: '🏛️ London Open', time: '08:00 - 13:00 UTC (European Volatility)', startH: 8, endH: 13, color: '#f7a600' },
+        { id: 'newyork', name: '🗽 New York Session', time: '13:00 - 21:00 UTC (US Market Hours)', startH: 13, endH: 21, color: '#a855f7' },
+        { id: 'late', name: '🌙 Off-Hours / Close', time: '21:00 - 24:00 UTC (Low Liquidity)', startH: 21, endH: 24, color: '#607d8b' }
+      ];
+
+      const cardsContainer = document.getElementById('sessionCardsGrid');
+      cardsContainer.innerHTML = sessions.map(sess => {
+        const sessTrades = closed.filter(t => {
+          const hour = new Date(t.date).getUTCHours();
+          return hour >= sess.startH && hour < sess.endH;
+        });
+
+        const count = sessTrades.length;
+        const wins = sessTrades.filter(t => t.status === 'WIN').length;
+        const losses = sessTrades.filter(t => t.status === 'LOSS').length;
+        const winRate = count > 0 ? ((wins / count) * 100) : 0;
+        const netPnl = sessTrades.reduce((acc, t) => acc + (parseFloat(t.realizedPnl) || 0), 0);
+        
+        const winPnl = sessTrades.filter(t => t.status === 'WIN').reduce((acc, t) => acc + (parseFloat(t.realizedPnl) || 0), 0);
+        const lossPnl = Math.abs(sessTrades.filter(t => t.status === 'LOSS').reduce((acc, t) => acc + (parseFloat(t.realizedPnl) || 0), 0));
+        const pf = lossPnl > 0 ? (winPnl / lossPnl).toFixed(2) : (winPnl > 0 ? '∞' : '—');
+
+        return `
+          <div class="session-kpi-box ${sess.id}">
+            <div class="session-kpi-title">
+              <span>${sess.name}</span>
+              <span style="font-size: 13px; color: ${sess.color}; font-family: 'JetBrains Mono';">${count} Trades</span>
+            </div>
+            <div class="session-time-range">${sess.time}</div>
+
+            <div class="session-stat-row">
+              <span style="color: var(--text-muted);">Win Rate:</span>
+              <span style="font-weight: 700; color: #fff;">${winRate.toFixed(1)}% (${wins}W / ${losses}L)</span>
+            </div>
+            <div class="win-progress-bar-wrap">
+              <div class="win-progress-bar-fill" style="width: ${winRate}%; background: ${sess.color};"></div>
+            </div>
+
+            <div class="session-stat-row" style="margin-top: 4px;">
+              <span style="color: var(--text-muted);">Net Realized P&L:</span>
+              <span style="font-weight: 800; font-family: 'JetBrains Mono'; color: ${netPnl >= 0 ? 'var(--green)' : 'var(--red)'};">
+                ${netPnl >= 0 ? '+' : ''}${netPnl.toFixed(4)} USDT
+              </span>
+            </div>
+
+            <div class="session-stat-row">
+              <span style="color: var(--text-muted);">Profit Factor:</span>
+              <span style="font-weight: 700; font-family: 'JetBrains Mono'; color: var(--accent-yellow);">${pf}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Day of Week Table Breakdown
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const tbody = document.getElementById('dayOfWeekMatrixBody');
+
+      tbody.innerHTML = days.map((dayName, dayIdx) => {
+        const dayTrades = closed.filter(t => new Date(t.date).getDay() === dayIdx);
+        const count = dayTrades.length;
+        if (count === 0) {
+          return `
+            <tr>
+              <td><strong>${dayName}</strong></td>
+              <td style="color: var(--text-muted);">0</td>
+              <td style="color: var(--text-muted);">—</td>
+              <td style="color: var(--text-muted);">0.00 USDT</td>
+              <td style="color: var(--text-muted);">—</td>
+            </tr>
+          `;
+        }
+
+        const wins = dayTrades.filter(t => t.status === 'WIN').length;
+        const losses = dayTrades.filter(t => t.status === 'LOSS').length;
+        const winRate = (wins / count) * 100;
+        const netPnl = dayTrades.reduce((acc, t) => acc + (parseFloat(t.realizedPnl) || 0), 0);
+        const winPnl = dayTrades.filter(t => t.status === 'WIN').reduce((acc, t) => acc + (parseFloat(t.realizedPnl) || 0), 0);
+        const lossPnl = Math.abs(dayTrades.filter(t => t.status === 'LOSS').reduce((acc, t) => acc + (parseFloat(t.realizedPnl) || 0), 0));
+        const pf = lossPnl > 0 ? (winPnl / lossPnl).toFixed(2) : (winPnl > 0 ? '∞' : '—');
+
+        return `
+          <tr>
+            <td><strong>${dayName}</strong></td>
+            <td><strong>${count}</strong> (${wins}W / ${losses}L)</td>
+            <td>
+              <div><strong>${winRate.toFixed(1)}%</strong></div>
+              <div class="win-progress-bar-wrap"><div class="win-progress-bar-fill" style="width: ${winRate}%;"></div></div>
+            </td>
+            <td style="color: ${netPnl >= 0 ? 'var(--green)' : 'var(--red)'}; font-weight: 700;">
+              ${netPnl >= 0 ? '+' : ''}${netPnl.toFixed(4)} USDT
+            </td>
+            <td style="color: var(--accent-yellow); font-weight: 700;">${pf}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
     /* CSV Export & JSON Backup / Restore */
     function exportTradesToCSV() {
       if (window.tradesData.length === 0) {
@@ -4501,6 +5419,8 @@
             }
             renderJournal();
             if (window.currentJournalView === 'analytics') renderAnalyticsView();
+            if (window.currentJournalView === 'calendar') renderCalendarView();
+            if (window.currentJournalView === 'session') renderSessionView();
             alert(`Successfully restored ${imported.length} trades!`);
           }
         } catch (err) {
@@ -4510,7 +5430,7 @@
       reader.readAsText(file);
     }
 
-    /* 5. PWA (SERVICE WORKER & INSTALL PROMPT) */
+    /* PWA Support */
     let deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -4539,9 +5459,11 @@
       });
     }
 
-    // Initialize Calculator & Auto-Scan Journal Database
+    // Initialize Calculator, Live Ticker & Journal Database
     calculate();
     initDB();
+    fetchBybitTicker();
+    setInterval(fetchBybitTicker, 10000); // Poll live ticker every 10s
   </script>
 </body>
 </html>
