@@ -2729,14 +2729,14 @@
             <tr>
               <th>Charts (1H & 4H)</th>
               <th>Date</th>
-              <th>Symbol</th>
-              <th>Side</th>
+              <th>Symbol & Side</th>
               <th>Entry / SL / TP</th>
+              <th>Live Price</th>
               <th>Lev & Qty</th>
               <th>Net RRR</th>
               <th>Strategy & Discipline</th>
-              <th>Status</th>
-              <th>Net P&L</th>
+              <th>Status / Trigger</th>
+              <th>Live / Realized P&L</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -4507,6 +4507,131 @@
       return 'custom';
     }
 
+    /* Global Live Price Store for Bybit Futures */
+    window.liveMarketPrices = {};
+
+    async function fetchGlobalBybitPrices() {
+      try {
+        const res = await fetch('https://api.bybit.com/v5/market/tickers?category=linear');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.retCode === 0 && data.result && Array.isArray(data.result.list)) {
+          data.result.list.forEach(t => {
+            const sym = t.symbol.toUpperCase();
+            window.liveMarketPrices[sym] = {
+              price: parseFloat(t.lastPrice) || 0,
+              markPrice: parseFloat(t.markPrice) || 0,
+              chgPct: (parseFloat(t.price24hPcnt) || 0) * 100,
+              fundingRate: (parseFloat(t.fundingRate) || 0) * 100,
+              high24h: parseFloat(t.highPrice24h) || 0,
+              low24h: parseFloat(t.lowPrice24h) || 0
+            };
+          });
+
+          // Update active calculator live banner
+          const activeSym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
+          const fmtActive = activeSym.endsWith('USDT') ? activeSym : `${activeSym}USDT`;
+          if (window.liveMarketPrices[fmtActive]) {
+            const t = window.liveMarketPrices[fmtActive];
+            liveTickerPrice = t.price;
+            document.getElementById('livePriceDisplay').innerText = `${t.price > 10 ? t.price.toFixed(2) : t.price.toFixed(4)} USDT`;
+            const chgBadge = document.getElementById('liveChgDisplay');
+            chgBadge.innerText = `${t.chgPct >= 0 ? '+' : ''}${t.chgPct.toFixed(2)}%`;
+            chgBadge.className = `live-chg-badge ${t.chgPct >= 0 ? 'up' : 'down'}`;
+            document.getElementById('liveFundingDisplay').innerText = `⚡ ${t.fundingRate >= 0 ? '+' : ''}${t.fundingRate.toFixed(4)}%`;
+            document.getElementById('liveStatusHint').innerText = '🟢 Bybit Live';
+            document.getElementById('liveStatusHint').style.color = '#0ecb81';
+          }
+
+          // Re-render journal table with updated live prices & live PnL
+          if (window.currentJournalView === 'table' || window.currentJournalView === 'gallery') {
+            renderJournal();
+          }
+        }
+      } catch (err) {
+        console.warn('Bybit batch ticker note:', err);
+      }
+    }
+
+    /* Helper: Calculate Live Unrealized PnL & Check Trigger */
+    function computeTradeLiveStatus(t) {
+      const sym = (t.symbol || '').toUpperCase().trim();
+      const fmtSym = sym.endsWith('USDT') ? sym : `${sym}USDT`;
+      const liveData = window.liveMarketPrices[fmtSym];
+      
+      if (!liveData || !liveData.price) {
+        return { livePrice: null, unrealizedPnl: null, roePct: null, triggered: null, triggerType: null };
+      }
+
+      const P = liveData.price;
+      const EP = parseFloat(t.entry) || 0;
+      const SL = parseFloat(t.stopLoss) || 0;
+      const TP = parseFloat(t.takeProfit) || 0;
+      const Q = parseFloat(t.quantity) || 1;
+      const L = parseFloat(t.leverage) || 5;
+      const f = 0.00055; // 0.055% taker fee
+
+      let grossUnrealized = 0;
+      let isTpTriggered = false;
+      let isSlTriggered = false;
+
+      if (t.direction === 'LONG') {
+        grossUnrealized = Q * (P - EP);
+        if (TP > 0 && P >= TP) isTpTriggered = true;
+        if (SL > 0 && P <= SL) isSlTriggered = true;
+      } else {
+        grossUnrealized = Q * (EP - P);
+        if (TP > 0 && P <= TP) isTpTriggered = true;
+        if (SL > 0 && P >= SL) isSlTriggered = true;
+      }
+
+      const openFee = (Q * EP) * f;
+      const estCloseFee = (Q * P) * f;
+      const netUnrealizedPnl = grossUnrealized - openFee - estCloseFee;
+      const margin = (Q * EP) / L;
+      const roePct = margin > 0 ? (netUnrealizedPnl / margin) * 100 : 0;
+
+      let triggered = null;
+      let triggerType = null;
+      if (isTpTriggered) {
+        triggered = '🎯 TP TRIGGERED';
+        triggerType = 'TP';
+      } else if (isSlTriggered) {
+        triggered = '🛑 SL TRIGGERED';
+        triggerType = 'SL';
+      }
+
+      return {
+        livePrice: P,
+        unrealizedPnl: netUnrealizedPnl,
+        roePct: roePct,
+        triggered: triggered,
+        triggerType: triggerType
+      };
+    }
+
+    function closeTriggeredTrade(tradeId, triggerType) {
+      const t = window.tradesData.find(x => x.id === tradeId);
+      if (!t) return;
+      if (triggerType === 'TP') {
+        t.status = 'WIN';
+        t.realizedPnl = parseFloat((t.risk * t.netRrr).toFixed(4));
+      } else if (triggerType === 'SL') {
+        t.status = 'LOSS';
+        t.realizedPnl = parseFloat((-t.risk).toFixed(4));
+      } else {
+        const liveInfo = computeTradeLiveStatus(t);
+        t.status = (liveInfo.unrealizedPnl || 0) >= 0 ? 'WIN' : 'LOSS';
+        t.realizedPnl = parseFloat((liveInfo.unrealizedPnl || 0).toFixed(4));
+      }
+      saveTradeToDB(t);
+      if (window.cloudSaveTrade) window.cloudSaveTrade(t);
+      renderJournal();
+      if (window.currentJournalView === 'analytics') renderAnalyticsView();
+      if (window.currentJournalView === 'calendar') renderCalendarView();
+      if (window.currentJournalView === 'session') renderSessionView();
+    }
+
     /* 3. RENDER JOURNAL (TABLE & GALLERY) */
     window.renderJournal = function() {
       const search = (document.getElementById('tradeSearchInput').value || '').toLowerCase();
@@ -4561,13 +4686,63 @@
       // Render Table View
       const tbody = document.getElementById('journalTableBody');
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" class="empty-state"><div class="empty-icon">📭</div><div>No trades found in this view. Click <strong>"+ New Trade"</strong> to log one!</div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="empty-state"><div class="empty-icon">📭</div><div>No trades found in this view. Click <strong>"+ New Trade"</strong> to log one!</div></td></tr>`;
       } else {
         tbody.innerHTML = filtered.map(t => {
           const dStr = new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-          const pnlVal = parseFloat(t.realizedPnl) || 0;
-          const pnlColor = pnlVal > 0 ? 'var(--green)' : (pnlVal < 0 ? 'var(--red)' : '#90a4ae');
-          const pnlText = t.status === 'OPEN' ? '<span style="color: var(--text-muted);">In Progress</span>' : `<span style="color: ${pnlColor}; font-weight: 700;">${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)}</span>`;
+          const liveInfo = computeTradeLiveStatus(t);
+
+          // Live Price Cell
+          let livePriceHtml = '<span style="color: var(--text-muted);">—</span>';
+          if (liveInfo.livePrice) {
+            const pStr = liveInfo.livePrice > 10 ? liveInfo.livePrice.toFixed(2) : liveInfo.livePrice.toFixed(4);
+            livePriceHtml = `<span style="color: #fff; font-weight: 700;"><span style="color: var(--green); font-size: 9px;">●</span> ${pStr}</span>`;
+          }
+
+          // Live PnL or Realized PnL Cell
+          let pnlCellHtml = '';
+          if (t.status === 'OPEN') {
+            if (liveInfo.unrealizedPnl !== null) {
+              const uPnl = liveInfo.unrealizedPnl;
+              const uColor = uPnl >= 0 ? 'var(--green)' : 'var(--red)';
+              pnlCellHtml = `
+                <div>
+                  <span style="color: ${uColor}; font-weight: 800;">${uPnl >= 0 ? '+' : ''}${uPnl.toFixed(4)} USDT</span>
+                  <div style="font-size: 10px; color: ${uColor};">${liveInfo.roePct >= 0 ? '+' : ''}${liveInfo.roePct.toFixed(1)}% ROE</div>
+                </div>
+              `;
+            } else {
+              pnlCellHtml = '<span style="color: #90caf9; font-weight: 600;">⏳ Open</span>';
+            }
+          } else {
+            const pnlVal = parseFloat(t.realizedPnl) || 0;
+            const pnlColor = pnlVal > 0 ? 'var(--green)' : (pnlVal < 0 ? 'var(--red)' : '#90a4ae');
+            pnlCellHtml = `<span style="color: ${pnlColor}; font-weight: 800;">${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)} USDT</span>`;
+          }
+
+          // Trigger Alert or Status Badge
+          let statusBlock = `
+            <select class="status-badge ${t.status.toLowerCase()}" onchange="quickSetStatus('${t.id}', this.value)" style="border: none; padding: 3px 6px; font-weight: 700;">
+              <option value="OPEN" ${t.status === 'OPEN' ? 'selected' : ''}>⏳ OPEN</option>
+              <option value="WIN" ${t.status === 'WIN' ? 'selected' : ''}>🟢 WIN</option>
+              <option value="LOSS" ${t.status === 'LOSS' ? 'selected' : ''}>🔴 LOSS</option>
+              <option value="BREAKEVEN" ${t.status === 'BREAKEVEN' ? 'selected' : ''}>⚪ BE</option>
+            </select>
+          `;
+
+          if (t.status === 'OPEN' && liveInfo.triggered) {
+            const isTp = liveInfo.triggerType === 'TP';
+            statusBlock = `
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <span class="status-badge ${isTp ? 'win' : 'loss'}" style="font-size: 10px; animation: pulse 1.2s infinite;" title="Price crossed trigger level!">
+                  ${liveInfo.triggered}
+                </span>
+                <button class="btn-action ${isTp ? 'green' : ''}" style="padding: 2px 6px; font-size: 10px; font-weight: 700;" onclick="closeTriggeredTrade('${t.id}', '${liveInfo.triggerType}')">
+                  ${isTp ? '✅ Lock WIN' : '🛑 Close LOSS'}
+                </button>
+              </div>
+            `;
+          }
 
           const thumbStrip = `
             <div class="multi-thumb-strip">
@@ -4602,13 +4777,16 @@
             <tr>
               <td>${thumbStrip}</td>
               <td style="color: var(--text-muted); font-size: 11px;">${dStr}</td>
-              <td style="font-weight: 800; color: #fff;">${t.symbol}</td>
-              <td><span class="dir-tag ${t.direction.toLowerCase()}">${t.direction}</span></td>
+              <td>
+                <div style="font-weight: 800; color: #fff;">${t.symbol}</div>
+                <div><span class="dir-tag ${t.direction.toLowerCase()}" style="font-size: 9.5px;">${t.direction}</span></div>
+              </td>
               <td>
                 <span style="color: #90caf9;">${t.entry}</span> / 
                 <span style="color: var(--red);">${t.stopLoss}</span> / 
                 <span style="color: var(--green);">${t.takeProfit}</span>
               </td>
+              <td>${livePriceHtml}</td>
               <td>${t.leverage}x (${t.quantity})</td>
               <td style="color: var(--accent-yellow); font-weight: 700;">1 : ${t.netRrr}</td>
               <td>
@@ -4618,15 +4796,8 @@
                   ${t.customTags ? `<span class="strat-badge custom">#${t.customTags}</span>` : ''}
                 </div>
               </td>
-              <td>
-                <select class="status-badge ${t.status.toLowerCase()}" onchange="quickSetStatus('${t.id}', this.value)" style="border: none; padding: 3px 6px; font-weight: 700;">
-                  <option value="OPEN" ${t.status === 'OPEN' ? 'selected' : ''}>⏳ OPEN</option>
-                  <option value="WIN" ${t.status === 'WIN' ? 'selected' : ''}>🟢 WIN</option>
-                  <option value="LOSS" ${t.status === 'LOSS' ? 'selected' : ''}>🔴 LOSS</option>
-                  <option value="BREAKEVEN" ${t.status === 'BREAKEVEN' ? 'selected' : ''}>⚪ BE</option>
-                </select>
-              </td>
-              <td>${pnlText}</td>
+              <td>${statusBlock}</td>
+              <td>${pnlCellHtml}</td>
               <td>
                 <div style="display: flex; gap: 4px;">
                   <button class="btn-action" style="padding: 3px 8px; font-size: 11px;" onclick="editTrade('${t.id}')">✏️</button>
@@ -4645,9 +4816,35 @@
       } else {
         gallery.innerHTML = filtered.map(t => {
           const dStr = new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-          const pnlVal = parseFloat(t.realizedPnl) || 0;
-          const pnlColor = pnlVal > 0 ? 'var(--green)' : (pnlVal < 0 ? 'var(--red)' : '#90a4ae');
-          const pnlText = t.status === 'OPEN' ? 'Open Position' : `${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)} USDT`;
+          const liveInfo = computeTradeLiveStatus(t);
+
+          let pnlVal = parseFloat(t.realizedPnl) || 0;
+          let pnlColor = pnlVal > 0 ? 'var(--green)' : (pnlVal < 0 ? 'var(--red)' : '#90a4ae');
+          let pnlText = `${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)} USDT`;
+
+          let livePnlBanner = '';
+          if (t.status === 'OPEN') {
+            if (liveInfo.unrealizedPnl !== null) {
+              const uPnl = liveInfo.unrealizedPnl;
+              const uColor = uPnl >= 0 ? 'var(--green)' : 'var(--red)';
+              pnlColor = uColor;
+              pnlText = `${uPnl >= 0 ? '+' : ''}${uPnl.toFixed(4)} USDT (${liveInfo.roePct >= 0 ? '+' : ''}${liveInfo.roePct.toFixed(1)}% ROE)`;
+            } else {
+              pnlText = 'Open Position';
+            }
+          }
+
+          if (t.status === 'OPEN' && liveInfo.triggered) {
+            const isTp = liveInfo.triggerType === 'TP';
+            livePnlBanner = `
+              <div style="background: ${isTp ? 'rgba(14, 203, 129, 0.18)' : 'rgba(246, 70, 93, 0.18)'}; border: 1px solid ${isTp ? 'var(--green)' : 'var(--red)'}; border-radius: 6px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                <span style="font-weight: 800; font-size: 11px; color: ${isTp ? 'var(--green)' : 'var(--red)'};">${liveInfo.triggered}</span>
+                <button class="btn-action ${isTp ? 'green' : ''}" style="padding: 2px 8px; font-size: 10px; font-weight: 700;" onclick="closeTriggeredTrade('${t.id}', '${liveInfo.triggerType}')">
+                  ${isTp ? '✅ Lock WIN' : '🛑 Close LOSS'}
+                </button>
+              </div>
+            `;
+          }
 
           const firstKey = TF_KEYS.find(k => t.images && t.images[k]) || 'before_1h';
           const currentImg = t.images ? t.images[firstKey] : null;
@@ -4663,6 +4860,8 @@
 
           const stratList = Array.isArray(t.strategies) ? t.strategies : [];
           const stratBadges = stratList.map(s => `<span class="strat-badge ${getStrategyBadgeClass(s)}">${s}</span>`).join(' ');
+
+          const livePriceStr = liveInfo.livePrice ? `Live: ${liveInfo.livePrice > 10 ? liveInfo.livePrice.toFixed(2) : liveInfo.livePrice.toFixed(4)}` : '';
 
           return `
             <div class="trade-card">
@@ -4682,11 +4881,16 @@
                     <span>${t.symbol}</span>
                     <span class="dir-tag ${t.direction.toLowerCase()}">${t.direction}</span>
                   </div>
-                  <span class="status-badge ${t.status.toLowerCase()}">${t.status}</span>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    ${livePriceStr ? `<span style="font-size: 11px; font-family: 'JetBrains Mono'; color: #69f0ae;">${livePriceStr}</span>` : ''}
+                    <span class="status-badge ${t.status.toLowerCase()}">${t.status}</span>
+                  </div>
                 </div>
 
+                ${livePnlBanner}
+
                 <div class="card-pnl-row">
-                  <span class="card-pnl-label">Realized Net P&L:</span>
+                  <span class="card-pnl-label">${t.status === 'OPEN' ? 'Unrealized Live P&L:' : 'Realized Net P&L:'}</span>
                   <span class="card-pnl-val" style="color: ${pnlColor};">${pnlText}</span>
                 </div>
 
@@ -4759,16 +4963,12 @@
       let cumPnl = 0;
       let peak = 0;
       let maxDrawdown = 0;
-      let maxDdPct = 0;
 
       closed.forEach(t => {
         cumPnl += (parseFloat(t.realizedPnl) || 0);
         if (cumPnl > peak) peak = cumPnl;
         const dd = peak - cumPnl;
-        if (dd > maxDrawdown) {
-          maxDrawdown = dd;
-          maxDdPct = peak > 0 ? (dd / peak) * 100 : 0;
-        }
+        if (dd > maxDrawdown) maxDrawdown = dd;
       });
 
       document.getElementById('advStatMdd').innerText = `-${maxDrawdown.toFixed(4)} USDT`;
@@ -4837,7 +5037,6 @@
       const avgWin = winCount > 0 ? (totalWinDollar / winCount) : 0;
       const avgLoss = lossCount > 0 ? (totalLossDollar / lossCount) : 0;
 
-      // Expectancy = (WinRate * AvgWin) - (LossRate * AvgLoss)
       const expectancy = (winRate * avgWin) - (lossRate * avgLoss);
       const payoffRatio = avgLoss > 0 ? (avgWin / avgLoss) : (avgWin > 0 ? 99 : 0);
       const profitFactor = totalLossDollar > 0 ? (totalWinDollar / totalLossDollar).toFixed(2) : (totalWinDollar > 0 ? '∞' : '—');
@@ -5463,7 +5662,9 @@
     calculate();
     initDB();
     fetchBybitTicker();
-    setInterval(fetchBybitTicker, 10000); // Poll live ticker every 10s
+    fetchGlobalBybitPrices();
+    setInterval(fetchBybitTicker, 8000);
+    setInterval(fetchGlobalBybitPrices, 8000); // Live sync all open trades every 8s
   </script>
 </body>
 </html>
