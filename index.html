@@ -2799,11 +2799,89 @@
     .chart-body-wrapper {
       position: relative;
       width: 100%;
-      height: 440px;
+      height: 480px;
       background: #0d1117;
+      transition: height 0.2s ease;
     }
 
     #lightweightChartContainer {
+      width: 100%;
+      height: 100%;
+    }
+
+    #dualChartContainer {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 900px) {
+      .chart-body-wrapper.dual-active {
+        height: 800px;
+      }
+      #dualChartContainer {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dual-pane {
+      display: flex;
+      flex-direction: column;
+      background: #0b0e14;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      height: 100%;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .dual-pane-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: rgba(22, 27, 34, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .dual-pane-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .dual-pane-name {
+      color: #fff;
+    }
+
+    .dual-badge-drag {
+      font-size: 9.5px;
+      padding: 2px 6px;
+      background: rgba(0, 229, 255, 0.15);
+      color: #00e5ff;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .dual-chart-canvas-wrap {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: calc(100% - 35px);
+      min-height: 250px;
+    }
+
+    .dual-canvas {
       width: 100%;
       height: 100%;
     }
@@ -2832,6 +2910,14 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(4px);
       flex-wrap: wrap;
+    }
+
+    .chart-ohlc-legend.dual-legend {
+      top: 6px;
+      left: 8px;
+      font-size: 10px;
+      gap: 6px;
+      padding: 2px 8px;
     }
 
     .chart-ohlc-item span {
@@ -3149,8 +3235,11 @@
           </div>
           <span class="chart-symbol-badge" id="chartActiveSymbol">KASUSDT PERP</span>
           <div class="chart-mode-pill-group">
-            <button type="button" class="chart-mode-btn active" id="btnChartModeVisual" onclick="setChartMode('visual')">
-              <span>⚡</span> Visual Setup (Entry/SL/TP)
+            <button type="button" class="chart-mode-btn active" id="btnChartModeDual" onclick="setChartMode('dual')">
+              <span>🔲</span> Dual Split (1H + 5m)
+            </button>
+            <button type="button" class="chart-mode-btn" id="btnChartModeVisual" onclick="setChartMode('visual')">
+              <span>⚡</span> Single (Visual)
             </button>
             <button type="button" class="chart-mode-btn" id="btnChartModeAdvanced" onclick="setChartMode('advanced')">
               <span>📊</span> TradingView Advanced
@@ -3159,8 +3248,8 @@
         </div>
 
         <div class="chart-header-controls">
-          <!-- Timeframe Selector -->
-          <div class="chart-tf-group" id="chartTfGroup">
+          <!-- Timeframe Selector for Single Mode -->
+          <div class="chart-tf-group" id="chartTfGroup" style="display: none;">
             <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('1', this)">1m</button>
             <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('5', this)">5m</button>
             <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('15', this)">15m</button>
@@ -3182,18 +3271,72 @@
       </div>
 
       <!-- Chart Display Area -->
-      <div class="chart-body-wrapper" id="chartBodyWrapper">
-        <!-- Live OHLC Header Legend -->
-        <div class="chart-ohlc-legend" id="chartOhlcLegend">
-          <div class="chart-ohlc-item">O: <span id="legO">—</span></div>
-          <div class="chart-ohlc-item">H: <span id="legH">—</span></div>
-          <div class="chart-ohlc-item">L: <span id="legL">—</span></div>
-          <div class="chart-ohlc-item">C: <span id="legC">—</span></div>
-          <div class="chart-ohlc-item">Chg: <span id="legChg">—</span></div>
+      <div class="chart-body-wrapper dual-active" id="chartBodyWrapper">
+        <!-- Dual Split Chart Container (HTF 1H + LTF 5m) -->
+        <div id="dualChartContainer">
+          <!-- Left Pane: HTF (Market Structure) -->
+          <div class="dual-pane" id="dualPaneHTF">
+            <div class="dual-pane-header">
+              <div class="dual-pane-title">
+                <span class="dual-pane-icon">🏛️</span>
+                <span class="dual-pane-name">Higher Timeframe (Structure)</span>
+              </div>
+              <div class="chart-tf-group">
+                <button type="button" class="chart-tf-btn active" id="btnHtf60" onclick="setDualTf('HTF', '60', this)">1H</button>
+                <button type="button" class="chart-tf-btn" id="btnHtf240" onclick="setDualTf('HTF', '240', this)">4H</button>
+                <button type="button" class="chart-tf-btn" id="btnHtfD" onclick="setDualTf('HTF', 'D', this)">1D</button>
+              </div>
+            </div>
+            <div class="dual-chart-canvas-wrap">
+              <div class="chart-ohlc-legend dual-legend" id="legendHTF">
+                <div class="chart-ohlc-item">O: <span id="legO_HTF">—</span></div>
+                <div class="chart-ohlc-item">H: <span id="legH_HTF">—</span></div>
+                <div class="chart-ohlc-item">L: <span id="legL_HTF">—</span></div>
+                <div class="chart-ohlc-item">C: <span id="legC_HTF">—</span></div>
+                <div class="chart-ohlc-item">Chg: <span id="legChg_HTF">—</span></div>
+              </div>
+              <div id="canvasContainerHTF" class="dual-canvas"></div>
+            </div>
+          </div>
+
+          <!-- Right Pane: LTF (Execution & Drag-and-Drop) -->
+          <div class="dual-pane" id="dualPaneLTF">
+            <div class="dual-pane-header">
+              <div class="dual-pane-title">
+                <span class="dual-pane-icon">🎯</span>
+                <span class="dual-pane-name">Lower Timeframe (Execution)</span>
+                <span class="dual-badge-drag">🖱️ Interactive Drag</span>
+              </div>
+              <div class="chart-tf-group">
+                <button type="button" class="chart-tf-btn" id="btnLtf1" onclick="setDualTf('LTF', '1', this)">1m</button>
+                <button type="button" class="chart-tf-btn active" id="btnLtf5" onclick="setDualTf('LTF', '5', this)">5m</button>
+                <button type="button" class="chart-tf-btn" id="btnLtf15" onclick="setDualTf('LTF', '15', this)">15m</button>
+              </div>
+            </div>
+            <div class="dual-chart-canvas-wrap">
+              <div class="chart-ohlc-legend dual-legend" id="legendLTF">
+                <div class="chart-ohlc-item">O: <span id="legO_LTF">—</span></div>
+                <div class="chart-ohlc-item">H: <span id="legH_LTF">—</span></div>
+                <div class="chart-ohlc-item">L: <span id="legL_LTF">—</span></div>
+                <div class="chart-ohlc-item">C: <span id="legC_LTF">—</span></div>
+                <div class="chart-ohlc-item">Chg: <span id="legChg_LTF">—</span></div>
+              </div>
+              <div id="canvasContainerLTF" class="dual-canvas"></div>
+            </div>
+          </div>
         </div>
 
-        <!-- Lightweight Charts Canvas Container -->
-        <div id="lightweightChartContainer"></div>
+        <!-- Single Lightweight Charts Canvas Container -->
+        <div id="lightweightChartContainer" style="display: none;">
+          <!-- Live OHLC Header Legend for Single -->
+          <div class="chart-ohlc-legend" id="chartOhlcLegend">
+            <div class="chart-ohlc-item">O: <span id="legO">—</span></div>
+            <div class="chart-ohlc-item">H: <span id="legH">—</span></div>
+            <div class="chart-ohlc-item">L: <span id="legL">—</span></div>
+            <div class="chart-ohlc-item">C: <span id="legC">—</span></div>
+            <div class="chart-ohlc-item">Chg: <span id="legChg">—</span></div>
+          </div>
+        </div>
 
         <!-- TradingView Full Widget Container -->
         <div id="tradingviewWidgetContainer">
@@ -5955,69 +6098,163 @@
     /* ============================================================ */
     /* 8. REAL-TIME TRADINGVIEW CHART & VISUAL TRADE PLANNER ENGINE */
     /* ============================================================ */
+    let currentChartSymbol = 'KASUSDT';
+    let currentChartMode = 'dual'; // 'dual' | 'visual' | 'advanced'
+
+    // Single Chart State
     let tvChart = null;
     let candleSeries = null;
     let chartPriceLines = [];
-    let currentChartSymbol = 'KASUSDT';
     let currentChartTimeframe = '60';
-    let currentChartMode = 'visual'; // 'visual' | 'advanced'
     let lastCandle = null;
     let chartKlinesList = [];
 
-    function initInteractiveChart() {
-      const container = document.getElementById('lightweightChartContainer');
-      if (!container || typeof LightweightCharts === 'undefined') return;
+    // Dual Chart State (HTF 1H + LTF 5m)
+    let tvChartHTF = null;
+    let candleSeriesHTF = null;
+    let chartPriceLinesHTF = [];
+    let currentTfHTF = '60'; // 1H
+    let lastCandleHTF = null;
 
-      container.innerHTML = '';
+    let tvChartLTF = null;
+    let candleSeriesLTF = null;
+    let chartPriceLinesLTF = [];
+    let currentTfLTF = '5'; // 5m
+    let lastCandleLTF = null;
+
+    function initInteractiveChart() {
+      if (typeof LightweightCharts === 'undefined') return;
 
       const sym = (document.getElementById('coinSymbol').value || 'KASUSDT').toUpperCase().trim();
       currentChartSymbol = sym.endsWith('USDT') ? sym : `${sym}USDT`;
       const badge = document.getElementById('chartActiveSymbol');
       if (badge) badge.innerText = `${currentChartSymbol} PERP`;
 
-      try {
-        tvChart = LightweightCharts.createChart(container, {
-          width: container.clientWidth || 800,
-          height: container.clientHeight || 440,
-          layout: {
-            background: { color: '#0d1117' },
-            textColor: '#8b98af',
-            fontFamily: "'JetBrains Mono', 'Inter', monospace",
-            fontSize: 11
+      if (currentChartMode === 'dual') {
+        initDualCharts();
+      } else if (currentChartMode === 'visual') {
+        initSingleChart();
+      } else if (currentChartMode === 'advanced') {
+        renderTradingViewWidget(currentChartSymbol);
+      }
+    }
+
+    function getChartThemeOptions(container) {
+      return {
+        width: container.clientWidth || 400,
+        height: container.clientHeight || 420,
+        layout: {
+          background: { color: '#0b0e14' },
+          textColor: '#8b98af',
+          fontFamily: "'JetBrains Mono', 'Inter', monospace",
+          fontSize: 11
+        },
+        grid: {
+          vertLines: { color: 'rgba(38, 45, 61, 0.4)' },
+          horzLines: { color: 'rgba(38, 45, 61, 0.4)' }
+        },
+        crosshair: {
+          mode: LightweightCharts.CrosshairMode.Normal,
+          vertLine: {
+            color: 'rgba(247, 166, 0, 0.5)',
+            width: 1,
+            style: LightweightCharts.LineStyle.Dashed,
+            labelBackgroundColor: '#f7a600'
           },
-          grid: {
-            vertLines: { color: 'rgba(38, 45, 61, 0.45)' },
-            horzLines: { color: 'rgba(38, 45, 61, 0.45)' }
-          },
-          crosshair: {
-            mode: LightweightCharts.CrosshairMode.Normal,
-            vertLine: {
-              color: 'rgba(247, 166, 0, 0.5)',
-              width: 1,
-              style: LightweightCharts.LineStyle.Dashed,
-              labelBackgroundColor: '#f7a600'
-            },
-            horzLine: {
-              color: 'rgba(247, 166, 0, 0.5)',
-              width: 1,
-              style: LightweightCharts.LineStyle.Dashed,
-              labelBackgroundColor: '#f7a600'
-            }
-          },
-          rightPriceScale: {
-            borderColor: '#262d3d',
-            scaleMargins: {
-              top: 0.12,
-              bottom: 0.15
-            }
-          },
-          timeScale: {
-            borderColor: '#262d3d',
-            timeVisible: true,
-            secondsVisible: false
+          horzLine: {
+            color: 'rgba(247, 166, 0, 0.5)',
+            width: 1,
+            style: LightweightCharts.LineStyle.Dashed,
+            labelBackgroundColor: '#f7a600'
           }
+        },
+        rightPriceScale: {
+          borderColor: '#262d3d',
+          scaleMargins: {
+            top: 0.12,
+            bottom: 0.15
+          }
+        },
+        timeScale: {
+          borderColor: '#262d3d',
+          timeVisible: true,
+          secondsVisible: false
+        }
+      };
+    }
+
+    function initDualCharts() {
+      const containerHTF = document.getElementById('canvasContainerHTF');
+      const containerLTF = document.getElementById('canvasContainerLTF');
+      if (!containerHTF || !containerLTF) return;
+
+      // 1. Higher Timeframe (Structure)
+      if (!tvChartHTF) {
+        containerHTF.innerHTML = '';
+        tvChartHTF = LightweightCharts.createChart(containerHTF, getChartThemeOptions(containerHTF));
+        candleSeriesHTF = tvChartHTF.addCandlestickSeries({
+          upColor: '#0ecb81',
+          downColor: '#f6465d',
+          borderUpColor: '#0ecb81',
+          borderDownColor: '#f6465d',
+          wickUpColor: '#0ecb81',
+          wickDownColor: '#f6465d'
         });
 
+        tvChartHTF.subscribeCrosshairMove(param => {
+          updateDualLegend('HTF', param);
+        });
+
+        if (window.ResizeObserver) {
+          const roHTF = new ResizeObserver(entries => {
+            if (!entries || entries.length === 0) return;
+            const { width, height } = entries[0].contentRect;
+            if (tvChartHTF && width > 0 && height > 0) tvChartHTF.applyOptions({ width, height });
+          });
+          roHTF.observe(containerHTF);
+        }
+      }
+
+      // 2. Lower Timeframe (Execution)
+      if (!tvChartLTF) {
+        containerLTF.innerHTML = '';
+        tvChartLTF = LightweightCharts.createChart(containerLTF, getChartThemeOptions(containerLTF));
+        candleSeriesLTF = tvChartLTF.addCandlestickSeries({
+          upColor: '#0ecb81',
+          downColor: '#f6465d',
+          borderUpColor: '#0ecb81',
+          borderDownColor: '#f6465d',
+          wickUpColor: '#0ecb81',
+          wickDownColor: '#f6465d'
+        });
+
+        tvChartLTF.subscribeCrosshairMove(param => {
+          updateDualLegend('LTF', param);
+        });
+
+        setupChartDragAndDrop(containerLTF);
+
+        if (window.ResizeObserver) {
+          const roLTF = new ResizeObserver(entries => {
+            if (!entries || entries.length === 0) return;
+            const { width, height } = entries[0].contentRect;
+            if (tvChartLTF && width > 0 && height > 0) tvChartLTF.applyOptions({ width, height });
+          });
+          roLTF.observe(containerLTF);
+        }
+      }
+
+      fetchDualKlines('HTF', currentChartSymbol, currentTfHTF);
+      fetchDualKlines('LTF', currentChartSymbol, currentTfLTF);
+    }
+
+    function initSingleChart() {
+      const container = document.getElementById('lightweightChartContainer');
+      if (!container || typeof LightweightCharts === 'undefined') return;
+
+      if (!tvChart) {
+        container.innerHTML = '';
+        tvChart = LightweightCharts.createChart(container, getChartThemeOptions(container));
         candleSeries = tvChart.addCandlestickSeries({
           upColor: '#0ecb81',
           downColor: '#f6465d',
@@ -6027,7 +6264,6 @@
           wickDownColor: '#f6465d'
         });
 
-        // Responsive Resize Observer
         if (window.ResizeObserver) {
           const ro = new ResizeObserver(entries => {
             if (!entries || entries.length === 0) return;
@@ -6039,17 +6275,14 @@
           ro.observe(container);
         }
 
-        // Crosshair move handler
         tvChart.subscribeCrosshairMove(param => {
           updateChartLegend(param);
         });
 
         setupChartDragAndDrop(container);
-
-        fetchChartKlines(currentChartSymbol, currentChartTimeframe);
-      } catch (err) {
-        console.warn('Lightweight chart init note:', err);
       }
+
+      fetchChartKlines(currentChartSymbol, currentChartTimeframe);
     }
 
     async function fetchChartKlines(symbol, timeframe) {
@@ -6084,35 +6317,121 @@
             chartKlinesList = candles;
             if (candles.length > 0) {
               lastCandle = { ...candles[candles.length - 1] };
-              if (candleSeries) {
+              if (candleSeries && tvChart) {
                 candleSeries.setData(candles);
                 tvChart.timeScale().fitContent();
-                updateChartPriceLines();
                 setLegendValues(lastCandle.open, lastCandle.high, lastCandle.low, lastCandle.close);
               }
+              updateChartPriceLines();
             }
             return;
           }
-        } catch (e) {
-          // Try next mirror
-        }
+        } catch (e) {}
+      }
+    }
+
+    async function fetchDualKlines(pane, symbol, timeframe) {
+      const cleanSym = (symbol || 'BTCUSDT').toUpperCase().trim();
+      const fmtSym = cleanSym.endsWith('USDT') ? cleanSym : `${cleanSym}USDT`;
+      currentChartSymbol = fmtSym;
+
+      const badge = document.getElementById('chartActiveSymbol');
+      if (badge) badge.innerText = `${fmtSym} PERP`;
+
+      const urls = [
+        `https://api.bytick.com/v5/market/kline?category=linear&symbol=${fmtSym}&interval=${timeframe}&limit=200`,
+        `https://api.bybit.com/v5/market/kline?category=linear&symbol=${fmtSym}&interval=${timeframe}&limit=200`,
+        `https://api.bybit-global.com/v5/market/kline?category=linear&symbol=${fmtSym}&interval=${timeframe}&limit=200`
+      ];
+
+      for (const url of urls) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (data.retCode === 0 && data.result && Array.isArray(data.result.list)) {
+            const rawList = data.result.list;
+            const candles = rawList.map(item => ({
+              time: Math.floor(parseInt(item[0], 10) / 1000),
+              open: parseFloat(item[1]),
+              high: parseFloat(item[2]),
+              low: parseFloat(item[3]),
+              close: parseFloat(item[4])
+            })).sort((a, b) => a.time - b.time);
+
+            if (candles.length > 0) {
+              const last = { ...candles[candles.length - 1] };
+              if (pane === 'HTF' && candleSeriesHTF && tvChartHTF) {
+                lastCandleHTF = last;
+                candleSeriesHTF.setData(candles);
+                tvChartHTF.timeScale().fitContent();
+                setDualLegendValues('HTF', last.open, last.high, last.low, last.close);
+              } else if (pane === 'LTF' && candleSeriesLTF && tvChartLTF) {
+                lastCandleLTF = last;
+                candleSeriesLTF.setData(candles);
+                tvChartLTF.timeScale().fitContent();
+                setDualLegendValues('LTF', last.open, last.high, last.low, last.close);
+              }
+              updateChartPriceLines();
+            }
+            return;
+          }
+        } catch (e) {}
+      }
+    }
+
+    function setDualTf(pane, tf, btn) {
+      if (pane === 'HTF') {
+        currentTfHTF = tf;
+        document.querySelectorAll('#dualPaneHTF .chart-tf-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        fetchDualKlines('HTF', currentChartSymbol, tf);
+      } else {
+        currentTfLTF = tf;
+        document.querySelectorAll('#dualPaneLTF .chart-tf-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        fetchDualKlines('LTF', currentChartSymbol, tf);
       }
     }
 
     function updateLiveCandleTick(sym, lastPrice) {
-      if (!lastPrice || !candleSeries || !lastCandle) return;
+      if (!lastPrice) return;
       const cleanSym = (sym || '').toUpperCase().trim();
       const fmtSym = cleanSym.endsWith('USDT') ? cleanSym : `${cleanSym}USDT`;
       if (fmtSym !== currentChartSymbol) return;
 
-      lastCandle.high = Math.max(lastCandle.high, lastPrice);
-      lastCandle.low = Math.min(lastCandle.low, lastPrice);
-      lastCandle.close = lastPrice;
+      // Update Single chart
+      if (candleSeries && lastCandle) {
+        lastCandle.high = Math.max(lastCandle.high, lastPrice);
+        lastCandle.low = Math.min(lastCandle.low, lastPrice);
+        lastCandle.close = lastPrice;
+        try {
+          candleSeries.update(lastCandle);
+          setLegendValues(lastCandle.open, lastCandle.high, lastCandle.low, lastCandle.close);
+        } catch (e) {}
+      }
 
-      try {
-        candleSeries.update(lastCandle);
-        setLegendValues(lastCandle.open, lastCandle.high, lastCandle.low, lastCandle.close);
-      } catch (e) {}
+      // Update HTF chart
+      if (candleSeriesHTF && lastCandleHTF) {
+        lastCandleHTF.high = Math.max(lastCandleHTF.high, lastPrice);
+        lastCandleHTF.low = Math.min(lastCandleHTF.low, lastPrice);
+        lastCandleHTF.close = lastPrice;
+        try {
+          candleSeriesHTF.update(lastCandleHTF);
+          setDualLegendValues('HTF', lastCandleHTF.open, lastCandleHTF.high, lastCandleHTF.low, lastCandleHTF.close);
+        } catch (e) {}
+      }
+
+      // Update LTF chart
+      if (candleSeriesLTF && lastCandleLTF) {
+        lastCandleLTF.high = Math.max(lastCandleLTF.high, lastPrice);
+        lastCandleLTF.low = Math.min(lastCandleLTF.low, lastPrice);
+        lastCandleLTF.close = lastPrice;
+        try {
+          candleSeriesLTF.update(lastCandleLTF);
+          setDualLegendValues('LTF', lastCandleLTF.open, lastCandleLTF.high, lastCandleLTF.low, lastCandleLTF.close);
+        } catch (e) {}
+      }
     }
 
     function setLegendValues(o, h, l, c) {
@@ -6130,8 +6449,31 @@
       elC.innerText = fmt(c);
 
       const chg = ((c - o) / o) * 100;
-      elChg.innerText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%`;
-      elChg.style.color = chg >= 0 ? '#0ecb81' : '#f6465d';
+      if (elChg) {
+        elChg.innerText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%`;
+        elChg.style.color = chg >= 0 ? '#0ecb81' : '#f6465d';
+      }
+    }
+
+    function setDualLegendValues(pane, o, h, l, c) {
+      const elO = document.getElementById(`legO_${pane}`);
+      const elH = document.getElementById(`legH_${pane}`);
+      const elL = document.getElementById(`legL_${pane}`);
+      const elC = document.getElementById(`legC_${pane}`);
+      const elChg = document.getElementById(`legChg_${pane}`);
+      if (!elO || !elH || !elL || !elC) return;
+
+      const fmt = (p) => p > 1000 ? p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : (p > 10 ? p.toFixed(2) : (p > 1 ? p.toFixed(4) : p.toFixed(5)));
+      elO.innerText = fmt(o);
+      elH.innerText = fmt(h);
+      elL.innerText = fmt(l);
+      elC.innerText = fmt(c);
+
+      const chg = ((c - o) / o) * 100;
+      if (elChg) {
+        elChg.innerText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%`;
+        elChg.style.color = chg >= 0 ? '#0ecb81' : '#f6465d';
+      }
     }
 
     function updateChartLegend(param) {
@@ -6140,19 +6482,28 @@
         return;
       }
       const data = param.seriesData.get(candleSeries);
-      if (data) {
-        setLegendValues(data.open, data.high, data.low, data.close);
-      }
+      if (data) setLegendValues(data.open, data.high, data.low, data.close);
     }
 
-    function updateChartPriceLines() {
-      if (!candleSeries || typeof LightweightCharts === 'undefined') return;
+    function updateDualLegend(pane, param) {
+      const series = pane === 'HTF' ? candleSeriesHTF : candleSeriesLTF;
+      const last = pane === 'HTF' ? lastCandleHTF : lastCandleLTF;
+      if (!param || !param.time || !param.seriesData || !series) {
+        if (last) setDualLegendValues(pane, last.open, last.high, last.low, last.close);
+        return;
+      }
+      const data = param.seriesData.get(series);
+      if (data) setDualLegendValues(pane, data.open, data.high, data.low, data.close);
+    }
 
-      // Clear previous price lines
-      chartPriceLines.forEach(line => {
-        try { candleSeries.removePriceLine(line); } catch (e) {}
+    function drawPriceLinesOnSeries(series, linesArr, isHTF = false) {
+      if (!series || typeof LightweightCharts === 'undefined') return;
+
+      // Clear existing lines
+      linesArr.forEach(line => {
+        try { series.removePriceLine(line); } catch (e) {}
       });
-      chartPriceLines = [];
+      linesArr.length = 0;
 
       const EP = parseFloat(document.getElementById('entryPrice').value) || 0;
       const SL = parseFloat(document.getElementById('stopLossPrice').value) || 0;
@@ -6165,7 +6516,6 @@
       if (EP <= 0 || SL <= 0 || deltaP <= 0) return;
 
       const lossPerUnit = deltaP + (EP * f) + (SL * f);
-      
       let tp1 = 0, tp2 = 0, tp3 = 0;
       if (currentDirection === 'LONG') {
         tp1 = (1 * lossPerUnit + EP * (1 + f)) / (1 - f);
@@ -6180,120 +6530,106 @@
       const L = parseFloat(document.getElementById('leverageSlider').value) || 1;
       const mmrFeePct = parseFloat(document.getElementById('mmrFeeRate').value) || 2.0;
       const B = mmrFeePct / 100;
-      let LP = 0;
-      if (currentDirection === 'LONG') {
-        LP = EP * (1 - 1 / L) / (1 - B);
-      } else {
-        LP = EP * (1 + 1 / L) / (1 + B);
-      }
+      let LP = currentDirection === 'LONG' ? EP * (1 - 1 / L) / (1 - B) : EP * (1 + 1 / L) / (1 + B);
+
+      let P_BE = currentDirection === 'LONG' ? EP * (1 + f) / (1 - f) : EP * (1 - f) / (1 + f);
 
       const fmt = (p) => p > 1000 ? p.toFixed(2) : (p > 10 ? p.toFixed(2) : (p > 1 ? p.toFixed(4) : p.toFixed(5)));
 
-      // 1. Entry Line (Cyan, Solid, Width 2)
-      const lineEntry = candleSeries.createPriceLine({
+      // Entry
+      linesArr.push(series.createPriceLine({
         price: EP,
         color: '#00e5ff',
         lineWidth: 2,
         lineStyle: LightweightCharts.LineStyle.Solid,
         axisLabelVisible: true,
         title: `🔵 ENTRY ${fmt(EP)}`
-      });
-      chartPriceLines.push(lineEntry);
+      }));
 
-      // 2. Stop Loss Line (Red, Dashed, Width 2)
-      const lineSL = candleSeries.createPriceLine({
+      // Stop Loss
+      linesArr.push(series.createPriceLine({
         price: SL,
         color: '#f6465d',
         lineWidth: 2,
         lineStyle: LightweightCharts.LineStyle.Dashed,
         axisLabelVisible: true,
         title: `🔴 SL ${fmt(SL)} (-$${R.toFixed(2)})`
-      });
-      chartPriceLines.push(lineSL);
+      }));
 
-      // 3. Take Profit 1R (Green, Dotted, Width 1)
-      if (tp1 > 0) {
-        const lineTp1 = candleSeries.createPriceLine({
-          price: tp1,
-          color: '#0ecb81',
-          lineWidth: 1,
-          lineStyle: LightweightCharts.LineStyle.Dotted,
-          axisLabelVisible: true,
-          title: `🟢 TP 1R ${fmt(tp1)} (+$${R.toFixed(2)})`
-        });
-        chartPriceLines.push(lineTp1);
+      if (!isHTF) {
+        // TP 1R
+        if (tp1 > 0) linesArr.push(series.createPriceLine({ price: tp1, color: '#0ecb81', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted, axisLabelVisible: true, title: `🟢 TP 1R ${fmt(tp1)} (+$${R.toFixed(2)})` }));
+        // TP 2R
+        if (tp2 > 0) linesArr.push(series.createPriceLine({ price: tp2, color: '#0ecb81', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: `🟢 TP 2R ${fmt(tp2)} (+$${(R * 2).toFixed(2)})` }));
+        // TP 3R
+        if (tp3 > 0) linesArr.push(series.createPriceLine({ price: tp3, color: '#0ecb81', lineWidth: 2, lineStyle: LightweightCharts.LineStyle.Solid, axisLabelVisible: true, title: `🟢 TP 3R ${fmt(tp3)} (+$${(R * 3).toFixed(2)})` }));
+        // Breakeven
+        if (P_BE > 0) linesArr.push(series.createPriceLine({ price: P_BE, color: '#38bdf8', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted, axisLabelVisible: true, title: `🛡️ BREAKEVEN ${fmt(P_BE)}` }));
       }
 
-      // 4. Take Profit 2R (Green, Dashed, Width 1)
-      if (tp2 > 0) {
-        const lineTp2 = candleSeries.createPriceLine({
-          price: tp2,
-          color: '#0ecb81',
-          lineWidth: 1,
-          lineStyle: LightweightCharts.LineStyle.Dashed,
-          axisLabelVisible: true,
-          title: `🟢 TP 2R ${fmt(tp2)} (+$${(R * 2).toFixed(2)})`
-        });
-        chartPriceLines.push(lineTp2);
-      }
-
-      // 5. Take Profit 3R (Green, Solid, Width 2)
-      if (tp3 > 0) {
-        const lineTp3 = candleSeries.createPriceLine({
-          price: tp3,
-          color: '#0ecb81',
-          lineWidth: 2,
-          lineStyle: LightweightCharts.LineStyle.Solid,
-          axisLabelVisible: true,
-          title: `🟢 TP 3R ${fmt(tp3)} (+$${(R * 3).toFixed(2)})`
-        });
-        chartPriceLines.push(lineTp3);
-      }
-
-      // 6. Target TP Line (if user customized target TP different from 1R/2R/3R)
-      if (TP > 0 && Math.abs(TP - tp1) > 0.0001 && Math.abs(TP - tp2) > 0.0001 && Math.abs(TP - tp3) > 0.0001) {
-        const lineTargetTp = candleSeries.createPriceLine({
+      // Target TP
+      if (TP > 0) {
+        linesArr.push(series.createPriceLine({
           price: TP,
           color: '#f7a600',
           lineWidth: 2,
           lineStyle: LightweightCharts.LineStyle.Solid,
           axisLabelVisible: true,
           title: `🎯 TARGET TP ${fmt(TP)}`
-        });
-        chartPriceLines.push(lineTargetTp);
+        }));
       }
 
-      // 7. Fee-Covered Breakeven Line (Sky Blue, Dotted, Width 1)
-      let P_BE = 0;
-      if (currentDirection === 'LONG') {
-        P_BE = EP * (1 + f) / (1 - f);
-      } else {
-        P_BE = EP * (1 - f) / (1 + f);
-      }
-      if (P_BE > 0) {
-        const lineBe = candleSeries.createPriceLine({
-          price: P_BE,
-          color: '#38bdf8',
-          lineWidth: 1,
-          lineStyle: LightweightCharts.LineStyle.Dotted,
-          axisLabelVisible: true,
-          title: `🛡️ BREAKEVEN ${fmt(P_BE)}`
-        });
-        chartPriceLines.push(lineBe);
-      }
-
-      // 8. Liquidation Line (Purple, Dotted, Width 1)
+      // Liq
       if (LP > 0 && LP < 10000000) {
-        const lineLiq = candleSeries.createPriceLine({
+        linesArr.push(series.createPriceLine({
           price: LP,
           color: '#a855f7',
           lineWidth: 1,
           lineStyle: LightweightCharts.LineStyle.Dotted,
           axisLabelVisible: true,
           title: `⚡ LIQ ${fmt(LP)}`
-        });
-        chartPriceLines.push(lineLiq);
+        }));
       }
+    }
+
+    function updateChartPriceLines() {
+      if (typeof LightweightCharts === 'undefined') return;
+
+      const EP = parseFloat(document.getElementById('entryPrice').value) || 0;
+      const SL = parseFloat(document.getElementById('stopLossPrice').value) || 0;
+      const TP = parseFloat(document.getElementById('takeProfitPrice').value) || 0;
+      const R = parseFloat(document.getElementById('riskAmount').value) || 0.20;
+      const feePct = parseFloat(document.getElementById('feeRateTaker').value) || 0.055;
+      const f = feePct / 100;
+      const deltaP = Math.abs(EP - SL);
+      const lossPerUnit = deltaP + (EP * f) + (SL * f);
+
+      let tp1 = 0, tp2 = 0, tp3 = 0;
+      if (currentDirection === 'LONG') {
+        tp1 = (1 * lossPerUnit + EP * (1 + f)) / (1 - f);
+        tp2 = (2 * lossPerUnit + EP * (1 + f)) / (1 - f);
+        tp3 = (3 * lossPerUnit + EP * (1 + f)) / (1 - f);
+      } else {
+        tp1 = (EP * (1 - f) - 1 * lossPerUnit) / (1 + f);
+        tp2 = (EP * (1 - f) - 2 * lossPerUnit) / (1 + f);
+        tp3 = (EP * (1 - f) - 3 * lossPerUnit) / (1 + f);
+      }
+
+      let P_BE = currentDirection === 'LONG' ? EP * (1 + f) / (1 - f) : EP * (1 - f) / (1 + f);
+
+      const L = parseFloat(document.getElementById('leverageSlider').value) || 1;
+      const mmrFeePct = parseFloat(document.getElementById('mmrFeeRate').value) || 2.0;
+      const B = mmrFeePct / 100;
+      let LP = currentDirection === 'LONG' ? EP * (1 - 1 / L) / (1 - B) : EP * (1 + 1 / L) / (1 + B);
+
+      const fmt = (p) => p > 1000 ? p.toFixed(2) : (p > 10 ? p.toFixed(2) : (p > 1 ? p.toFixed(4) : p.toFixed(5)));
+
+      // Draw on Single chart
+      if (candleSeries) drawPriceLinesOnSeries(candleSeries, chartPriceLines, false);
+
+      // Draw on Dual charts
+      if (candleSeriesHTF) drawPriceLinesOnSeries(candleSeriesHTF, chartPriceLinesHTF, true);
+      if (candleSeriesLTF) drawPriceLinesOnSeries(candleSeriesLTF, chartPriceLinesLTF, false);
 
       // Update Legend Bar Pills below Chart
       const pEntry = document.getElementById('pillEntryVal');
@@ -6339,6 +6675,13 @@
         bodyWrapper.appendChild(dragTooltipEl);
       }
 
+      function getActiveSeriesAndChart() {
+        if (currentChartMode === 'dual') {
+          return { series: candleSeriesLTF, chart: tvChartLTF };
+        }
+        return { series: candleSeries, chart: tvChart };
+      }
+
       function getRelativeCoords(e) {
         const rect = container.getBoundingClientRect();
         const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
@@ -6352,14 +6695,15 @@
       }
 
       function checkHoverLine(y) {
-        if (!candleSeries) return null;
+        const { series } = getActiveSeriesAndChart();
+        if (!series) return null;
         const EP = parseFloat(document.getElementById('entryPrice').value) || 0;
         const SL = parseFloat(document.getElementById('stopLossPrice').value) || 0;
         const TP = parseFloat(document.getElementById('takeProfitPrice').value) || 0;
 
-        const yEP = candleSeries.priceToCoordinate(EP);
-        const ySL = candleSeries.priceToCoordinate(SL);
-        const yTP = candleSeries.priceToCoordinate(TP);
+        const yEP = series.priceToCoordinate(EP);
+        const ySL = series.priceToCoordinate(SL);
+        const yTP = series.priceToCoordinate(TP);
 
         const hitDist = 14; // 14px grab tolerance
         if (yEP !== null && Math.abs(y - yEP) <= hitDist) return { type: 'entry', price: EP, coord: yEP };
@@ -6369,7 +6713,7 @@
       }
 
       container.addEventListener('mousemove', (e) => {
-        if (currentChartMode !== 'visual' || isDraggingLine) return;
+        if (currentChartMode === 'advanced' || isDraggingLine) return;
         const { x, y } = getRelativeCoords(e);
         const hover = checkHoverLine(y);
 
@@ -6389,14 +6733,15 @@
       });
 
       const onDragStart = (e) => {
-        if (currentChartMode !== 'visual') return;
+        if (currentChartMode === 'advanced') return;
         const { y } = getRelativeCoords(e);
         const hover = checkHoverLine(y);
         if (hover) {
           isDraggingLine = hover.type;
           container.style.cursor = 'grabbing';
-          if (tvChart) {
-            tvChart.applyOptions({
+          const { chart } = getActiveSeriesAndChart();
+          if (chart) {
+            chart.applyOptions({
               handleScroll: false,
               handleScale: false
             });
@@ -6407,9 +6752,11 @@
       };
 
       const onDragMove = (e) => {
-        if (!isDraggingLine || !candleSeries) return;
+        if (!isDraggingLine) return;
+        const { series } = getActiveSeriesAndChart();
+        if (!series) return;
         const { x, y } = getRelativeCoords(e);
-        const price = candleSeries.coordinateToPrice(y);
+        const price = series.coordinateToPrice(y);
         if (!price || price <= 0) return;
 
         let dec = 4;
@@ -6453,8 +6800,9 @@
           isDraggingLine = null;
           container.style.cursor = 'crosshair';
           if (dragTooltipEl) dragTooltipEl.style.display = 'none';
-          if (tvChart) {
-            tvChart.applyOptions({
+          const { chart } = getActiveSeriesAndChart();
+          if (chart) {
+            chart.applyOptions({
               handleScroll: true,
               handleScale: true
             });
@@ -6473,7 +6821,7 @@
 
     function setChartTimeframe(tf, btn) {
       currentChartTimeframe = tf;
-      document.querySelectorAll('.chart-tf-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#chartTfGroup .chart-tf-btn').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
       if (currentChartMode === 'visual') {
         fetchChartKlines(currentChartSymbol, tf);
@@ -6482,28 +6830,53 @@
 
     function setChartMode(mode) {
       currentChartMode = mode;
+      const btnD = document.getElementById('btnChartModeDual');
       const btnV = document.getElementById('btnChartModeVisual');
       const btnA = document.getElementById('btnChartModeAdvanced');
+      const boxD = document.getElementById('dualChartContainer');
       const boxV = document.getElementById('lightweightChartContainer');
       const boxA = document.getElementById('tradingviewWidgetContainer');
       const tfGroup = document.getElementById('chartTfGroup');
+      const bodyWrapper = document.getElementById('chartBodyWrapper');
 
-      if (mode === 'visual') {
+      if (btnD) btnD.classList.remove('active');
+      if (btnV) btnV.classList.remove('active');
+      if (btnA) btnA.classList.remove('active');
+
+      if (mode === 'dual') {
+        if (btnD) btnD.classList.add('active');
+        if (boxD) boxD.style.display = 'grid';
+        if (boxV) boxV.style.display = 'none';
+        if (boxA) boxA.style.display = 'none';
+        if (tfGroup) tfGroup.style.display = 'none';
+        if (bodyWrapper) bodyWrapper.classList.add('dual-active');
+        initDualCharts();
+        setTimeout(() => {
+          if (tvChartHTF) tvChartHTF.timeScale().fitContent();
+          if (tvChartLTF) tvChartLTF.timeScale().fitContent();
+          updateChartPriceLines();
+        }, 80);
+      } else if (mode === 'visual') {
         if (btnV) btnV.classList.add('active');
-        if (btnA) btnA.classList.remove('active');
+        if (boxD) boxD.style.display = 'none';
         if (boxV) boxV.style.display = 'block';
         if (boxA) boxA.style.display = 'none';
         if (tfGroup) tfGroup.style.display = 'inline-flex';
-        if (tvChart) {
-          tvChart.timeScale().fitContent();
-          updateChartPriceLines();
-        }
+        if (bodyWrapper) bodyWrapper.classList.remove('dual-active');
+        initSingleChart();
+        setTimeout(() => {
+          if (tvChart) {
+            tvChart.timeScale().fitContent();
+            updateChartPriceLines();
+          }
+        }, 80);
       } else {
-        if (btnV) btnV.classList.remove('active');
         if (btnA) btnA.classList.add('active');
+        if (boxD) boxD.style.display = 'none';
         if (boxV) boxV.style.display = 'none';
         if (boxA) boxA.style.display = 'block';
         if (tfGroup) tfGroup.style.display = 'none';
+        if (bodyWrapper) bodyWrapper.classList.remove('dual-active');
         renderTradingViewWidget(currentChartSymbol);
       }
     }
@@ -6541,7 +6914,10 @@
       const badge = document.getElementById('chartActiveSymbol');
       if (badge) badge.innerText = `${fmtSym} PERP`;
 
-      if (currentChartMode === 'visual') {
+      if (currentChartMode === 'dual') {
+        fetchDualKlines('HTF', fmtSym, currentTfHTF);
+        fetchDualKlines('LTF', fmtSym, currentTfLTF);
+      } else if (currentChartMode === 'visual') {
         fetchChartKlines(fmtSym, currentChartTimeframe);
       } else {
         renderTradingViewWidget(fmtSym);
@@ -6549,7 +6925,10 @@
     }
 
     function fitChartContent() {
-      if (tvChart && currentChartMode === 'visual') {
+      if (currentChartMode === 'dual') {
+        if (tvChartHTF) tvChartHTF.timeScale().fitContent();
+        if (tvChartLTF) tvChartLTF.timeScale().fitContent();
+      } else if (currentChartMode === 'visual' && tvChart) {
         tvChart.timeScale().fitContent();
       }
     }
@@ -6561,15 +6940,9 @@
       if (sec.classList.contains('collapsed')) {
         sec.classList.remove('collapsed');
         if (icon) icon.innerText = '−';
-        if (tvChart && currentChartMode === 'visual') {
-          setTimeout(() => {
-            const container = document.getElementById('lightweightChartContainer');
-            if (container && container.clientWidth > 0) {
-              tvChart.applyOptions({ width: container.clientWidth, height: 440 });
-              tvChart.timeScale().fitContent();
-            }
-          }, 100);
-        }
+        setTimeout(() => {
+          fitChartContent();
+        }, 100);
       } else {
         sec.classList.add('collapsed');
         if (icon) icon.innerText = '+';
