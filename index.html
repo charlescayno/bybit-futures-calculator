@@ -3896,43 +3896,54 @@
       const formattedSym = sym.endsWith('USDT') ? sym : `${sym}USDT`;
       document.getElementById('liveSymbolDisplay').innerText = formattedSym;
 
-      try {
-        const res = await fetch(`https://api.bybit.com/v5/market/tickers?category=linear&symbol=${formattedSym}`);
-        if (!res.ok) throw new Error('API offline');
-        const data = await res.json();
+      const endpoints = [
+        `https://api.bytick.com/v5/market/tickers?category=linear&symbol=${formattedSym}`,
+        `https://api.bybit.com/v5/market/tickers?category=linear&symbol=${formattedSym}`,
+        `https://api.bybit-global.com/v5/market/tickers?category=linear&symbol=${formattedSym}`
+      ];
 
-        if (data.retCode === 0 && data.result && data.result.list && data.result.list.length > 0) {
-          const t = data.result.list[0];
-          const lastPrice = parseFloat(t.lastPrice) || 0;
-          const chgPct = (parseFloat(t.price24hPcnt) || 0) * 100;
-          const fundingRate = (parseFloat(t.fundingRate) || 0) * 100;
-          const nextFundingTime = parseInt(t.nextFundingTime, 10);
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const data = await res.json();
 
-          liveTickerPrice = lastPrice;
-          document.getElementById('livePriceDisplay').innerText = `${lastPrice > 10 ? lastPrice.toFixed(2) : lastPrice.toFixed(4)} USDT`;
+          if (data.retCode === 0 && data.result && data.result.list && data.result.list.length > 0) {
+            const t = data.result.list[0];
+            const lastPrice = parseFloat(t.lastPrice) || 0;
+            const chgPct = (parseFloat(t.price24hPcnt) || 0) * 100;
+            const fundingRate = (parseFloat(t.fundingRate) || 0) * 100;
+            const nextFundingTime = parseInt(t.nextFundingTime, 10);
 
-          const chgBadge = document.getElementById('liveChgDisplay');
-          chgBadge.innerText = `${chgPct >= 0 ? '+' : ''}${chgPct.toFixed(2)}%`;
-          chgBadge.className = `live-chg-badge ${chgPct >= 0 ? 'up' : 'down'}`;
+            liveTickerPrice = lastPrice;
+            document.getElementById('livePriceDisplay').innerText = `${lastPrice > 10 ? lastPrice.toFixed(2) : (lastPrice > 1 ? lastPrice.toFixed(4) : lastPrice.toFixed(5))} USDT`;
 
-          let hrsLeft = '4h';
-          if (nextFundingTime > 0) {
-            const diffMs = nextFundingTime - Date.now();
-            if (diffMs > 0) {
-              const h = Math.floor(diffMs / (1000 * 60 * 60));
-              const m = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-              hrsLeft = `${h}h:${m}m`;
+            const chgBadge = document.getElementById('liveChgDisplay');
+            chgBadge.innerText = `${chgPct >= 0 ? '+' : ''}${chgPct.toFixed(2)}%`;
+            chgBadge.className = `live-chg-badge ${chgPct >= 0 ? 'up' : 'down'}`;
+
+            let hrsLeft = '4h';
+            if (nextFundingTime > 0) {
+              const diffMs = nextFundingTime - Date.now();
+              if (diffMs > 0) {
+                const h = Math.floor(diffMs / (1000 * 60 * 60));
+                const m = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                hrsLeft = `${h}h:${m}m`;
+              }
             }
-          }
 
-          document.getElementById('liveFundingDisplay').innerText = `⚡ ${fundingRate >= 0 ? '+' : ''}${fundingRate.toFixed(4)}% (${hrsLeft})`;
-          document.getElementById('liveStatusHint').innerText = '🟢 Bybit Live';
-          document.getElementById('liveStatusHint').style.color = '#0ecb81';
+            document.getElementById('liveFundingDisplay').innerText = `⚡ ${fundingRate >= 0 ? '+' : ''}${fundingRate.toFixed(4)}% (${hrsLeft})`;
+            document.getElementById('liveStatusHint').innerText = '🟢 Bybit Live';
+            document.getElementById('liveStatusHint').style.color = '#0ecb81';
+            return; // Successful fetch
+          }
+        } catch (err) {
+          // Try next mirror
         }
-      } catch (err) {
-        document.getElementById('liveStatusHint').innerText = 'Manual Mode';
-        document.getElementById('liveStatusHint').style.color = '#8b98af';
       }
+
+      document.getElementById('liveStatusHint').innerText = 'Manual Mode';
+      document.getElementById('liveStatusHint').style.color = '#8b98af';
     }
 
     function useLivePriceAsEntry() {
@@ -4975,6 +4986,12 @@
     let bybitWs = null;
     let wsPingInterval = null;
     let wsReconnectTimeout = null;
+    let currentWsIdx = 0;
+    const WS_ENDPOINTS = [
+      'wss://stream.bytick.com/v5/public/linear',
+      'wss://stream.bybit.com/v5/public/linear',
+      'wss://stream.bybit-global.com/v5/public/linear'
+    ];
 
     function initBybitWebSocket() {
       if (bybitWs && (bybitWs.readyState === WebSocket.OPEN || bybitWs.readyState === WebSocket.CONNECTING)) {
@@ -4983,9 +5000,10 @@
 
       const badge = document.getElementById('wsStatusBadge');
       const badgeText = document.getElementById('wsStatusText');
+      const targetWsUrl = WS_ENDPOINTS[currentWsIdx];
 
       try {
-        bybitWs = new WebSocket('wss://stream.bybit.com/v5/public/linear');
+        bybitWs = new WebSocket(targetWsUrl);
 
         bybitWs.onopen = () => {
           if (badge) badge.className = 'ws-status-badge live';
@@ -5059,7 +5077,7 @@
               const fmtActive = activeSym.endsWith('USDT') ? activeSym : `${activeSym}USDT`;
               if (sym === fmtActive && newPrice > 0) {
                 liveTickerPrice = newPrice;
-                document.getElementById('livePriceDisplay').innerText = `${newPrice > 10 ? newPrice.toFixed(2) : newPrice.toFixed(4)} USDT`;
+                document.getElementById('livePriceDisplay').innerText = `${newPrice > 10 ? newPrice.toFixed(2) : (newPrice > 1 ? newPrice.toFixed(4) : newPrice.toFixed(5))} USDT`;
                 const chgBadge = document.getElementById('liveChgDisplay');
                 const chgPct = window.liveMarketPrices[sym].chgPct;
                 chgBadge.innerText = `${chgPct >= 0 ? '+' : ''}${chgPct.toFixed(2)}%`;
@@ -5081,7 +5099,8 @@
         };
 
         bybitWs.onerror = (err) => {
-          console.warn('Bybit WebSocket note, fallback active:', err);
+          console.warn('Bybit WebSocket note, trying next mirror:', err);
+          currentWsIdx = (currentWsIdx + 1) % WS_ENDPOINTS.length;
           if (badge) badge.className = 'ws-status-badge polling';
           if (badgeText) badgeText.innerText = 'Polling Fallback';
         };
@@ -5091,10 +5110,11 @@
           if (badgeText) badgeText.innerText = 'Reconnecting WS...';
           clearInterval(wsPingInterval);
           clearTimeout(wsReconnectTimeout);
-          wsReconnectTimeout = setTimeout(initBybitWebSocket, 4000);
+          wsReconnectTimeout = setTimeout(initBybitWebSocket, 3000);
         };
       } catch (err) {
         console.warn('WS Init failed:', err);
+        currentWsIdx = (currentWsIdx + 1) % WS_ENDPOINTS.length;
         if (badge) badge.className = 'ws-status-badge polling';
         if (badgeText) badgeText.innerText = 'Polling Fallback';
       }
@@ -5162,17 +5182,17 @@
         const d = window.liveMarketPrices[sym] || { price: 0, chgPct: 0, fundingRate: 0, high24h: 0, low24h: 0 };
         const priceStr = d.price > 1000 ? d.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) :
                          (d.price > 10 ? d.price.toFixed(2) :
-                         (d.price > 1 ? d.price.toFixed(4) : (d.price > 0 ? d.price.toFixed(5) : '—')));
-        const chgStr = `${d.chgPct >= 0 ? '+' : ''}${d.chgPct.toFixed(2)}%`;
+                         (d.price > 1 ? d.price.toFixed(4) : (d.price > 0 ? d.price.toFixed(5) : '...')));
+        const chgStr = d.price > 0 ? `${d.chgPct >= 0 ? '+' : ''}${d.chgPct.toFixed(2)}%` : '...';
         const chgClass = d.chgPct >= 0 ? 'up' : 'down';
-        const fundingStr = `${d.fundingRate >= 0 ? '+' : ''}${d.fundingRate.toFixed(4)}%`;
+        const fundingStr = d.price > 0 ? `${d.fundingRate >= 0 ? '+' : ''}${d.fundingRate.toFixed(4)}%` : '...';
 
         let hlPct = 50;
         if (d.high24h > d.low24h && d.price >= d.low24h) {
           hlPct = Math.min(100, Math.max(0, ((d.price - d.low24h) / (d.high24h - d.low24h)) * 100));
         }
-        const lowStr = d.low24h > 1000 ? (d.low24h / 1000).toFixed(1) + 'k' : (d.low24h > 1 ? d.low24h.toFixed(2) : d.low24h.toFixed(4));
-        const highStr = d.high24h > 1000 ? (d.high24h / 1000).toFixed(1) + 'k' : (d.high24h > 1 ? d.high24h.toFixed(2) : d.high24h.toFixed(4));
+        const lowStr = d.low24h > 1000 ? (d.low24h / 1000).toFixed(1) + 'k' : (d.low24h > 1 ? d.low24h.toFixed(2) : (d.low24h > 0 ? d.low24h.toFixed(4) : '—'));
+        const highStr = d.high24h > 1000 ? (d.high24h / 1000).toFixed(1) + 'k' : (d.high24h > 1 ? d.high24h.toFixed(2) : (d.high24h > 0 ? d.high24h.toFixed(4) : '—'));
 
         return `
           <div class="wl-card" id="wl_card_${sym}" onclick="loadCoinToCalculator('${sym}')" title="Click to load into calculator">
@@ -5292,50 +5312,59 @@
       showToast(`🗑️ Removed <strong>${sym}</strong> from Watchlist.`);
     }
 
-    /* REST Polling Fallback & Full Market Cache */
+    /* REST Polling Fallback & Full Market Cache with Mirror Support */
     async function fetchGlobalBybitPrices() {
-      try {
-        const res = await fetch('https://api.bybit.com/v5/market/tickers?category=linear');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.retCode === 0 && data.result && Array.isArray(data.result.list)) {
-          data.result.list.forEach(t => {
-            const sym = t.symbol.toUpperCase();
-            window.liveMarketPrices[sym] = {
-              price: parseFloat(t.lastPrice) || 0,
-              markPrice: parseFloat(t.markPrice) || 0,
-              chgPct: (parseFloat(t.price24hPcnt) || 0) * 100,
-              fundingRate: (parseFloat(t.fundingRate) || 0) * 100,
-              high24h: parseFloat(t.highPrice24h) || 0,
-              low24h: parseFloat(t.lowPrice24h) || 0
-            };
-          });
+      const urls = [
+        'https://api.bytick.com/v5/market/tickers?category=linear',
+        'https://api.bybit.com/v5/market/tickers?category=linear',
+        'https://api.bybit-global.com/v5/market/tickers?category=linear'
+      ];
 
-          // Render Watchlist with loaded data
-          renderWatchlist();
+      for (const url of urls) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (data.retCode === 0 && data.result && Array.isArray(data.result.list)) {
+            data.result.list.forEach(t => {
+              const sym = t.symbol.toUpperCase();
+              window.liveMarketPrices[sym] = {
+                price: parseFloat(t.lastPrice) || 0,
+                markPrice: parseFloat(t.markPrice) || 0,
+                chgPct: (parseFloat(t.price24hPcnt) || 0) * 100,
+                fundingRate: (parseFloat(t.fundingRate) || 0) * 100,
+                high24h: parseFloat(t.highPrice24h) || 0,
+                low24h: parseFloat(t.lowPrice24h) || 0
+              };
+            });
 
-          // Update active calculator live banner
-          const activeSym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
-          const fmtActive = activeSym.endsWith('USDT') ? activeSym : `${activeSym}USDT`;
-          if (window.liveMarketPrices[fmtActive]) {
-            const t = window.liveMarketPrices[fmtActive];
-            liveTickerPrice = t.price;
-            document.getElementById('livePriceDisplay').innerText = `${t.price > 10 ? t.price.toFixed(2) : t.price.toFixed(4)} USDT`;
-            const chgBadge = document.getElementById('liveChgDisplay');
-            chgBadge.innerText = `${t.chgPct >= 0 ? '+' : ''}${t.chgPct.toFixed(2)}%`;
-            chgBadge.className = `live-chg-badge ${t.chgPct >= 0 ? 'up' : 'down'}`;
-            document.getElementById('liveFundingDisplay').innerText = `⚡ ${t.fundingRate >= 0 ? '+' : ''}${t.fundingRate.toFixed(4)}%`;
-            document.getElementById('liveStatusHint').innerText = '🟢 Bybit Live';
-            document.getElementById('liveStatusHint').style.color = '#0ecb81';
+            // Render Watchlist with loaded data
+            renderWatchlist();
+
+            // Update active calculator live banner
+            const activeSym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
+            const fmtActive = activeSym.endsWith('USDT') ? activeSym : `${activeSym}USDT`;
+            if (window.liveMarketPrices[fmtActive]) {
+              const t = window.liveMarketPrices[fmtActive];
+              liveTickerPrice = t.price;
+              document.getElementById('livePriceDisplay').innerText = `${t.price > 10 ? t.price.toFixed(2) : (t.price > 1 ? t.price.toFixed(4) : t.price.toFixed(5))} USDT`;
+              const chgBadge = document.getElementById('liveChgDisplay');
+              chgBadge.innerText = `${t.chgPct >= 0 ? '+' : ''}${t.chgPct.toFixed(2)}%`;
+              chgBadge.className = `live-chg-badge ${t.chgPct >= 0 ? 'up' : 'down'}`;
+              document.getElementById('liveFundingDisplay').innerText = `⚡ ${t.fundingRate >= 0 ? '+' : ''}${t.fundingRate.toFixed(4)}%`;
+              document.getElementById('liveStatusHint').innerText = '🟢 Bybit Live';
+              document.getElementById('liveStatusHint').style.color = '#0ecb81';
+            }
+
+            // Re-render journal table with updated live prices & live PnL
+            if (window.currentJournalView === 'table' || window.currentJournalView === 'gallery') {
+              renderJournal();
+            }
+            return; // Successfully fetched from mirror
           }
-
-          // Re-render journal table with updated live prices & live PnL
-          if (window.currentJournalView === 'table' || window.currentJournalView === 'gallery') {
-            renderJournal();
-          }
+        } catch (err) {
+          // Try next mirror
         }
-      } catch (err) {
-        console.warn('Bybit batch ticker note:', err);
       }
     }
 
