@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bybit Futures Risk, RRR Calculator & Trading Journal</title>
+  <title>Bybit Futures Risk, RRR Calculator & Multi-Timeframe Trading Journal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -28,6 +28,8 @@
       --purple-bg: rgba(168, 85, 247, 0.12);
       --orange: #ff9800;
       --orange-bg: rgba(255, 152, 0, 0.12);
+      --cyan: #00e5ff;
+      --cyan-bg: rgba(0, 229, 255, 0.12);
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 16px;
@@ -53,7 +55,7 @@
 
     .container {
       width: 100%;
-      max-width: 1200px;
+      max-width: 1240px;
     }
 
     /* Header */
@@ -192,6 +194,18 @@
       gap: 12px;
     }
 
+    .form-row-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 640px) {
+      .form-row, .form-row-3, .form-row-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+
     label {
       display: flex;
       justify-content: space-between;
@@ -239,7 +253,7 @@
       font-size: 13px;
       padding: 10px 12px;
       resize: vertical;
-      min-height: 70px;
+      min-height: 65px;
     }
 
     input[type="number"]:focus, input[type="text"]:focus, select:focus, textarea:focus {
@@ -820,6 +834,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
     .journal-main-title {
@@ -910,6 +925,7 @@
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .cat-pill {
@@ -951,6 +967,17 @@
       color: #90caf9;
     }
 
+    .strategy-filter-select {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 20px;
+      color: #90caf9;
+      font-size: 12px;
+      padding: 6px 28px 6px 12px;
+      outline: none;
+      font-weight: 600;
+    }
+
     .search-input {
       background: var(--input-bg);
       border: 1px solid var(--input-border);
@@ -959,7 +986,7 @@
       font-size: 12px;
       padding: 6px 14px;
       outline: none;
-      width: 180px;
+      width: 170px;
       font-family: 'Inter', sans-serif;
     }
 
@@ -996,35 +1023,64 @@
       border-bottom: 1px solid #1c2331;
       vertical-align: middle;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12.5px;
+      font-size: 12px;
     }
 
     table.journal-table tr:hover td {
       background: rgba(255, 255, 255, 0.02);
     }
 
-    .thumb-cell {
-      width: 52px;
-      height: 40px;
-      border-radius: 6px;
-      overflow: hidden;
-      background: #1c2432;
+    /* Multi-Thumbnail Strip in Table Cell */
+    .multi-thumb-strip {
       display: flex;
+      gap: 4px;
       align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      border: 1px solid #2e3a4e;
     }
 
-    .thumb-cell img {
+    .tf-thumb-badge {
+      width: 38px;
+      height: 30px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #10141d;
+      border: 1px solid #283448;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s;
+    }
+
+    .tf-thumb-badge:hover {
+      border-color: var(--accent-yellow);
+      transform: translateY(-1px);
+    }
+
+    .tf-thumb-badge.has-img {
+      border-color: #3b82f6;
+    }
+
+    .tf-thumb-badge img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    .thumb-cell .no-img {
-      font-size: 16px;
-      color: #4b5568;
+    .tf-thumb-badge .tf-tag {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.75);
+      font-size: 8px;
+      text-align: center;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
     }
 
     /* Status Badges */
@@ -1073,10 +1129,36 @@
     .dir-tag.long { background: var(--green-bg); color: var(--green); }
     .dir-tag.short { background: var(--red-bg); color: var(--red); }
 
-    /* GALLERY / CARDS VIEW */
+    /* Strategy Tags */
+    .strategy-badge-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .strat-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .strat-badge.breakout { background: rgba(14, 203, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(14, 203, 129, 0.3); }
+    .strat-badge.breakdown { background: rgba(246, 70, 93, 0.15); color: #fca5a5; border: 1px solid rgba(246, 70, 93, 0.3); }
+    .strat-badge.bounce382 { background: rgba(41, 121, 255, 0.15); color: #93c5fd; border: 1px solid rgba(41, 121, 255, 0.3); }
+    .strat-badge.bounce5 { background: rgba(0, 229, 255, 0.15); color: #67e8f9; border: 1px solid rgba(0, 229, 255, 0.3); }
+    .strat-badge.bounce618 { background: rgba(247, 166, 0, 0.15); color: #fde047; border: 1px solid rgba(247, 166, 0, 0.3); }
+    .strat-badge.parabolic { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .strat-badge.custom { background: #1f293d; color: #cfd8dc; border: 1px solid #334360; }
+
+    /* GALLERY / CARDS VIEW (NOTION STYLE) */
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 20px;
     }
 
@@ -1096,17 +1178,61 @@
       border-color: #3b4863;
     }
 
+    /* Card Image Viewer with Before/After Timeframe Tabs */
+    .card-img-container {
+      width: 100%;
+      background: #0f131a;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-tf-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      background: #0a0d13;
+      border-bottom: 1px solid #1c2434;
+    }
+
+    .card-tf-tab {
+      padding: 6px 2px;
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: all 0.15s;
+    }
+
+    .card-tf-tab:hover {
+      color: #fff;
+    }
+
+    .card-tf-tab.active {
+      color: var(--accent-yellow);
+      background: #151a23;
+      border-bottom: 2px solid var(--accent-yellow);
+    }
+
+    .card-tf-tab.has-data {
+      font-weight: 800;
+      color: #90caf9;
+    }
+    .card-tf-tab.has-data.active {
+      color: var(--accent-yellow);
+    }
+
     .card-img-wrap {
       width: 100%;
-      height: 160px;
-      background: #11151f;
+      height: 180px;
       position: relative;
       cursor: pointer;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-bottom: 1px solid var(--card-border);
     }
 
     .card-img-wrap img {
@@ -1123,7 +1249,7 @@
     .card-img-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0,0,0,0.4);
+      background: rgba(0,0,0,0.45);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1141,7 +1267,7 @@
 
     .card-no-img {
       color: #3a475d;
-      font-size: 32px;
+      font-size: 28px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1232,21 +1358,6 @@
       font-family: 'Inter', sans-serif;
     }
 
-    .card-tags {
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-    }
-
-    .card-tag {
-      font-size: 10px;
-      padding: 2px 6px;
-      background: #1e283a;
-      color: #90caf9;
-      border-radius: 4px;
-      font-weight: 600;
-    }
-
     .card-actions {
       display: flex;
       justify-content: space-between;
@@ -1260,8 +1371,8 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(6px);
       display: none;
       align-items: center;
       justify-content: center;
@@ -1278,10 +1389,10 @@
       border: 1px solid var(--card-border);
       border-radius: var(--radius-lg);
       width: 100%;
-      max-width: 600px;
-      max-height: 90vh;
+      max-width: 780px;
+      max-height: 92vh;
       overflow-y: auto;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
       display: flex;
       flex-direction: column;
     }
@@ -1330,95 +1441,250 @@
       border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
 
-    /* Image Dropzone in Modal */
-    .dropzone {
-      border: 2px dashed #334460;
-      border-radius: var(--radius-md);
-      padding: 20px;
+    /* Multi-Strategy Selector in Modal */
+    .strategy-select-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .strat-select-btn {
+      padding: 8px 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    .strat-select-btn:hover {
+      border-color: #4b5a75;
+      color: #fff;
+    }
+
+    .strat-select-btn.active {
+      background: rgba(247, 166, 0, 0.15);
+      border-color: var(--accent-yellow);
+      color: var(--accent-yellow);
+      font-weight: 700;
+    }
+
+    /* 4-Slot Multi-Timeframe Image Dropzone Grid */
+    .timeframe-slots-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 680px) {
+      .timeframe-slots-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .tf-slot-box {
+      background: #0f131a;
+      border: 2px dashed #283448;
+      border-radius: var(--radius-sm);
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
-      background: #10141d;
       cursor: pointer;
       transition: all 0.2s;
       position: relative;
+      min-height: 140px;
+      justify-content: center;
     }
 
-    .dropzone:hover, .dropzone.dragover {
+    .tf-slot-box:hover, .tf-slot-box.dragover, .tf-slot-box.focused {
       border-color: var(--accent-yellow);
       background: rgba(247, 166, 0, 0.05);
     }
 
-    .dropzone-preview {
+    .tf-slot-box.has-image {
+      border-style: solid;
+      border-color: #2b3952;
+      padding: 4px;
+    }
+
+    .tf-slot-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #90caf9;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .tf-slot-icon {
+      font-size: 22px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .tf-slot-hint {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+
+    .tf-slot-preview {
       width: 100%;
-      max-height: 180px;
-      object-fit: contain;
-      border-radius: 6px;
-      margin-top: 8px;
+      height: 105px;
+      object-fit: cover;
+      border-radius: 4px;
       display: none;
     }
 
-    .dropzone-icon {
-      font-size: 28px;
-      margin-bottom: 6px;
-      color: var(--accent-yellow);
+    .tf-slot-del-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(246, 70, 93, 0.85);
+      border: none;
+      color: #fff;
+      font-size: 10px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
     }
 
-    .dropzone-text {
-      font-size: 12.5px;
-      color: #cfd8dc;
-      font-weight: 600;
-    }
-
-    .dropzone-sub {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    /* Lightbox Fullscreen */
+    /* Lightbox Fullscreen Carousel */
     .lightbox-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.92);
+      background: rgba(0, 0, 0, 0.94);
       backdrop-filter: blur(8px);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 2000;
       padding: 24px;
+      flex-direction: column;
+      gap: 12px;
     }
 
     .lightbox-overlay.active {
       display: flex;
     }
 
+    .lightbox-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+      color: #fff;
+    }
+
+    .lightbox-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lightbox-nav-tabs {
+      display: flex;
+      gap: 6px;
+    }
+
+    .lightbox-tab-btn {
+      padding: 4px 10px;
+      background: #1c2638;
+      border: 1px solid #334460;
+      color: #cfd8dc;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .lightbox-tab-btn.active {
+      background: var(--accent-yellow);
+      color: #000;
+      border-color: var(--accent-yellow);
+    }
+
+    .lightbox-stage {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 92vw;
+      max-height: 80vh;
+    }
+
     .lightbox-img {
       max-width: 90vw;
-      max-height: 85vh;
+      max-height: 78vh;
       border-radius: var(--radius-sm);
       box-shadow: 0 10px 40px rgba(0,0,0,0.8);
       object-fit: contain;
     }
 
-    .lightbox-close {
+    .lightbox-arrow {
       position: absolute;
-      top: 20px;
-      right: 24px;
-      background: rgba(255, 255, 255, 0.15);
-      border: none;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       color: #fff;
-      font-size: 24px;
-      width: 40px;
-      height: 40px;
+      font-size: 20px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
-    .lightbox-close:hover {
-      background: rgba(255, 255, 255, 0.3);
+
+    .lightbox-arrow:hover {
+      background: rgba(247, 166, 0, 0.85);
+      color: #000;
     }
+
+    .lightbox-arrow.left { left: -54px; }
+    .lightbox-arrow.right { right: -54px; }
+
+    @media (max-width: 768px) {
+      .lightbox-arrow.left { left: 8px; }
+      .lightbox-arrow.right { right: 8px; }
+    }
+
+    .lightbox-close {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox-close:hover { background: rgba(255, 255, 255, 0.3); }
 
     .empty-state {
       text-align: center;
@@ -1439,9 +1705,9 @@
 
   <div class="container">
     <header>
-      <div class="badge">⚡ Bybit Isolated Margin • Risk Cockpit</div>
+      <div class="badge">⚡ Bybit Isolated Margin • Multi-Timeframe Journal</div>
       <h1>Futures Position Calculator & Trading Journal</h1>
-      <p class="subtitle">Lock your net dollar loss ($R$), verify Bybit liquidation safety, and log trades with chart screenshots just like in Notion.</p>
+      <p class="subtitle">Lock your net dollar loss ($R$), verify Bybit liquidation safety, and attach Before/After (1H & 4H) chart screenshots.</p>
     </header>
 
     <!-- TOP: CALCULATOR GRID -->
@@ -1737,7 +2003,7 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- NOTION-STYLE TRADING JOURNAL & LOG -->
+    <!-- NOTION-STYLE TRADING JOURNAL & LOG (MULTI-TIMEFRAME) -->
     <!-- ============================================================ -->
     <div class="journal-section" id="journalSection">
       <div class="journal-header-card">
@@ -1793,11 +2059,22 @@
         <!-- Filter & Search Bar -->
         <div class="filter-bar">
           <div class="category-pills">
-            <button class="cat-pill active" onclick="setCategoryFilter('ALL')">All Trades (<span id="countAll">0</span>)</button>
+            <button class="cat-pill active" onclick="setCategoryFilter('ALL')">All (<span id="countAll">0</span>)</button>
             <button class="cat-pill win" onclick="setCategoryFilter('WIN')">🟢 Wins (<span id="countWin">0</span>)</button>
             <button class="cat-pill loss" onclick="setCategoryFilter('LOSS')">🔴 Losses (<span id="countLoss">0</span>)</button>
             <button class="cat-pill open" onclick="setCategoryFilter('OPEN')">⏳ Open (<span id="countOpen">0</span>)</button>
             <button class="cat-pill" onclick="setCategoryFilter('BREAKEVEN')">⚪ BE (<span id="countBE">0</span>)</button>
+
+            <!-- Strategy Filter Dropdown -->
+            <select class="strategy-filter-select" id="strategyFilterSelect" onchange="setStrategyFilter(this.value)">
+              <option value="ALL">All Strategies (🎯)</option>
+              <option value="Breakout">Breakout</option>
+              <option value="Breakdown">Breakdown</option>
+              <option value="0.382 Bounce">0.382 Bounce</option>
+              <option value="0.5 Bounce">0.5 Bounce</option>
+              <option value="0.618 Bounce">0.618 Bounce</option>
+              <option value="Parabolic Play">Parabolic Play</option>
+            </select>
           </div>
           <input type="text" id="tradeSearchInput" class="search-input" placeholder="🔍 Search symbol, tag..." oninput="renderJournal()">
         </div>
@@ -1808,16 +2085,16 @@
         <table class="journal-table">
           <thead>
             <tr>
-              <th>Chart</th>
+              <th>Charts (1H & 4H)</th>
               <th>Date</th>
               <th>Symbol</th>
               <th>Side</th>
               <th>Entry / SL / TP</th>
               <th>Lev & Qty</th>
-              <th>Target RRR</th>
+              <th>Net RRR</th>
+              <th>Strategy Setup</th>
               <th>Status</th>
               <th>Net P&L</th>
-              <th>Strategy & Notes</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -1834,7 +2111,7 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- MODAL: ADD / EDIT TRADE -->
+    <!-- MODAL: ADD / EDIT TRADE (MULTI-TIMEFRAME & STRATEGIES) -->
     <!-- ============================================================ -->
     <div class="modal-overlay" id="tradeModal">
       <div class="modal-box">
@@ -1847,7 +2124,7 @@
         <div class="modal-body">
           <input type="hidden" id="modalTradeId">
 
-          <!-- Symbol, Direction, Date -->
+          <!-- Symbol, Direction, Leverage, Date -->
           <div class="form-row-3">
             <div class="form-group" style="margin: 0;">
               <label><span>Symbol</span></label>
@@ -1898,6 +2175,23 @@
             </div>
           </div>
 
+          <!-- Strategy Selection (Multiple Selection Dropdown/Pills) -->
+          <div class="form-group" style="margin: 0;">
+            <label>
+              <span>Strategy Confluence</span>
+              <span class="hint" style="color: #69f0ae;">Select all that apply</span>
+            </label>
+            <div class="strategy-select-grid" id="modalStrategyGrid">
+              <button type="button" class="strat-select-btn" onclick="toggleModalStrategy('Breakout', this)"><span>🟢</span> Breakout</button>
+              <button type="button" class="strat-select-btn" onclick="toggleModalStrategy('Breakdown', this)"><span>🔴</span> Breakdown</button>
+              <button type="button" class="strat-select-btn" onclick="toggleModalStrategy('0.382 Bounce', this)"><span>📈</span> 0.382 Bounce</button>
+              <button type="button" class="strat-select-btn" onclick="toggleModalStrategy('0.5 Bounce', this)"><span>📊</span> 0.5 Bounce</button>
+              <button type="button" class="strat-select-btn" onclick="toggleModalStrategy('0.618 Bounce', this)"><span>🎯</span> 0.618 Bounce</button>
+              <button type="button" class="strat-select-btn" onclick="toggleModalStrategy('Parabolic Play', this)"><span>🚀</span> Parabolic Play</button>
+            </div>
+            <input type="text" id="mCustomTags" placeholder="Additional custom tags (comma separated, e.g. 15m Retest, S/R Flip)" style="margin-top: 8px; font-size: 12px;">
+          </div>
+
           <!-- Outcome Status & Realized Net P&L -->
           <div class="form-row">
             <div class="form-group" style="margin: 0;">
@@ -1918,29 +2212,61 @@
             </div>
           </div>
 
-          <!-- Strategy Tags & Notes -->
-          <div class="form-group" style="margin: 0;">
-            <label><span>Strategy Setup / Tags</span><span class="hint">e.g. Breakout, 4H Support, Trend</span></label>
-            <input type="text" id="mTags" placeholder="Breakout, Retest, 15m Supply">
-          </div>
-
+          <!-- Notes & Reflection -->
           <div class="form-group" style="margin: 0;">
             <label><span>Trade Notes & Reflection</span></label>
-            <textarea id="mNotes" placeholder="Reason for entry, emotions, execution details, post-trade analysis..."></textarea>
+            <textarea id="mNotes" placeholder="Reason for entry, execution emotions, key takeaways, post-trade analysis..."></textarea>
           </div>
 
-          <!-- Chart Screenshot Attachment (Dropzone + Paste Support) -->
+          <!-- 4-Slot Multi-Timeframe Chart Attachments (Before/After 1h & 4h) -->
           <div class="form-group" style="margin: 0;">
-            <label><span>Chart Screenshot Attachment</span><span class="hint" style="color: #69f0ae;">Tip: Press Ctrl+V to paste!</span></label>
-            <div class="dropzone" id="modalDropzone" onclick="document.getElementById('modalImageInput').click()">
-              <input type="file" id="modalImageInput" accept="image/*" style="display: none;" onchange="handleImageFileSelect(event)">
-              <div class="dropzone-icon">📸</div>
-              <div class="dropzone-text">Click to upload, drag image here, or <strong>paste (Ctrl+V)</strong></div>
-              <div class="dropzone-sub">Supports PNG, JPG, WebP chart screenshots</div>
-              <img id="modalImgPreview" class="dropzone-preview" alt="Chart Preview">
+            <label>
+              <span>Chart Screenshots (Before & After 1H / 4H)</span>
+              <span class="hint" style="color: #69f0ae;">Click slot to upload or press Ctrl+V to paste!</span>
+            </label>
+
+            <div class="timeframe-slots-grid">
+              <!-- Slot 1: Before 1H -->
+              <div class="tf-slot-box" id="slot_before_1h" onclick="selectSlotToUpload('before_1h')">
+                <button type="button" class="tf-slot-del-btn" id="del_before_1h" onclick="removeSlotImage(event, 'before_1h')">✕</button>
+                <div class="tf-slot-title">Before (1h)</div>
+                <div class="tf-slot-icon" id="icon_before_1h">📸</div>
+                <div class="tf-slot-hint" id="hint_before_1h">Entry Trigger</div>
+                <img class="tf-slot-preview" id="preview_before_1h" alt="Before 1H">
+              </div>
+
+              <!-- Slot 2: Before 4H -->
+              <div class="tf-slot-box" id="slot_before_4h" onclick="selectSlotToUpload('before_4h')">
+                <button type="button" class="tf-slot-del-btn" id="del_before_4h" onclick="removeSlotImage(event, 'before_4h')">✕</button>
+                <div class="tf-slot-title">Before (4h)</div>
+                <div class="tf-slot-icon" id="icon_before_4h">📸</div>
+                <div class="tf-slot-hint" id="hint_before_4h">Higher TF</div>
+                <img class="tf-slot-preview" id="preview_before_4h" alt="Before 4H">
+              </div>
+
+              <!-- Slot 3: After 1H -->
+              <div class="tf-slot-box" id="slot_after_1h" onclick="selectSlotToUpload('after_1h')">
+                <button type="button" class="tf-slot-del-btn" id="del_after_1h" onclick="removeSlotImage(event, 'after_1h')">✕</button>
+                <div class="tf-slot-title">After (1h)</div>
+                <div class="tf-slot-icon" id="icon_after_1h">📸</div>
+                <div class="tf-slot-hint" id="hint_after_1h">Execution Result</div>
+                <img class="tf-slot-preview" id="preview_after_1h" alt="After 1H">
+              </div>
+
+              <!-- Slot 4: After 4H -->
+              <div class="tf-slot-box" id="slot_after_4h" onclick="selectSlotToUpload('after_4h')">
+                <button type="button" class="tf-slot-del-btn" id="del_after_4h" onclick="removeSlotImage(event, 'after_4h')">✕</button>
+                <div class="tf-slot-title">After (4h)</div>
+                <div class="tf-slot-icon" id="icon_after_4h">📸</div>
+                <div class="tf-slot-hint" id="hint_after_4h">Macro Outcome</div>
+                <img class="tf-slot-preview" id="preview_after_4h" alt="After 4H">
+              </div>
             </div>
-            <button type="button" id="btnRemoveImg" class="btn-action" style="margin-top: 6px; display: none; color: #ff8a80;" onclick="removeModalImage()">🗑️ Remove Attached Image</button>
+
+            <!-- Hidden File Input -->
+            <input type="file" id="modalSlotFileInput" accept="image/*" style="display: none;" onchange="handleSlotFileSelect(event)">
           </div>
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-action" onclick="closeTradeModal()">Cancel</button>
@@ -1950,15 +2276,28 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- LIGHTBOX: FULL-SCREEN IMAGE PREVIEW -->
+    <!-- LIGHTBOX: FULL-SCREEN MULTI-IMAGE CAROUSEL VIEWER -->
     <!-- ============================================================ -->
-    <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
-      <button class="lightbox-close" onclick="closeLightbox()">✕</button>
-      <img id="lightboxImg" class="lightbox-img" alt="Enlarged Chart View">
+    <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightboxOnBackdrop(event)">
+      <div class="lightbox-header">
+        <div class="lightbox-title" id="lightboxTitle">
+          <span>📸</span> Chart Inspection
+        </div>
+        <div class="lightbox-nav-tabs" id="lightboxNavTabs">
+          <!-- Populated by JS -->
+        </div>
+        <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+      </div>
+
+      <div class="lightbox-stage">
+        <button class="lightbox-arrow left" onclick="navigateLightbox(-1)">❮</button>
+        <img id="lightboxImg" class="lightbox-img" alt="Enlarged Chart View">
+        <button class="lightbox-arrow right" onclick="navigateLightbox(1)">❯</button>
+      </div>
     </div>
 
     <footer>
-      Bybit Isolated Margin Liquidation & Sizing Engine • Notion-Style Visual Trading Journal
+      Bybit Isolated Margin Liquidation & Sizing Engine • Multi-Timeframe Visual Trading Journal
     </footer>
   </div>
 
@@ -1967,7 +2306,7 @@
     /* 1. CALCULATOR LOGIC & STATE */
     /* ============================================================ */
     let currentDirection = 'LONG';
-    let currentLotStep = '1'; // '1', '0.1', '0.01', 'exact'
+    let currentLotStep = '1';
 
     function setDirection(dir) {
       currentDirection = dir;
@@ -2176,7 +2515,7 @@
 
         if (SL <= LP) {
           isSafe = false;
-          safetyMsg = `<strong>CRITICAL WARNING: Liquidation Price (${LP.toFixed(4)}) is reached BEFORE your Stop Loss (${SL.toFixed(4)})!</strong> Lower your leverage to under ${Math.floor(maxL)}x or you will lose your entire margin.`;
+          safetyMsg = `<strong>CRITICAL WARNING: Liquidation Price (${LP.toFixed(4)}) is reached BEFORE your Stop Loss (${SL.toFixed(4)})!</strong> Lower your leverage to under ${Math.floor(maxL)}x.`;
         } else {
           const bufferPct = ((SL - LP) / SL) * 100;
           safetyMsg = `<strong>Leverage is Safe (${L}x ≤ max ${maxL.toFixed(1)}x)</strong><span>Stop Loss (${SL.toFixed(4)}) triggers safely before Liquidation (${LP.toFixed(4)}). Buffer: ${bufferPct.toFixed(1)}% below SL.</span>`;
@@ -2378,22 +2717,42 @@
     }
 
     /* ============================================================ */
-    /* 2. NOTION-STYLE TRADING JOURNAL (IndexedDB + Storage) */
+    /* 2. NOTION-STYLE TRADING JOURNAL (MULTI-TIMEFRAME & STRATEGY) */
     /* ============================================================ */
     let currentJournalView = 'table'; // 'table' or 'gallery'
     let currentCategoryFilter = 'ALL'; // 'ALL', 'WIN', 'LOSS', 'OPEN', 'BREAKEVEN'
+    let currentStrategyFilter = 'ALL';
     let tradesData = [];
-    let modalAttachedImage = null; // Base64 dataURL
 
-    // IndexedDB Setup for large screenshot storage
-    const DB_NAME = 'BybitTradingJournalDB';
+    // Active modal state
+    let modalSelectedStrategies = [];
+    let modalAttachedImages = {
+      before_1h: null,
+      before_4h: null,
+      after_1h: null,
+      after_4h: null
+    };
+    let activeUploadSlot = 'before_1h';
+
+    // Lightbox carousel state
+    let lightboxCurrentTrade = null;
+    let lightboxCurrentKey = 'before_1h';
+    const TF_KEYS = ['before_1h', 'before_4h', 'after_1h', 'after_4h'];
+    const TF_LABELS = {
+      before_1h: 'Before (1h)',
+      before_4h: 'Before (4h)',
+      after_1h: 'After (1h)',
+      after_4h: 'After (4h)'
+    };
+
+    // IndexedDB Setup
+    const DB_NAME = 'BybitTradingJournalDB_v2';
     const DB_VERSION = 1;
     let dbInstance = null;
 
     function initDB() {
       return new Promise((resolve) => {
         if (!window.indexedDB) {
-          // Fallback to localStorage
           loadTradesFromLocalStorage();
           resolve();
           return;
@@ -2428,9 +2787,7 @@
         const request = store.getAll();
         request.onsuccess = () => {
           tradesData = request.result || [];
-          if (tradesData.length === 0) {
-            loadDefaultSampleTrades();
-          }
+          if (tradesData.length === 0) loadDefaultSampleTrades();
           renderJournal();
           resolve();
         };
@@ -2470,7 +2827,7 @@
 
     function loadTradesFromLocalStorage() {
       try {
-        const stored = localStorage.getItem('bybit_journal_trades');
+        const stored = localStorage.getItem('bybit_journal_trades_v2');
         tradesData = stored ? JSON.parse(stored) : [];
         if (tradesData.length === 0) loadDefaultSampleTrades();
       } catch (e) {
@@ -2481,14 +2838,13 @@
 
     function saveTradesToLocalStorage() {
       try {
-        localStorage.setItem('bybit_journal_trades', JSON.stringify(tradesData));
+        localStorage.setItem('bybit_journal_trades_v2', JSON.stringify(tradesData));
       } catch (e) {
-        console.warn('Storage quota reached in localStorage');
+        console.warn('LocalStorage limit reached.');
       }
     }
 
     function loadDefaultSampleTrades() {
-      // Add initial verified sample trade so user sees Notion-style journal in action
       const sampleTrade = {
         id: 'trade_' + Date.now(),
         date: new Date().toISOString(),
@@ -2503,9 +2859,15 @@
         netRrr: 3.25,
         status: 'OPEN',
         realizedPnl: 0,
-        tags: 'Breakout, Support, 5x Isolated',
-        notes: 'Clean bounce off 0.5581 support level. Risk capped to strictly 0.20 USDT net after fees.',
-        image: null
+        strategies: ['0.618 Bounce', 'Breakout'],
+        customTags: '4H Support Flip',
+        notes: 'Clean Fibonacci 0.618 golden pocket confluence with 1H breakout structure. Strict 0.20 USDT net risk.',
+        images: {
+          before_1h: null,
+          before_4h: null,
+          after_1h: null,
+          after_4h: null
+        }
       };
       tradesData = [sampleTrade];
       if (dbInstance) saveTradeToDB(sampleTrade);
@@ -2542,7 +2904,115 @@
       renderJournal();
     }
 
-    /* Modal Operations */
+    function setStrategyFilter(strat) {
+      currentStrategyFilter = strat;
+      renderJournal();
+    }
+
+    /* Strategy Selection Toggle inside Modal */
+    function toggleModalStrategy(stratName, btnElem) {
+      const idx = modalSelectedStrategies.indexOf(stratName);
+      if (idx > -1) {
+        modalSelectedStrategies.splice(idx, 1);
+        btnElem.classList.remove('active');
+      } else {
+        modalSelectedStrategies.push(stratName);
+        btnElem.classList.add('active');
+      }
+    }
+
+    function resetModalStrategyButtons() {
+      const buttons = document.querySelectorAll('#modalStrategyGrid .strat-select-btn');
+      buttons.forEach(btn => {
+        const text = btn.innerText.trim();
+        const match = modalSelectedStrategies.some(s => text.includes(s));
+        if (match) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+    }
+
+    /* 4-Slot Image Attachment Handling */
+    function selectSlotToUpload(slotKey) {
+      activeUploadSlot = slotKey;
+      document.querySelectorAll('.tf-slot-box').forEach(el => el.classList.remove('focused'));
+      document.getElementById('slot_' + slotKey).classList.add('focused');
+      document.getElementById('modalSlotFileInput').click();
+    }
+
+    function handleSlotFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      processSlotFile(activeUploadSlot, file);
+      e.target.value = '';
+    }
+
+    function processSlotFile(slotKey, file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setSlotImageData(slotKey, event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function setSlotImageData(slotKey, dataUrl) {
+      modalAttachedImages[slotKey] = dataUrl;
+      const box = document.getElementById('slot_' + slotKey);
+      const preview = document.getElementById('preview_' + slotKey);
+      const icon = document.getElementById('icon_' + slotKey);
+      const hint = document.getElementById('hint_' + slotKey);
+      const delBtn = document.getElementById('del_' + slotKey);
+
+      if (dataUrl) {
+        box.classList.add('has-image');
+        preview.src = dataUrl;
+        preview.style.display = 'block';
+        icon.style.display = 'none';
+        hint.style.display = 'none';
+        delBtn.style.display = 'flex';
+      } else {
+        box.classList.remove('has-image');
+        preview.src = '';
+        preview.style.display = 'none';
+        icon.style.display = 'block';
+        hint.style.display = 'block';
+        delBtn.style.display = 'none';
+      }
+    }
+
+    function removeSlotImage(e, slotKey) {
+      e.stopPropagation();
+      setSlotImageData(slotKey, null);
+    }
+
+    function resetAllModalSlots() {
+      TF_KEYS.forEach(k => {
+        setSlotImageData(k, null);
+      });
+    }
+
+    // Direct Ctrl+V Paste Listener across Slots
+    window.addEventListener('paste', (e) => {
+      const modal = document.getElementById('tradeModal');
+      if (!modal.classList.contains('active')) return;
+
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+      for (let item of items) {
+        if (item.type.indexOf('image') === 0) {
+          const blob = item.getAsFile();
+          // Paste to focused or first empty slot
+          let targetSlot = activeUploadSlot;
+          if (modalAttachedImages[targetSlot]) {
+            const emptySlot = TF_KEYS.find(k => !modalAttachedImages[k]);
+            if (emptySlot) targetSlot = emptySlot;
+          }
+          processSlotFile(targetSlot, blob);
+          e.preventDefault();
+          break;
+        }
+      }
+    });
+
+    /* Modal Open / Edit / Save */
     function openNewTradeModal() {
       document.getElementById('modalTitle').innerHTML = '<span>📝</span> Log New Trade';
       document.getElementById('modalTradeId').value = '';
@@ -2557,17 +3027,21 @@
       document.getElementById('mRrr').value = document.getElementById('targetRrrInput').value;
       document.getElementById('mStatus').value = 'OPEN';
       document.getElementById('mRealizedPnl').value = '';
-      document.getElementById('mTags').value = '';
+      document.getElementById('mCustomTags').value = '';
       document.getElementById('mNotes').value = '';
       
-      removeModalImage();
+      modalSelectedStrategies = ['Breakout'];
+      resetModalStrategyButtons();
+      resetAllModalSlots();
+
+      activeUploadSlot = 'before_1h';
       document.getElementById('tradeModal').classList.add('active');
     }
 
     function openLogModalFromCurrentCalc() {
       openNewTradeModal();
       const symbol = document.getElementById('coinSymbol').value.toUpperCase() || 'TRADE';
-      document.getElementById('mTags').value = `${symbol}, ${document.getElementById('leverageSlider').value}x Isolated, Strict Risk`;
+      document.getElementById('mCustomTags').value = `${symbol}, ${document.getElementById('leverageSlider').value}x Lev, Net Risk Lock`;
     }
 
     function editTrade(id) {
@@ -2587,15 +3061,20 @@
       document.getElementById('mRrr').value = t.netRrr;
       document.getElementById('mStatus').value = t.status;
       document.getElementById('mRealizedPnl').value = t.realizedPnl !== undefined ? t.realizedPnl : '';
-      document.getElementById('mTags').value = t.tags || '';
+      document.getElementById('mCustomTags').value = t.customTags || '';
       document.getElementById('mNotes').value = t.notes || '';
 
-      if (t.image) {
-        setModalImagePreview(t.image);
-      } else {
-        removeModalImage();
+      modalSelectedStrategies = Array.isArray(t.strategies) ? [...t.strategies] : [];
+      resetModalStrategyButtons();
+
+      resetAllModalSlots();
+      if (t.images) {
+        TF_KEYS.forEach(k => {
+          if (t.images[k]) setSlotImageData(k, t.images[k]);
+        });
       }
 
+      activeUploadSlot = 'before_1h';
       document.getElementById('tradeModal').classList.add('active');
     }
 
@@ -2640,9 +3119,10 @@
         netRrr: parseFloat(document.getElementById('mRrr').value) || 3.0,
         status: document.getElementById('mStatus').value,
         realizedPnl: parseFloat(document.getElementById('mRealizedPnl').value) || 0,
-        tags: document.getElementById('mTags').value.trim(),
+        strategies: [...modalSelectedStrategies],
+        customTags: document.getElementById('mCustomTags').value.trim(),
         notes: document.getElementById('mNotes').value.trim(),
-        image: modalAttachedImage
+        images: { ...modalAttachedImages }
       };
 
       if (editId) {
@@ -2679,75 +3159,127 @@
       renderJournal();
     }
 
-    /* Image Attachment & Clipboard Paste Support */
-    function handleImageFileSelect(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      processImageFile(file);
-    }
+    /* ============================================================ */
+    /* 3. LIGHTBOX MULTI-IMAGE CAROUSEL */
+    /* ============================================================ */
+    function openLightbox(tradeId, startKey = 'before_1h') {
+      const trade = tradesData.find(x => x.id === tradeId);
+      if (!trade || !trade.images) return;
 
-    function processImageFile(file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setModalImagePreview(event.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function setModalImagePreview(dataUrl) {
-      modalAttachedImage = dataUrl;
-      const preview = document.getElementById('modalImgPreview');
-      preview.src = dataUrl;
-      preview.style.display = 'block';
-      document.getElementById('btnRemoveImg').style.display = 'inline-flex';
-    }
-
-    function removeModalImage() {
-      modalAttachedImage = null;
-      const preview = document.getElementById('modalImgPreview');
-      preview.src = '';
-      preview.style.display = 'none';
-      document.getElementById('btnRemoveImg').style.display = 'none';
-      document.getElementById('modalImageInput').value = '';
-    }
-
-    // Direct Ctrl+V Paste Listener for Chart Screenshots
-    window.addEventListener('paste', (e) => {
-      const modal = document.getElementById('tradeModal');
-      if (!modal.classList.contains('active')) return;
-
-      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-      for (let item of items) {
-        if (item.type.indexOf('image') === 0) {
-          const blob = item.getAsFile();
-          processImageFile(blob);
-          e.preventDefault();
-          break;
-        }
+      lightboxCurrentTrade = trade;
+      
+      // If startKey doesn't have image, pick first available
+      if (!trade.images[startKey]) {
+        const firstAvail = TF_KEYS.find(k => trade.images[k]);
+        if (firstAvail) lightboxCurrentKey = firstAvail;
+        else lightboxCurrentKey = startKey;
+      } else {
+        lightboxCurrentKey = startKey;
       }
-    });
 
-    /* Lightbox Full-screen Viewer */
-    function openLightbox(imgSrc) {
-      if (!imgSrc) return;
-      const overlay = document.getElementById('lightboxOverlay');
-      const img = document.getElementById('lightboxImg');
-      img.src = imgSrc;
-      overlay.classList.add('active');
+      renderLightboxContent();
+      document.getElementById('lightboxOverlay').classList.add('active');
+    }
+
+    function renderLightboxContent() {
+      if (!lightboxCurrentTrade) return;
+      const trade = lightboxCurrentTrade;
+      const activeImg = trade.images ? trade.images[lightboxCurrentKey] : null;
+
+      document.getElementById('lightboxTitle').innerHTML = `<span>📸</span> <strong>${trade.symbol}</strong> • ${TF_LABELS[lightboxCurrentKey]} • <span style="font-size: 12px; color: var(--text-muted);">${trade.direction} @ ${trade.entry}</span>`;
+
+      // Render tab buttons
+      const tabContainer = document.getElementById('lightboxNavTabs');
+      tabContainer.innerHTML = TF_KEYS.map(k => {
+        const hasImg = trade.images && trade.images[k];
+        const isActive = k === lightboxCurrentKey;
+        return `<button class="lightbox-tab-btn ${isActive ? 'active' : ''}" style="${!hasImg ? 'opacity: 0.4;' : ''}" onclick="switchLightboxTab('${k}')">${TF_LABELS[k]}</button>`;
+      }).join('');
+
+      const imgElem = document.getElementById('lightboxImg');
+      if (activeImg) {
+        imgElem.src = activeImg;
+        imgElem.style.display = 'block';
+      } else {
+        imgElem.src = '';
+        imgElem.style.display = 'none';
+      }
+    }
+
+    function switchLightboxTab(key) {
+      lightboxCurrentKey = key;
+      renderLightboxContent();
+    }
+
+    function navigateLightbox(dir) {
+      if (!lightboxCurrentTrade) return;
+      let currIdx = TF_KEYS.indexOf(lightboxCurrentKey);
+      let nextIdx = (currIdx + dir + TF_KEYS.length) % TF_KEYS.length;
+      lightboxCurrentKey = TF_KEYS[nextIdx];
+      renderLightboxContent();
     }
 
     function closeLightbox() {
       document.getElementById('lightboxOverlay').classList.remove('active');
     }
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
+    function closeLightboxOnBackdrop(e) {
+      if (e.target.id === 'lightboxOverlay') {
         closeLightbox();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const lb = document.getElementById('lightboxOverlay');
+      if (lb.classList.contains('active')) {
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') navigateLightbox(-1);
+        if (e.key === 'ArrowRight') navigateLightbox(1);
+      } else if (e.key === 'Escape') {
         closeTradeModal();
       }
     });
 
-    /* Render Journal System (Table + Gallery + Stats) */
+    /* Card Timeframe Switcher in Gallery View */
+    function setCardActiveTimeframe(tradeId, slotKey, tabElem) {
+      const card = tabElem.closest('.trade-card');
+      card.querySelectorAll('.card-tf-tab').forEach(b => b.classList.remove('active'));
+      tabElem.classList.add('active');
+
+      const trade = tradesData.find(x => x.id === tradeId);
+      if (!trade || !trade.images) return;
+
+      const imgWrap = card.querySelector('.card-img-wrap');
+      const dataUrl = trade.images[slotKey];
+
+      if (dataUrl) {
+        imgWrap.innerHTML = `
+          <img src="${dataUrl}" alt="${TF_LABELS[slotKey]}">
+          <div class="card-img-overlay">🔍 ${TF_LABELS[slotKey]} • Click to Expand</div>
+        `;
+        imgWrap.onclick = () => openLightbox(tradeId, slotKey);
+      } else {
+        imgWrap.innerHTML = `
+          <div class="card-no-img">📷<span>No ${TF_LABELS[slotKey]} chart • Click to add</span></div>
+        `;
+        imgWrap.onclick = () => editTrade(tradeId);
+      }
+    }
+
+    /* Helper: Strategy Class name */
+    function getStrategyBadgeClass(strat) {
+      if (strat.includes('Breakout')) return 'breakout';
+      if (strat.includes('Breakdown')) return 'breakdown';
+      if (strat.includes('0.382')) return 'bounce382';
+      if (strat.includes('0.5')) return 'bounce5';
+      if (strat.includes('0.618')) return 'bounce618';
+      if (strat.includes('Parabolic')) return 'parabolic';
+      return 'custom';
+    }
+
+    /* ============================================================ */
+    /* 4. RENDER JOURNAL (TABLE + GALLERY + METRICS) */
+    /* ============================================================ */
     function renderJournal() {
       const search = (document.getElementById('tradeSearchInput').value || '').toLowerCase();
 
@@ -2782,14 +3314,21 @@
       document.getElementById('statWinLossRatio').innerText = `${countWins}W / ${countLosses}L (${countOpens} Open)`;
       document.getElementById('statProfitFactor').innerText = profitFactor;
 
-      // Filtered Trades
+      // Filter Trades
       let filtered = tradesData.filter(t => {
         if (currentCategoryFilter !== 'ALL' && t.status !== currentCategoryFilter) return false;
+        
+        if (currentStrategyFilter !== 'ALL') {
+          const hasStrat = Array.isArray(t.strategies) && t.strategies.some(s => s.toLowerCase().includes(currentStrategyFilter.toLowerCase()));
+          if (!hasStrat) return false;
+        }
+
         if (search) {
           const matchSym = t.symbol.toLowerCase().includes(search);
-          const matchTag = (t.tags || '').toLowerCase().includes(search);
+          const matchStrat = Array.isArray(t.strategies) && t.strategies.some(s => s.toLowerCase().includes(search));
+          const matchTag = (t.customTags || '').toLowerCase().includes(search);
           const matchNotes = (t.notes || '').toLowerCase().includes(search);
-          if (!matchSym && !matchTag && !matchNotes) return false;
+          if (!matchSym && !matchStrat && !matchTag && !matchNotes) return false;
         }
         return true;
       });
@@ -2805,13 +3344,35 @@
           const pnlColor = pnlVal > 0 ? 'var(--green)' : (pnlVal < 0 ? 'var(--red)' : '#90a4ae');
           const pnlText = t.status === 'OPEN' ? '<span style="color: var(--text-muted);">In Progress</span>' : `<span style="color: ${pnlColor}; font-weight: 700;">${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)}</span>`;
 
-          const imgCell = t.image 
-            ? `<div class="thumb-cell" onclick="openLightbox('${t.image}')" title="Click to enlarge chart"><img src="${t.image}" alt="Chart"></div>`
-            : `<div class="thumb-cell" onclick="editTrade('${t.id}')" title="Add Chart Image"><span class="no-img">📷</span></div>`;
+          // Multi-Thumb Strip for Table (Before 1h, Before 4h, After 1h, After 4h)
+          const thumbStrip = `
+            <div class="multi-thumb-strip">
+              <div class="tf-thumb-badge ${t.images && t.images.before_1h ? 'has-img' : ''}" onclick="openLightbox('${t.id}', 'before_1h')" title="Before (1h)">
+                ${t.images && t.images.before_1h ? `<img src="${t.images.before_1h}">` : '1H'}
+                <span class="tf-tag">B-1H</span>
+              </div>
+              <div class="tf-thumb-badge ${t.images && t.images.before_4h ? 'has-img' : ''}" onclick="openLightbox('${t.id}', 'before_4h')" title="Before (4h)">
+                ${t.images && t.images.before_4h ? `<img src="${t.images.before_4h}">` : '4H'}
+                <span class="tf-tag">B-4H</span>
+              </div>
+              <div class="tf-thumb-badge ${t.images && t.images.after_1h ? 'has-img' : ''}" onclick="openLightbox('${t.id}', 'after_1h')" title="After (1h)">
+                ${t.images && t.images.after_1h ? `<img src="${t.images.after_1h}">` : '1H'}
+                <span class="tf-tag">A-1H</span>
+              </div>
+              <div class="tf-thumb-badge ${t.images && t.images.after_4h ? 'has-img' : ''}" onclick="openLightbox('${t.id}', 'after_4h')" title="After (4h)">
+                ${t.images && t.images.after_4h ? `<img src="${t.images.after_4h}">` : '4H'}
+                <span class="tf-tag">A-4H</span>
+              </div>
+            </div>
+          `;
+
+          // Strategy badges
+          const stratList = Array.isArray(t.strategies) ? t.strategies : [];
+          const stratBadges = stratList.map(s => `<span class="strat-badge ${getStrategyBadgeClass(s)}">${s}</span>`).join(' ');
 
           return `
             <tr>
-              <td>${imgCell}</td>
+              <td>${thumbStrip}</td>
               <td style="color: var(--text-muted); font-size: 11px;">${dStr}</td>
               <td style="font-weight: 800; color: #fff;">${t.symbol}</td>
               <td><span class="dir-tag ${t.direction.toLowerCase()}">${t.direction}</span></td>
@@ -2823,6 +3384,12 @@
               <td>${t.leverage}x (${t.quantity})</td>
               <td style="color: var(--accent-yellow); font-weight: 700;">1 : ${t.netRrr}</td>
               <td>
+                <div class="strategy-badge-container">
+                  ${stratBadges || '<span style="color: var(--text-muted); font-size: 11px;">—</span>'}
+                  ${t.customTags ? `<span class="strat-badge custom">#${t.customTags}</span>` : ''}
+                </div>
+              </td>
+              <td>
                 <select class="status-badge ${t.status.toLowerCase()}" onchange="quickSetStatus('${t.id}', this.value)" style="border: none; padding: 3px 6px; font-weight: 700;">
                   <option value="OPEN" ${t.status === 'OPEN' ? 'selected' : ''}>⏳ OPEN</option>
                   <option value="WIN" ${t.status === 'WIN' ? 'selected' : ''}>🟢 WIN</option>
@@ -2831,10 +3398,6 @@
                 </select>
               </td>
               <td>${pnlText}</td>
-              <td style="max-width: 200px; font-family: 'Inter', sans-serif; font-size: 12px; color: #b0bec5;">
-                ${t.tags ? `<div style="color: #90caf9; font-size: 10.5px; font-weight: 600;">#${t.tags}</div>` : ''}
-                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${t.notes || '—'}</div>
-              </td>
               <td>
                 <div style="display: flex; gap: 4px;">
                   <button class="btn-action" style="padding: 3px 8px; font-size: 11px;" onclick="editTrade('${t.id}')">✏️</button>
@@ -2857,20 +3420,35 @@
           const pnlColor = pnlVal > 0 ? 'var(--green)' : (pnlVal < 0 ? 'var(--red)' : '#90a4ae');
           const pnlText = t.status === 'OPEN' ? 'Open Position' : `${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)} USDT`;
 
-          const imgBlock = t.image 
-            ? `<div class="card-img-wrap" onclick="openLightbox('${t.image}')">
-                 <img src="${t.image}" alt="Chart Screenshot">
-                 <div class="card-img-overlay">🔍 Click to Expand</div>
+          // Determine first available active image or default to before_1h
+          const firstKey = TF_KEYS.find(k => t.images && t.images[k]) || 'before_1h';
+          const currentImg = t.images ? t.images[firstKey] : null;
+
+          const imgBlock = currentImg 
+            ? `<div class="card-img-wrap" onclick="openLightbox('${t.id}', '${firstKey}')">
+                 <img src="${currentImg}" alt="Chart Screenshot">
+                 <div class="card-img-overlay">🔍 ${TF_LABELS[firstKey]} • Click to Expand</div>
                </div>`
             : `<div class="card-img-wrap" onclick="editTrade('${t.id}')">
                  <div class="card-no-img">📷<span>No chart attached • Click to add</span></div>
                </div>`;
 
-          const tagList = (t.tags || '').split(',').map(x => x.trim()).filter(Boolean);
+          const stratList = Array.isArray(t.strategies) ? t.strategies : [];
+          const stratBadges = stratList.map(s => `<span class="strat-badge ${getStrategyBadgeClass(s)}">${s}</span>`).join(' ');
 
           return `
             <div class="trade-card">
-              ${imgBlock}
+              <!-- Multi-Timeframe Tabs Header -->
+              <div class="card-img-container">
+                <div class="card-tf-tabs">
+                  <button class="card-tf-tab ${firstKey === 'before_1h' ? 'active' : ''} ${t.images && t.images.before_1h ? 'has-data' : ''}" onclick="setCardActiveTimeframe('${t.id}', 'before_1h', this)">B-1H</button>
+                  <button class="card-tf-tab ${firstKey === 'before_4h' ? 'active' : ''} ${t.images && t.images.before_4h ? 'has-data' : ''}" onclick="setCardActiveTimeframe('${t.id}', 'before_4h', this)">B-4H</button>
+                  <button class="card-tf-tab ${firstKey === 'after_1h' ? 'active' : ''} ${t.images && t.images.after_1h ? 'has-data' : ''}" onclick="setCardActiveTimeframe('${t.id}', 'after_1h', this)">A-1H</button>
+                  <button class="card-tf-tab ${firstKey === 'after_4h' ? 'active' : ''} ${t.images && t.images.after_4h ? 'has-data' : ''}" onclick="setCardActiveTimeframe('${t.id}', 'after_4h', this)">A-4H</button>
+                </div>
+                ${imgBlock}
+              </div>
+
               <div class="card-body">
                 <div class="card-header-row">
                   <div class="card-symbol-title">
@@ -2904,11 +3482,11 @@
                   </div>
                 </div>
 
-                ${tagList.length > 0 ? `
-                  <div class="card-tags">
-                    ${tagList.map(tag => `<span class="card-tag">#${tag}</span>`).join('')}
-                  </div>
-                ` : ''}
+                <!-- Strategy Badges -->
+                <div class="strategy-badge-container">
+                  ${stratBadges}
+                  ${t.customTags ? `<span class="strat-badge custom">#${t.customTags}</span>` : ''}
+                </div>
 
                 ${t.notes ? `<div class="card-notes">${t.notes}</div>` : ''}
 
@@ -2932,7 +3510,7 @@
         alert('No trades in journal to export.');
         return;
       }
-      const headers = ['ID', 'Date', 'Symbol', 'Direction', 'Leverage', 'Entry', 'StopLoss', 'TakeProfit', 'Quantity', 'Risk_USDT', 'Net_RRR', 'Status', 'Realized_PnL_USDT', 'Tags', 'Notes'];
+      const headers = ['ID', 'Date', 'Symbol', 'Direction', 'Leverage', 'Entry', 'StopLoss', 'TakeProfit', 'Quantity', 'Risk_USDT', 'Net_RRR', 'Status', 'Realized_PnL_USDT', 'Strategies', 'CustomTags', 'Notes'];
       const rows = tradesData.map(t => [
         t.id,
         t.date,
@@ -2947,7 +3525,8 @@
         t.netRrr,
         t.status,
         t.realizedPnl,
-        `"${(t.tags || '').replace(/"/g, '""')}"`,
+        `"${(Array.isArray(t.strategies) ? t.strategies.join(', ') : '').replace(/"/g, '""')}"`,
+        `"${(t.customTags || '').replace(/"/g, '""')}"`,
         `"${(t.notes || '').replace(/"/g, '""')}"`
       ]);
 
