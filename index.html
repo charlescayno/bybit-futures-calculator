@@ -3351,143 +3351,6 @@
       </div>
     </div>
 
-    <!-- REAL-TIME TRADINGVIEW CHART & VISUAL TRADE PLANNER -->
-    <div class="chart-section" id="interactiveChartSection">
-      <div class="chart-header">
-        <div class="chart-header-left">
-          <div class="chart-title">
-            <span>📈</span> Real-Time Chart & Trade Setup Visualizer
-          </div>
-          <span class="chart-symbol-badge" id="chartActiveSymbol">KASUSDT PERP</span>
-          <div class="chart-mode-pill-group">
-            <button type="button" class="chart-mode-btn active" id="btnChartModeDual" onclick="setChartMode('dual')">
-              <span>🔲</span> Dual Split (1H + 5m)
-            </button>
-            <button type="button" class="chart-mode-btn" id="btnChartModeVisual" onclick="setChartMode('visual')">
-              <span>⚡</span> Single (Visual)
-            </button>
-            <button type="button" class="chart-mode-btn" id="btnChartModeAdvanced" onclick="setChartMode('advanced')">
-              <span>📊</span> TradingView Advanced
-            </button>
-          </div>
-        </div>
-
-        <div class="chart-header-controls">
-          <!-- Timeframe Selector for Single Mode -->
-          <div class="chart-tf-group" id="chartTfGroup" style="display: none;">
-            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('1', this)">1m</button>
-            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('5', this)">5m</button>
-            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('15', this)">15m</button>
-            <button type="button" class="chart-tf-btn active" onclick="setChartTimeframe('60', this)">1H</button>
-            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('240', this)">4H</button>
-            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('D', this)">1D</button>
-          </div>
-
-          <button type="button" class="btn-chart-tool" onclick="fitChartContent()" title="Fit Chart Scale">
-            <span>⤢</span> Fit
-          </button>
-          <button type="button" class="btn-chart-tool" onclick="useLivePriceAsEntry()" title="Snap Entry Price to Live Market Price">
-            <span>🎯</span> Snap Entry
-          </button>
-          <button type="button" class="btn-chart-tool" id="btnToggleChartCollapse" onclick="toggleChartSection()" title="Collapse/Expand Chart">
-            <span id="chartCollapseIcon">−</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Chart Display Area -->
-      <div class="chart-body-wrapper dual-active" id="chartBodyWrapper">
-        <!-- Dual Split Chart Container (HTF 1H + LTF 5m) -->
-        <div id="dualChartContainer">
-          <!-- Left Pane: HTF (Market Structure) -->
-          <div class="dual-pane" id="dualPaneHTF">
-            <div class="dual-pane-header">
-              <div class="dual-pane-title">
-                <span class="dual-pane-icon">🏛️</span>
-                <span class="dual-pane-name">Higher Timeframe (Structure)</span>
-              </div>
-              <div class="chart-tf-group">
-                <button type="button" class="chart-tf-btn active" id="btnHtf60" onclick="setDualTf('HTF', '60', this)">1H</button>
-                <button type="button" class="chart-tf-btn" id="btnHtf240" onclick="setDualTf('HTF', '240', this)">4H</button>
-                <button type="button" class="chart-tf-btn" id="btnHtfD" onclick="setDualTf('HTF', 'D', this)">1D</button>
-              </div>
-            </div>
-            <div class="dual-chart-canvas-wrap">
-              <div class="chart-ohlc-legend dual-legend" id="legendHTF">
-                <div class="chart-ohlc-item">O: <span id="legO_HTF">—</span></div>
-                <div class="chart-ohlc-item">H: <span id="legH_HTF">—</span></div>
-                <div class="chart-ohlc-item">L: <span id="legL_HTF">—</span></div>
-                <div class="chart-ohlc-item">C: <span id="legC_HTF">—</span></div>
-                <div class="chart-ohlc-item">Chg: <span id="legChg_HTF">—</span></div>
-              </div>
-              <div id="canvasContainerHTF" class="dual-canvas"></div>
-            </div>
-          </div>
-
-          <!-- Right Pane: LTF (Execution & Drag-and-Drop) -->
-          <div class="dual-pane" id="dualPaneLTF">
-            <div class="dual-pane-header">
-              <div class="dual-pane-title">
-                <span class="dual-pane-icon">🎯</span>
-                <span class="dual-pane-name">Lower Timeframe (Execution)</span>
-                <span class="dual-badge-drag">🖱️ Interactive Drag</span>
-              </div>
-              <div class="chart-tf-group">
-                <button type="button" class="chart-tf-btn" id="btnLtf1" onclick="setDualTf('LTF', '1', this)">1m</button>
-                <button type="button" class="chart-tf-btn active" id="btnLtf5" onclick="setDualTf('LTF', '5', this)">5m</button>
-                <button type="button" class="chart-tf-btn" id="btnLtf15" onclick="setDualTf('LTF', '15', this)">15m</button>
-              </div>
-            </div>
-            <div class="dual-chart-canvas-wrap">
-              <div class="chart-ohlc-legend dual-legend" id="legendLTF">
-                <div class="chart-ohlc-item">O: <span id="legO_LTF">—</span></div>
-                <div class="chart-ohlc-item">H: <span id="legH_LTF">—</span></div>
-                <div class="chart-ohlc-item">L: <span id="legL_LTF">—</span></div>
-                <div class="chart-ohlc-item">C: <span id="legC_LTF">—</span></div>
-                <div class="chart-ohlc-item">Chg: <span id="legChg_LTF">—</span></div>
-              </div>
-              <div id="canvasContainerLTF" class="dual-canvas"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Single Lightweight Charts Canvas Container -->
-        <div id="lightweightChartContainer" style="display: none;">
-          <!-- Live OHLC Header Legend for Single -->
-          <div class="chart-ohlc-legend" id="chartOhlcLegend">
-            <div class="chart-ohlc-item">O: <span id="legO">—</span></div>
-            <div class="chart-ohlc-item">H: <span id="legH">—</span></div>
-            <div class="chart-ohlc-item">L: <span id="legL">—</span></div>
-            <div class="chart-ohlc-item">C: <span id="legC">—</span></div>
-            <div class="chart-ohlc-item">Chg: <span id="legChg">—</span></div>
-          </div>
-        </div>
-
-        <!-- TradingView Full Widget Container -->
-        <div id="tradingviewWidgetContainer">
-          <div id="tradingview_advanced_chart" style="width: 100%; height: 100%;"></div>
-        </div>
-      </div>
-
-      <!-- Live Setup Legend Bar (Entry, SL, TP1, TP2, TP3, Target TP, Breakeven, Liq) -->
-      <div class="chart-setup-legend-bar" id="chartSetupLegendBar">
-        <div class="chart-setup-pills">
-          <span class="chart-pill entry" id="pillEntry">🔵 Entry: <strong id="pillEntryVal">—</strong></span>
-          <span class="chart-pill sl" id="pillSl">🔴 Stop Loss: <strong id="pillSlVal">—</strong></span>
-          <span class="chart-pill be" id="pillBe" title="Fee-Covered Breakeven Price">🛡️ Breakeven: <strong id="pillBeVal">—</strong></span>
-          <span class="chart-pill tp1" id="pillTp1">🟢 TP 1R: <strong id="pillTp1Val">—</strong></span>
-          <span class="chart-pill tp2" id="pillTp2">🟢 TP 2R: <strong id="pillTp2Val">—</strong></span>
-          <span class="chart-pill tp3" id="pillTp3">🟢 TP 3R: <strong id="pillTp3Val">—</strong></span>
-          <span class="chart-pill target-tp" id="pillTargetTp">🎯 Target TP: <strong id="pillTargetTpVal">—</strong></span>
-          <span class="chart-pill liq" id="pillLiq">⚡ Liq: <strong id="pillLiqVal">—</strong></span>
-        </div>
-        <div style="font-size: 11px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-          <span style="color: #00e5ff; font-weight: 700;">🖱️ Drag & Drop Entry / SL / TP lines on chart</span>
-          <span style="color: var(--text-muted);">• Dynamic RRR & Lot Sync</span>
-        </div>
-      </div>
-    </div>
-
     <!-- TOP: CALCULATOR GRID -->
     <div class="grid">
       <!-- Input Panel -->
@@ -4111,6 +3974,145 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- REAL-TIME TRADINGVIEW CHART & VISUAL TRADE PLANNER -->
+    <!-- ============================================================ -->
+    <div class="chart-section" id="interactiveChartSection">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <span>📈</span> Real-Time Chart & Trade Setup Visualizer
+          </div>
+          <span class="chart-symbol-badge" id="chartActiveSymbol">KASUSDT PERP</span>
+          <div class="chart-mode-pill-group">
+            <button type="button" class="chart-mode-btn active" id="btnChartModeDual" onclick="setChartMode('dual')">
+              <span>🔲</span> Dual Split (1H + 5m)
+            </button>
+            <button type="button" class="chart-mode-btn" id="btnChartModeVisual" onclick="setChartMode('visual')">
+              <span>⚡</span> Single (Visual)
+            </button>
+            <button type="button" class="chart-mode-btn" id="btnChartModeAdvanced" onclick="setChartMode('advanced')">
+              <span>📊</span> TradingView Advanced
+            </button>
+          </div>
+        </div>
+
+        <div class="chart-header-controls">
+          <!-- Timeframe Selector for Single Mode -->
+          <div class="chart-tf-group" id="chartTfGroup" style="display: none;">
+            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('1', this)">1m</button>
+            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('5', this)">5m</button>
+            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('15', this)">15m</button>
+            <button type="button" class="chart-tf-btn active" onclick="setChartTimeframe('60', this)">1H</button>
+            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('240', this)">4H</button>
+            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('D', this)">1D</button>
+          </div>
+
+          <button type="button" class="btn-chart-tool" onclick="fitChartContent()" title="Fit Chart Scale">
+            <span>⤢</span> Fit
+          </button>
+          <button type="button" class="btn-chart-tool" onclick="useLivePriceAsEntry()" title="Snap Entry Price to Live Market Price">
+            <span>🎯</span> Snap Entry
+          </button>
+          <button type="button" class="btn-chart-tool" id="btnToggleChartCollapse" onclick="toggleChartSection()" title="Collapse/Expand Chart">
+            <span id="chartCollapseIcon">−</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chart Display Area -->
+      <div class="chart-body-wrapper dual-active" id="chartBodyWrapper">
+        <!-- Dual Split Chart Container (HTF 1H + LTF 5m) -->
+        <div id="dualChartContainer">
+          <!-- Left Pane: HTF (Market Structure) -->
+          <div class="dual-pane" id="dualPaneHTF">
+            <div class="dual-pane-header">
+              <div class="dual-pane-title">
+                <span class="dual-pane-icon">🏛️</span>
+                <span class="dual-pane-name">Higher Timeframe (Structure)</span>
+              </div>
+              <div class="chart-tf-group">
+                <button type="button" class="chart-tf-btn active" id="btnHtf60" onclick="setDualTf('HTF', '60', this)">1H</button>
+                <button type="button" class="chart-tf-btn" id="btnHtf240" onclick="setDualTf('HTF', '240', this)">4H</button>
+                <button type="button" class="chart-tf-btn" id="btnHtfD" onclick="setDualTf('HTF', 'D', this)">1D</button>
+              </div>
+            </div>
+            <div class="dual-chart-canvas-wrap">
+              <div class="chart-ohlc-legend dual-legend" id="legendHTF">
+                <div class="chart-ohlc-item">O: <span id="legO_HTF">—</span></div>
+                <div class="chart-ohlc-item">H: <span id="legH_HTF">—</span></div>
+                <div class="chart-ohlc-item">L: <span id="legL_HTF">—</span></div>
+                <div class="chart-ohlc-item">C: <span id="legC_HTF">—</span></div>
+                <div class="chart-ohlc-item">Chg: <span id="legChg_HTF">—</span></div>
+              </div>
+              <div id="canvasContainerHTF" class="dual-canvas"></div>
+            </div>
+          </div>
+
+          <!-- Right Pane: LTF (Execution & Drag-and-Drop) -->
+          <div class="dual-pane" id="dualPaneLTF">
+            <div class="dual-pane-header">
+              <div class="dual-pane-title">
+                <span class="dual-pane-icon">🎯</span>
+                <span class="dual-pane-name">Lower Timeframe (Execution)</span>
+                <span class="dual-badge-drag">🖱️ Interactive Drag</span>
+              </div>
+              <div class="chart-tf-group">
+                <button type="button" class="chart-tf-btn" id="btnLtf1" onclick="setDualTf('LTF', '1', this)">1m</button>
+                <button type="button" class="chart-tf-btn active" id="btnLtf5" onclick="setDualTf('LTF', '5', this)">5m</button>
+                <button type="button" class="chart-tf-btn" id="btnLtf15" onclick="setDualTf('LTF', '15', this)">15m</button>
+              </div>
+            </div>
+            <div class="dual-chart-canvas-wrap">
+              <div class="chart-ohlc-legend dual-legend" id="legendLTF">
+                <div class="chart-ohlc-item">O: <span id="legO_LTF">—</span></div>
+                <div class="chart-ohlc-item">H: <span id="legH_LTF">—</span></div>
+                <div class="chart-ohlc-item">L: <span id="legL_LTF">—</span></div>
+                <div class="chart-ohlc-item">C: <span id="legC_LTF">—</span></div>
+                <div class="chart-ohlc-item">Chg: <span id="legChg_LTF">—</span></div>
+              </div>
+              <div id="canvasContainerLTF" class="dual-canvas"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Single Lightweight Charts Canvas Container -->
+        <div id="lightweightChartContainer" style="display: none;">
+          <!-- Live OHLC Header Legend for Single -->
+          <div class="chart-ohlc-legend" id="chartOhlcLegend">
+            <div class="chart-ohlc-item">O: <span id="legO">—</span></div>
+            <div class="chart-ohlc-item">H: <span id="legH">—</span></div>
+            <div class="chart-ohlc-item">L: <span id="legL">—</span></div>
+            <div class="chart-ohlc-item">C: <span id="legC">—</span></div>
+            <div class="chart-ohlc-item">Chg: <span id="legChg">—</span></div>
+          </div>
+        </div>
+
+        <!-- TradingView Full Widget Container -->
+        <div id="tradingviewWidgetContainer">
+          <div id="tradingview_advanced_chart" style="width: 100%; height: 100%;"></div>
+        </div>
+      </div>
+
+      <!-- Live Setup Legend Bar (Entry, SL, TP1, TP2, TP3, Target TP, Breakeven, Liq) -->
+      <div class="chart-setup-legend-bar" id="chartSetupLegendBar">
+        <div class="chart-setup-pills">
+          <span class="chart-pill entry" id="pillEntry">🔵 Entry: <strong id="pillEntryVal">—</strong></span>
+          <span class="chart-pill sl" id="pillSl">🔴 Stop Loss: <strong id="pillSlVal">—</strong></span>
+          <span class="chart-pill be" id="pillBe" title="Fee-Covered Breakeven Price">🛡️ Breakeven: <strong id="pillBeVal">—</strong></span>
+          <span class="chart-pill tp1" id="pillTp1">🟢 TP 1R: <strong id="pillTp1Val">—</strong></span>
+          <span class="chart-pill tp2" id="pillTp2">🟢 TP 2R: <strong id="pillTp2Val">—</strong></span>
+          <span class="chart-pill tp3" id="pillTp3">🟢 TP 3R: <strong id="pillTp3Val">—</strong></span>
+          <span class="chart-pill target-tp" id="pillTargetTp">🎯 Target TP: <strong id="pillTargetTpVal">—</strong></span>
+          <span class="chart-pill liq" id="pillLiq">⚡ Liq: <strong id="pillLiqVal">—</strong></span>
+        </div>
+        <div style="font-size: 11px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <span style="color: #00e5ff; font-weight: 700;">🖱️ Drag & Drop Entry / SL / TP lines on chart</span>
+          <span style="color: var(--text-muted);">• Dynamic RRR & Lot Sync</span>
+        </div>
+      </div>
     </div>
 
     <!-- ============================================================ -->
