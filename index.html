@@ -239,6 +239,7 @@
     .card-title-actions {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     /* Direction Toggle */
@@ -537,6 +538,13 @@
       color: #a7f3d0;
     }
     .btn-action.green:hover { background: var(--green); color: #000; }
+
+    .btn-action.purple {
+      background: rgba(168, 85, 247, 0.18);
+      border-color: rgba(168, 85, 247, 0.4);
+      color: #d8b4fe;
+    }
+    .btn-action.purple:hover { background: var(--purple); color: #000; }
 
     /* Output Results Side */
     .results-card {
@@ -2274,6 +2282,7 @@
 
           <div class="card-title-actions">
             <button class="btn-action primary" onclick="openNewTradeModal()">+ New Trade</button>
+            <button class="btn-action purple" onclick="scanAndRecoverAllLegacyTrades(true)" title="Deep-scans browser IndexedDB and LocalStorage for past trades">🔄 Recover Old Logs</button>
             <button class="btn-action" onclick="exportTradesToCSV()">📥 Export CSV</button>
             <button class="btn-action" onclick="exportBackupJSON()">💾 Backup</button>
             <button class="btn-action" onclick="document.getElementById('importFileInput').click()">📂 Restore</button>
@@ -2631,7 +2640,6 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // Your Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBn4G1tYGov5xgsv-WibS-DVvWo3TonTk4",
       authDomain: "bybit-trading-journal.firebaseapp.com",
@@ -2642,7 +2650,6 @@
       measurementId: "G-8KGPP254NV"
     };
 
-    // Initialize Firebase
     let firebaseApp = null;
     let auth = null;
     let db = null;
@@ -2712,42 +2719,49 @@
       });
     }
 
-    // Real-Time Firestore Sync
+    // Two-Way Merging Firestore Sync
     async function setupFirestoreSync(uid) {
       if (!db) return;
       const userTradesRef = collection(db, 'users', uid, 'trades');
 
-      // 1. Initial push of local trades if Cloud is empty
       try {
         const snapshot = await getDocs(userTradesRef);
-        if (snapshot.empty && window.tradesData && window.tradesData.length > 0) {
-          for (let trade of window.tradesData) {
-            await setDoc(doc(userTradesRef, trade.id), trade);
+        const cloudTrades = [];
+        snapshot.forEach(d => cloudTrades.push(d.data()));
+
+        // Merge local trades into Firestore if local has more trades
+        if (window.tradesData && window.tradesData.length > 0) {
+          for (let localTrade of window.tradesData) {
+            const existsInCloud = cloudTrades.some(ct => ct.id === localTrade.id);
+            if (!existsInCloud) {
+              await setDoc(doc(userTradesRef, localTrade.id), localTrade);
+              cloudTrades.push(localTrade);
+            }
           }
+        }
+
+        if (cloudTrades.length > 0) {
+          window.mergeAndSaveTrades(cloudTrades);
         }
       } catch (e) {
         console.warn('Initial sync notice:', e);
       }
 
-      // 2. Real-time Firestore Listener
+      // Real-time Firestore Listener
       unsubscribeFirestore = onSnapshot(userTradesRef, (snapshot) => {
         const cloudTrades = [];
         snapshot.forEach((docSnap) => {
           cloudTrades.push(docSnap.data());
         });
 
-        if (cloudTrades.length > 0 || snapshot.metadata.hasPendingWrites === false) {
-          window.tradesData = cloudTrades.sort((a, b) => new Date(b.date) - new Date(a.date));
-          window.saveTradesToLocalStorage();
-          window.renderJournal();
-          if (window.currentJournalView === 'analytics') window.renderAnalyticsView();
+        if (cloudTrades.length > 0) {
+          window.mergeAndSaveTrades(cloudTrades);
         }
       }, (error) => {
-        console.warn('Firestore sync error:', error);
+        console.warn('Firestore listener note:', error);
       });
     }
 
-    // Expose Cloud DB Save / Delete helpers to global scope
     window.cloudSaveTrade = async function(trade) {
       if (currentUser && db) {
         try {
@@ -2771,7 +2785,7 @@
     };
   </script>
 
-  <!-- APP ENGINE & EVENT HANDLERS -->
+  <!-- APP ENGINE, RECOVERY & EVENT HANDLERS -->
   <script>
     /* 1. CALCULATOR LOGIC & STATE */
     let currentDirection = 'LONG';
@@ -3174,7 +3188,7 @@
       }
     }
 
-    /* 2. JOURNAL STATE & LOCAL / CLOUD STORAGE */
+    /* 2. COMPREHENSIVE STORAGE RECOVERY & JOURNAL STATE */
     window.currentJournalView = 'table';
     window.currentCategoryFilter = 'ALL';
     window.currentStrategyFilter = 'ALL';
@@ -3200,103 +3214,250 @@
       after_4h: 'After (4h)'
     };
 
-    const DB_NAME = 'BybitTradingJournalDB_v4';
-    const DB_VERSION = 1;
-    let dbInstance = null;
+    const MAIN_DB_NAME = 'BybitTradingJournalDB_v4';
+    let mainDbInstance = null;
+
+    // Helper: Merge new trade array into window.tradesData and save
+    window.mergeAndSaveTrades = function(newTradesList) {
+      if (!Array.isArray(newTradesList) || newTradesList.length === 0) return;
+      const tradeMap = new Map();
+      
+      // Keep existing
+      window.tradesData.forEach(t => tradeMap.set(t.id, t));
+      
+      // Add or update from list
+      newTradesList.forEach(t => {
+        if (t && t.id) {
+          tradeMap.set(t.id, t);
+        }
+      });
+
+      window.tradesData = Array.from(tradeMap.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+      window.saveTradesToAllLocal();
+      renderJournal();
+      if (window.currentJournalView === 'analytics') renderAnalyticsView();
+    };
+
+    window.saveTradesToAllLocal = function() {
+      // 1. Save to Main IndexedDB
+      if (mainDbInstance) {
+        try {
+          const tx = mainDbInstance.transaction('trades', 'readwrite');
+          const store = tx.objectStore('trades');
+          window.tradesData.forEach(t => store.put(t));
+        } catch (e) {
+          console.warn('IndexedDB write note:', e);
+        }
+      }
+
+      // 2. Save to LocalStorage across all common legacy keys as safety mirror
+      try {
+        const jsonStr = JSON.stringify(window.tradesData);
+        localStorage.setItem('bybit_journal_trades_v4', jsonStr);
+        localStorage.setItem('bybit_journal_trades_v3', jsonStr);
+        localStorage.setItem('bybit_journal_trades_v2', jsonStr);
+        localStorage.setItem('bybit_journal_trades', jsonStr);
+        localStorage.setItem('bybit_trades', jsonStr);
+      } catch (e) {
+        console.warn('LocalStorage mirror note (quota):', e);
+      }
+    };
+
+    // Deep-scan IndexedDB database
+    function readAllFromIndexedDb(dbName) {
+      return new Promise((resolve) => {
+        if (!window.indexedDB) return resolve([]);
+        const req = indexedDB.open(dbName);
+        req.onerror = () => resolve([]);
+        req.onsuccess = (e) => {
+          const db = e.target.result;
+          const storeName = db.objectStoreNames.contains('trades') ? 'trades' : (db.objectStoreNames[0] || null);
+          if (!storeName) {
+            db.close();
+            return resolve([]);
+          }
+          try {
+            const tx = db.transaction(storeName, 'readonly');
+            const store = tx.objectStore(storeName);
+            const getAllReq = store.getAll();
+            getAllReq.onsuccess = () => {
+              const res = getAllReq.result || [];
+              db.close();
+              resolve(res);
+            };
+            getAllReq.onerror = () => {
+              db.close();
+              resolve([]);
+            };
+          } catch (err) {
+            db.close();
+            resolve([]);
+          }
+        };
+      });
+    }
+
+    // Auto-scan ALL legacy versions of IndexedDB & LocalStorage
+    async function scanAndRecoverAllLegacyTrades(isUserInitiated = false) {
+      const recoveredMap = new Map();
+
+      // 1. Scan all known LocalStorage keys
+      const lsKeys = [
+        'bybit_journal_trades_v4',
+        'bybit_journal_trades_v3',
+        'bybit_journal_trades_v2',
+        'bybit_journal_trades_v1',
+        'bybit_journal_trades',
+        'bybit_trades',
+        'tradesData',
+        'trades'
+      ];
+
+      lsKeys.forEach(key => {
+        try {
+          const raw = localStorage.getItem(key);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              parsed.forEach(t => {
+                if (t && t.id && !recoveredMap.has(t.id)) recoveredMap.set(t.id, t);
+              });
+            }
+          }
+        } catch (e) {}
+      });
+
+      // 2. Scan all known IndexedDB DB names
+      const knownDbs = [
+        'BybitTradingJournalDB_v4',
+        'BybitTradingJournalDB_v3',
+        'BybitTradingJournalDB_v2',
+        'BybitTradingJournalDB_v1',
+        'BybitJournalDB',
+        'BybitTradingJournalDB'
+      ];
+
+      // If browser supports indexedDB.databases(), grab everything
+      if (indexedDB.databases) {
+        try {
+          const dbs = await indexedDB.databases();
+          dbs.forEach(d => {
+            if (d.name && !knownDbs.includes(d.name) && d.name.toLowerCase().includes('journal')) {
+              knownDbs.push(d.name);
+            }
+          });
+        } catch (e) {}
+      }
+
+      for (const dbName of knownDbs) {
+        try {
+          const dbTrades = await readAllFromIndexedDb(dbName);
+          dbTrades.forEach(t => {
+            if (t && t.id && !recoveredMap.has(t.id)) recoveredMap.set(t.id, t);
+          });
+        } catch (e) {}
+      }
+
+      const allRecovered = Array.from(recoveredMap.values());
+      const initialCount = window.tradesData.length;
+
+      if (allRecovered.length > 0) {
+        window.mergeAndSaveTrades(allRecovered);
+
+        // Push recovered trades to Cloud if user is signed into Firebase
+        if (window.cloudSaveTrade) {
+          allRecovered.forEach(t => window.cloudSaveTrade(t));
+        }
+
+        if (isUserInitiated) {
+          alert(`✅ Recovery Complete: Found ${allRecovered.length} total trades across all browser storage databases!`);
+        }
+      } else if (isUserInitiated) {
+        alert('ℹ️ No older trades found in browser storage.');
+      }
+    }
 
     function initDB() {
       return new Promise((resolve) => {
         if (!window.indexedDB) {
-          loadTradesFromLocalStorage();
+          scanAndRecoverAllLegacyTrades();
+          if (window.tradesData.length === 0) loadDefaultSampleTrades();
           resolve();
           return;
         }
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onupgradeneeded = (e) => {
+
+        const req = indexedDB.open(MAIN_DB_NAME, 1);
+        req.onupgradeneeded = (e) => {
           const db = e.target.result;
           if (!db.objectStoreNames.contains('trades')) {
             db.createObjectStore('trades', { keyPath: 'id' });
           }
         };
-        request.onsuccess = (e) => {
-          dbInstance = e.target.result;
-          loadTradesFromDB().then(() => resolve());
-        };
-        request.onerror = () => {
-          loadTradesFromLocalStorage();
-          resolve();
-        };
-      });
-    }
 
-    function loadTradesFromDB() {
-      return new Promise((resolve) => {
-        if (!dbInstance) {
-          loadTradesFromLocalStorage();
-          resolve();
-          return;
-        }
-        const tx = dbInstance.transaction('trades', 'readonly');
-        const store = tx.objectStore('trades');
-        const request = store.getAll();
-        request.onsuccess = () => {
-          window.tradesData = request.result || [];
-          if (window.tradesData.length === 0) loadDefaultSampleTrades();
-          renderJournal();
-          resolve();
+        req.onsuccess = async (e) => {
+          mainDbInstance = e.target.result;
+          
+          // Initial read from Main DB
+          const tx = mainDbInstance.transaction('trades', 'readonly');
+          const store = tx.objectStore('trades');
+          const getReq = store.getAll();
+          getReq.onsuccess = async () => {
+            window.tradesData = getReq.result || [];
+            
+            // Run deep scan to merge all legacy v1/v2/v3 or localStorage trades
+            await scanAndRecoverAllLegacyTrades();
+
+            if (window.tradesData.length === 0) {
+              loadDefaultSampleTrades();
+            }
+
+            renderJournal();
+            resolve();
+          };
+          getReq.onerror = async () => {
+            await scanAndRecoverAllLegacyTrades();
+            resolve();
+          };
         };
-        request.onerror = () => {
-          loadTradesFromLocalStorage();
+
+        req.onerror = async () => {
+          await scanAndRecoverAllLegacyTrades();
           resolve();
         };
       });
     }
 
     function saveTradeToDB(trade) {
+      if (!mainDbInstance) {
+        window.saveTradesToAllLocal();
+        return Promise.resolve();
+      }
       return new Promise((resolve) => {
-        if (!dbInstance) {
-          saveTradesToLocalStorage();
-          resolve();
-          return;
-        }
-        const tx = dbInstance.transaction('trades', 'readwrite');
+        const tx = mainDbInstance.transaction('trades', 'readwrite');
         const store = tx.objectStore('trades');
         store.put(trade);
-        tx.oncomplete = () => resolve();
+        tx.oncomplete = () => {
+          window.saveTradesToAllLocal();
+          resolve();
+        };
       });
     }
 
     function deleteTradeFromDB(tradeId) {
+      if (!mainDbInstance) {
+        window.saveTradesToAllLocal();
+        return Promise.resolve();
+      }
       return new Promise((resolve) => {
-        if (!dbInstance) {
-          saveTradesToLocalStorage();
-          resolve();
-        }
-        const tx = dbInstance.transaction('trades', 'readwrite');
+        const tx = mainDbInstance.transaction('trades', 'readwrite');
         const store = tx.objectStore('trades');
         store.delete(tradeId);
-        tx.oncomplete = () => resolve();
+        tx.oncomplete = () => {
+          window.saveTradesToAllLocal();
+          resolve();
+        };
       });
     }
-
-    function loadTradesFromLocalStorage() {
-      try {
-        const stored = localStorage.getItem('bybit_journal_trades_v4');
-        window.tradesData = stored ? JSON.parse(stored) : [];
-        if (window.tradesData.length === 0) loadDefaultSampleTrades();
-      } catch (e) {
-        window.tradesData = [];
-      }
-      renderJournal();
-    }
-
-    window.saveTradesToLocalStorage = function() {
-      try {
-        localStorage.setItem('bybit_journal_trades_v4', JSON.stringify(window.tradesData));
-      } catch (e) {
-        console.warn('LocalStorage quota limit.');
-      }
-    };
 
     function loadDefaultSampleTrades() {
       const now = Date.now();
@@ -3364,11 +3525,7 @@
       ];
 
       window.tradesData = sampleTrades;
-      if (dbInstance) {
-        sampleTrades.forEach(t => saveTradeToDB(t));
-      } else {
-        window.saveTradesToLocalStorage();
-      }
+      window.saveTradesToAllLocal();
     }
 
     function switchView(viewName) {
@@ -4338,13 +4495,10 @@
           const imported = JSON.parse(e.target.result);
           if (Array.isArray(imported)) {
             window.tradesData = imported;
-            if (dbInstance) {
-              const tx = dbInstance.transaction('trades', 'readwrite');
-              const store = tx.objectStore('trades');
-              store.clear();
-              imported.forEach(t => store.put(t));
+            window.saveTradesToAllLocal();
+            if (window.cloudSaveTrade) {
+              imported.forEach(t => window.cloudSaveTrade(t));
             }
-            window.saveTradesToLocalStorage();
             renderJournal();
             if (window.currentJournalView === 'analytics') renderAnalyticsView();
             alert(`Successfully restored ${imported.length} trades!`);
@@ -4385,7 +4539,7 @@
       });
     }
 
-    // Initialize Calculator & Journal Database
+    // Initialize Calculator & Auto-Scan Journal Database
     calculate();
     initDB();
   </script>
