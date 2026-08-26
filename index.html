@@ -4504,6 +4504,17 @@
 
   <!-- APP ENGINE, LIVE BYBIT TICKER, CALENDAR & HEATMAPS -->
   <script>
+    /* Symbol Normalization Helper (Handles .P, /, -, USDT) */
+    function normalizeSymbol(sym) {
+      if (!sym) return 'BTCUSDT';
+      let s = sym.toString().trim().toUpperCase();
+      s = s.replace(/\.P$/i, '').replace(/[\/\-_:]/g, '');
+      if (!s.endsWith('USDT') && !s.endsWith('USDC')) {
+        s += 'USDT';
+      }
+      return s;
+    }
+
     /* 1. CALCULATOR LOGIC & STATE */
     let currentDirection = 'LONG';
     let currentLotStep = '1';
@@ -4706,8 +4717,8 @@
     function onSymbolChange() {
       clearTimeout(symbolFetchTimeout);
       symbolFetchTimeout = setTimeout(() => {
-        const sym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
-        const formattedSym = sym.endsWith('USDT') ? sym : `${sym}USDT`;
+        const rawSym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
+        const formattedSym = normalizeSymbol(rawSym);
         if (typeof loadChartSymbol === 'function') {
           loadChartSymbol(formattedSym);
         }
@@ -4716,10 +4727,10 @@
     }
 
     async function fetchBybitTicker() {
-      const sym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
-      if (!sym) return;
+      const rawSym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
+      if (!rawSym) return;
 
-      const formattedSym = sym.endsWith('USDT') ? sym : `${sym}USDT`;
+      const formattedSym = normalizeSymbol(rawSym);
       document.getElementById('liveSymbolDisplay').innerText = formattedSym;
 
       const endpoints = [
@@ -4742,6 +4753,15 @@
             const nextFundingTime = parseInt(t.nextFundingTime, 10);
 
             liveTickerPrice = lastPrice;
+            window.liveMarketPrices[formattedSym] = {
+              price: lastPrice,
+              markPrice: parseFloat(t.markPrice) || 0,
+              chgPct: chgPct,
+              fundingRate: fundingRate,
+              high24h: parseFloat(t.highPrice24h) || 0,
+              low24h: parseFloat(t.lowPrice24h) || 0
+            };
+
             document.getElementById('livePriceDisplay').innerText = `${lastPrice > 10 ? lastPrice.toFixed(2) : (lastPrice > 1 ? lastPrice.toFixed(4) : lastPrice.toFixed(5))} USDT`;
 
             const chgBadge = document.getElementById('liveChgDisplay');
@@ -5284,17 +5304,30 @@
               loadDefaultSampleTrades();
             }
 
+            if (typeof subscribeToBybitWsSymbols === 'function') {
+              subscribeToBybitWsSymbols();
+            }
+            (window.tradesData || []).forEach(tr => {
+              if (tr.symbol && typeof fetchSingleSymbolPrice === 'function') {
+                fetchSingleSymbolPrice(tr.symbol);
+              }
+            });
+
             renderJournal();
             resolve();
           };
           getReq.onerror = async () => {
             await scanAndRecoverAllLegacyTrades();
+            if (typeof subscribeToBybitWsSymbols === 'function') subscribeToBybitWsSymbols();
+            renderJournal();
             resolve();
           };
         };
 
         req.onerror = async () => {
           await scanAndRecoverAllLegacyTrades();
+          if (typeof subscribeToBybitWsSymbols === 'function') subscribeToBybitWsSymbols();
+          renderJournal();
           resolve();
         };
       });
@@ -5687,6 +5720,13 @@
       saveTradeToDB(trade);
       if (window.cloudSaveTrade) window.cloudSaveTrade(trade);
 
+      if (typeof subscribeToBybitWsSymbols === 'function') {
+        subscribeToBybitWsSymbols();
+      }
+      if (trade.symbol && typeof fetchSingleSymbolPrice === 'function') {
+        fetchSingleSymbolPrice(trade.symbol);
+      }
+
       closeTradeModal();
       renderJournal();
       if (window.currentJournalView === 'analytics') renderAnalyticsView();
@@ -5865,6 +5905,52 @@
       'wss://stream.bybit-global.com/v5/public/linear'
     ];
 
+    const pendingPriceFetches = new Set();
+    async function fetchSingleSymbolPrice(symbol) {
+      const cleanSym = normalizeSymbol(symbol);
+      if (!cleanSym || pendingPriceFetches.has(cleanSym)) return;
+      pendingPriceFetches.add(cleanSym);
+
+      const endpoints = [
+        `https://api.bytick.com/v5/market/tickers?category=linear&symbol=${cleanSym}`,
+        `https://api.bybit.com/v5/market/tickers?category=linear&symbol=${cleanSym}`,
+        `https://api.bybit-global.com/v5/market/tickers?category=linear&symbol=${cleanSym}`
+      ];
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (data.retCode === 0 && data.result && data.result.list && data.result.list.length > 0) {
+            const t = data.result.list[0];
+            const p = parseFloat(t.lastPrice) || 0;
+            if (p > 0) {
+              window.liveMarketPrices[cleanSym] = {
+                price: p,
+                markPrice: parseFloat(t.markPrice) || 0,
+                chgPct: (parseFloat(t.price24hPcnt) || 0) * 100,
+                fundingRate: (parseFloat(t.fundingRate) || 0) * 100,
+                high24h: parseFloat(t.highPrice24h) || 0,
+                low24h: parseFloat(t.lowPrice24h) || 0
+              };
+              if (symbol && symbol !== cleanSym) {
+                window.liveMarketPrices[symbol] = window.liveMarketPrices[cleanSym];
+              }
+              if (bybitWs && bybitWs.readyState === WebSocket.OPEN) {
+                bybitWs.send(JSON.stringify({ op: "subscribe", args: [`tickers.${cleanSym}`] }));
+              }
+              if (window.currentJournalView === 'table' || window.currentJournalView === 'gallery') {
+                renderJournal();
+              }
+            }
+            break;
+          }
+        } catch (e) {}
+      }
+      pendingPriceFetches.delete(cleanSym);
+    }
+
     function initBybitWebSocket() {
       if (bybitWs && (bybitWs.readyState === WebSocket.OPEN || bybitWs.readyState === WebSocket.CONNECTING)) {
         return;
@@ -5899,7 +5985,8 @@
 
             if (msg.topic && msg.topic.startsWith('tickers.') && msg.data) {
               const t = msg.data;
-              const sym = (t.symbol || msg.topic.replace('tickers.', '')).toUpperCase();
+              const rawSym = t.symbol || msg.topic.replace('tickers.', '');
+              const sym = normalizeSymbol(rawSym);
 
               if (!window.liveMarketPrices[sym]) {
                 window.liveMarketPrices[sym] = { price: 0, markPrice: 0, chgPct: 0, fundingRate: 0, high24h: 0, low24h: 0 };
@@ -5914,6 +6001,10 @@
               if (t.fundingRate) window.liveMarketPrices[sym].fundingRate = (parseFloat(t.fundingRate) || 0) * 100;
               if (t.highPrice24h) window.liveMarketPrices[sym].high24h = parseFloat(t.highPrice24h) || 0;
               if (t.lowPrice24h) window.liveMarketPrices[sym].low24h = parseFloat(t.lowPrice24h) || 0;
+
+              if (rawSym && rawSym !== sym) {
+                window.liveMarketPrices[rawSym] = window.liveMarketPrices[sym];
+              }
 
               // Live Real-Time Flash on Watchlist Card
               const priceElem = document.getElementById(`wl_price_${sym}`);
@@ -5945,9 +6036,8 @@
               }
 
               // Update active calculator live banner if matching
-              const activeSym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
-              const fmtActive = activeSym.endsWith('USDT') ? activeSym : `${activeSym}USDT`;
-              if (sym === fmtActive && newPrice > 0) {
+              const activeSym = normalizeSymbol(document.getElementById('coinSymbol').value || '');
+              if (sym === activeSym && newPrice > 0) {
                 liveTickerPrice = newPrice;
                 document.getElementById('livePriceDisplay').innerText = `${newPrice > 10 ? newPrice.toFixed(2) : (newPrice > 1 ? newPrice.toFixed(4) : newPrice.toFixed(5))} USDT`;
                 const chgBadge = document.getElementById('liveChgDisplay');
@@ -5963,8 +6053,8 @@
                 updateLiveCandleTick(sym, newPrice);
               }
 
-              // Re-render open trades in journal if this symbol is open
-              if (window.tradesData && window.tradesData.some(tr => tr.status === 'OPEN' && (tr.symbol.toUpperCase() === sym || `${tr.symbol.toUpperCase()}USDT` === sym))) {
+              // Re-render open trades in journal if any trade matches this symbol
+              if (window.tradesData && window.tradesData.some(tr => normalizeSymbol(tr.symbol) === sym)) {
                 if (window.currentJournalView === 'table' || window.currentJournalView === 'gallery') {
                   renderJournal();
                 }
@@ -5999,9 +6089,17 @@
 
     function subscribeToBybitWsSymbols() {
       if (!bybitWs || bybitWs.readyState !== WebSocket.OPEN) return;
-      const activeSym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
-      const fmtActive = activeSym.endsWith('USDT') ? activeSym : `${activeSym}USDT`;
-      const allSymbols = Array.from(new Set([...window.userWatchlist, fmtActive]));
+      const activeSym = normalizeSymbol(document.getElementById('coinSymbol').value || '');
+      const chartSym = typeof currentChartSymbol !== 'undefined' ? normalizeSymbol(currentChartSymbol) : 'BTCUSDT';
+      const journalSymbols = (window.tradesData || []).map(t => normalizeSymbol(t.symbol));
+
+      const allSymbols = Array.from(new Set([
+        ...window.userWatchlist.map(s => normalizeSymbol(s)),
+        activeSym,
+        chartSym,
+        ...journalSymbols
+      ])).filter(Boolean);
+
       const subTopics = allSymbols.map(s => `tickers.${s}`);
 
       bybitWs.send(JSON.stringify({
@@ -6028,28 +6126,29 @@
 
     window.loadChartCoin = function(symbol, event) {
       if (event) event.stopPropagation();
-      const cleanSym = (symbol || '').toUpperCase().trim();
-      const formattedSym = cleanSym.endsWith('USDT') ? cleanSym : `${cleanSym}USDT`;
+      const cleanSym = normalizeSymbol(symbol || 'BTCUSDT');
 
       // Load symbol into Chart visualizer
       if (typeof loadChartSymbol === 'function') {
-        loadChartSymbol(formattedSym);
+        loadChartSymbol(cleanSym);
       }
 
       // Sync calculator inputs as well
       const symInput = document.getElementById('coinSymbol');
       if (symInput) symInput.value = cleanSym;
 
-      const liveData = window.liveMarketPrices[formattedSym] || window.liveMarketPrices[cleanSym];
+      const liveData = window.liveMarketPrices[cleanSym];
       if (liveData && liveData.price > 0) {
         document.getElementById('entryPrice').value = liveData.price > 10 ? liveData.price.toFixed(2) : (liveData.price > 1 ? liveData.price.toFixed(4) : liveData.price.toFixed(5));
+      } else {
+        fetchSingleSymbolPrice(cleanSym);
       }
       onRiskOrEntryChange();
       fetchBybitTicker();
       subscribeToBybitWsSymbols();
       renderWatchlist();
 
-      showToast(`📈 Charting <strong>${formattedSym}</strong> in Dual Split View!`);
+      showToast(`📈 Charting <strong>${cleanSym}</strong> in Dual Split View!`);
       const chartSec = document.getElementById('interactiveChartSection');
       if (chartSec) {
         chartSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -6058,20 +6157,21 @@
 
     window.loadCoinToCalculator = function(symbol, event) {
       if (event) event.stopPropagation();
-      const cleanSym = (symbol || '').toUpperCase().trim();
-      const formattedSym = cleanSym.endsWith('USDT') ? cleanSym : `${cleanSym}USDT`;
+      const cleanSym = normalizeSymbol(symbol || 'BTCUSDT');
       
       document.getElementById('coinSymbol').value = cleanSym;
-      const liveData = window.liveMarketPrices[formattedSym] || window.liveMarketPrices[cleanSym];
+      const liveData = window.liveMarketPrices[cleanSym];
       if (liveData && liveData.price > 0) {
         document.getElementById('entryPrice').value = liveData.price > 10 ? liveData.price.toFixed(2) : (liveData.price > 1 ? liveData.price.toFixed(4) : liveData.price.toFixed(5));
+      } else {
+        fetchSingleSymbolPrice(cleanSym);
       }
 
       onRiskOrEntryChange();
       fetchBybitTicker();
       subscribeToBybitWsSymbols();
       if (typeof loadChartSymbol === 'function') {
-        loadChartSymbol(formattedSym);
+        loadChartSymbol(cleanSym);
       }
       renderWatchlist();
 
@@ -7142,20 +7242,20 @@
     }
 
     function loadChartSymbol(symbol) {
-      const cleanSym = (symbol || 'BTCUSDT').toUpperCase().trim();
-      const fmtSym = cleanSym.endsWith('USDT') ? cleanSym : `${cleanSym}USDT`;
-      currentChartSymbol = fmtSym;
+      const cleanSym = normalizeSymbol(symbol || 'BTCUSDT');
+      currentChartSymbol = cleanSym;
       const badge = document.getElementById('chartActiveSymbol');
-      if (badge) badge.innerText = `${fmtSym} PERP`;
+      if (badge) badge.innerText = `${cleanSym} PERP`;
 
       if (currentChartMode === 'dual') {
-        fetchDualKlines('HTF', fmtSym, currentTfHTF);
-        fetchDualKlines('LTF', fmtSym, currentTfLTF);
+        fetchDualKlines('HTF', cleanSym, currentTfHTF);
+        fetchDualKlines('LTF', cleanSym, currentTfLTF);
       } else if (currentChartMode === 'visual') {
-        fetchChartKlines(fmtSym, currentChartTimeframe);
+        fetchChartKlines(cleanSym, currentChartTimeframe);
       } else {
-        renderTradingViewWidget(fmtSym);
+        renderTradingViewWidget(cleanSym);
       }
+      subscribeToBybitWsSymbols();
       renderWatchlist();
     }
 
@@ -7186,11 +7286,12 @@
 
     /* Helper: Calculate Live Unrealized PnL & Check Trigger */
     function computeTradeLiveStatus(t) {
-      const sym = (t.symbol || '').toUpperCase().trim();
-      const fmtSym = sym.endsWith('USDT') ? sym : `${sym}USDT`;
-      const liveData = window.liveMarketPrices[fmtSym];
+      const rawSym = (t.symbol || '').toUpperCase().trim();
+      const cleanSym = normalizeSymbol(rawSym);
+      let liveData = window.liveMarketPrices[cleanSym] || window.liveMarketPrices[rawSym];
       
       if (!liveData || !liveData.price) {
+        fetchSingleSymbolPrice(cleanSym);
         return { livePrice: null, unrealizedPnl: null, roePct: null, triggered: null, triggerType: null };
       }
 
@@ -7324,10 +7425,20 @@
           const liveInfo = computeTradeLiveStatus(t);
 
           // Live Price Cell
-          let livePriceHtml = '<span style="color: var(--text-muted);">—</span>';
+          let livePriceHtml = '<span style="color: var(--text-muted); font-size: 11px;">—</span>';
           if (liveInfo.livePrice) {
-            const pStr = liveInfo.livePrice > 10 ? liveInfo.livePrice.toFixed(2) : liveInfo.livePrice.toFixed(4);
-            livePriceHtml = `<span style="color: #fff; font-weight: 700;"><span style="color: var(--green); font-size: 9px;">●</span> ${pStr}</span>`;
+            const p = liveInfo.livePrice;
+            const pStr = p > 1000 ? p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) :
+                         (p > 10 ? p.toFixed(2) :
+                         (p > 1 ? p.toFixed(4) : p.toFixed(5)));
+            
+            let dotColor = '#8b98af';
+            const ep = parseFloat(t.entry) || 0;
+            if (ep > 0) {
+              const isProfit = (t.direction === 'LONG' && p >= ep) || (t.direction === 'SHORT' && p <= ep);
+              dotColor = isProfit ? 'var(--green)' : 'var(--red)';
+            }
+            livePriceHtml = `<span style="color: #fff; font-weight: 700; font-family: 'JetBrains Mono'; font-size: 12.5px;"><span style="color: ${dotColor}; font-size: 9px; margin-right: 3px;">●</span>${pStr}</span>`;
           }
 
           // Live PnL or Realized PnL Cell
@@ -7338,8 +7449,8 @@
               const uColor = uPnl >= 0 ? 'var(--green)' : 'var(--red)';
               pnlCellHtml = `
                 <div>
-                  <span style="color: ${uColor}; font-weight: 800;">${uPnl >= 0 ? '+' : ''}${uPnl.toFixed(4)} USDT</span>
-                  <div style="font-size: 10px; color: ${uColor};">${liveInfo.roePct >= 0 ? '+' : ''}${liveInfo.roePct.toFixed(1)}% ROE</div>
+                  <span style="color: ${uColor}; font-weight: 800; font-family: 'JetBrains Mono';">${uPnl >= 0 ? '+' : ''}${uPnl.toFixed(4)} USDT</span>
+                  <div style="font-size: 10px; color: ${uColor}; font-weight: 600;">${liveInfo.roePct >= 0 ? '+' : ''}${liveInfo.roePct.toFixed(1)}% ROE</div>
                 </div>
               `;
             } else {
@@ -7348,7 +7459,7 @@
           } else {
             const pnlVal = parseFloat(t.realizedPnl) || 0;
             const pnlColor = pnlVal > 0 ? 'var(--green)' : (pnlVal < 0 ? 'var(--red)' : '#90a4ae');
-            pnlCellHtml = `<span style="color: ${pnlColor}; font-weight: 800;">${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)} USDT</span>`;
+            pnlCellHtml = `<span style="color: ${pnlColor}; font-weight: 800; font-family: 'JetBrains Mono';">${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(4)} USDT</span>`;
           }
 
           // Trigger Alert or Status Badge
@@ -7409,7 +7520,10 @@
               <td>${thumbStrip}</td>
               <td style="color: var(--text-muted); font-size: 11px;">${dStr}</td>
               <td>
-                <div style="font-weight: 800; color: #fff;">${t.symbol}</div>
+                <div style="font-weight: 800; color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" onclick="loadChartCoin('${t.symbol}', event)" title="Click to open ${t.symbol} Chart & Calculator">
+                  <span>${t.symbol}</span>
+                  <span style="font-size: 11px; opacity: 0.7;">📈</span>
+                </div>
                 <div><span class="dir-tag ${t.direction.toLowerCase()}" style="font-size: 9.5px;">${t.direction}</span></div>
               </td>
               <td>
