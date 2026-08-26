@@ -2577,14 +2577,108 @@
       font-size: 10px;
     }
 
+    .watchlist-sort-select-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #18202f;
+      border: 1px solid #28374e;
+      border-radius: 6px;
+      padding: 3px 8px;
+    }
+
+    .wl-sort-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #90a4ae;
+      white-space: nowrap;
+    }
+
+    .wl-sort-select {
+      background: transparent;
+      border: none;
+      color: #e2e8f0;
+      font-size: 11.5px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .wl-sort-select option {
+      background: #131822;
+      color: #ffffff;
+    }
+
+    .wl-card.chart-active {
+      border-color: #00e5ff;
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.28);
+      background: #121c2c;
+    }
+
+    .wl-rank-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #b0bec5;
+      display: inline-flex;
+      align-items: center;
+    }
+    .wl-rank-badge.top-gainer {
+      background: rgba(14, 203, 129, 0.18);
+      color: #0ecb81;
+      border: 1px solid rgba(14, 203, 129, 0.35);
+    }
+    .wl-rank-badge.top-loser {
+      background: rgba(246, 70, 93, 0.18);
+      color: #f6465d;
+      border: 1px solid rgba(246, 70, 93, 0.35);
+    }
+
+    .wl-badge-charting {
+      font-size: 9px;
+      font-weight: 800;
+      background: rgba(0, 229, 255, 0.2);
+      color: #00e5ff;
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
     .wl-card-footer {
       display: flex;
       gap: 6px;
       margin-top: 4px;
     }
 
+    .btn-wl-chart {
+      flex: 1;
+      background: rgba(0, 229, 255, 0.12);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .btn-wl-chart:hover {
+      background: var(--cyan);
+      color: #000;
+      border-color: var(--cyan);
+    }
+
     .btn-wl-load {
-      width: 100%;
+      flex: 1;
       background: rgba(247, 166, 0, 0.12);
       border: 1px solid rgba(247, 166, 0, 0.35);
       color: var(--accent-yellow);
@@ -3206,11 +3300,22 @@
           </span>
         </div>
         <div class="watchlist-actions">
+          <div class="watchlist-sort-select-wrap">
+            <span class="wl-sort-label">⇅ Sort:</span>
+            <select class="wl-sort-select" id="wlSortSelect" onchange="setWatchlistSort(this.value)">
+              <option value="chg_desc">🔥 24h % (High → Low)</option>
+              <option value="chg_asc">❄️ 24h % (Low → High)</option>
+              <option value="funding_desc">⚡ Funding Rate (High → Low)</option>
+              <option value="price_desc">💲 Price (High → Low)</option>
+              <option value="name_asc">🔤 Symbol (A → Z)</option>
+              <option value="custom">⭐ Default Watchlist</option>
+            </select>
+          </div>
           <div class="watchlist-filters">
             <button type="button" class="wl-filter-btn active" id="wlFilterAll" onclick="setWatchlistFilter('all', this)">All (<span id="wlCountAll">8</span>)</button>
-            <button type="button" class="wl-filter-btn" onclick="setWatchlistFilter('gainers', this)">🔥 Gainers</button>
-            <button type="button" class="wl-filter-btn" onclick="setWatchlistFilter('losers', this)">❄️ Losers</button>
-            <button type="button" class="wl-filter-btn" onclick="setWatchlistFilter('funding', this)">⚡ Funding</button>
+            <button type="button" class="wl-filter-btn" id="wlFilterGainers" onclick="setWatchlistFilter('gainers', this)">🔥 Gainers</button>
+            <button type="button" class="wl-filter-btn" id="wlFilterLosers" onclick="setWatchlistFilter('losers', this)">❄️ Losers</button>
+            <button type="button" class="wl-filter-btn" id="wlFilterFunding" onclick="setWatchlistFilter('funding', this)">⚡ Funding</button>
           </div>
           <button type="button" class="btn-action primary" onclick="openAddWatchlistModal()" style="font-size: 11.5px; padding: 5px 12px;">
             <span>➕</span> Add Coin
@@ -5732,6 +5837,7 @@
     window.liveMarketPrices = {};
     window.userWatchlist = JSON.parse(localStorage.getItem('bybit_watchlist_v1') || '["BTCUSDT", "ETHUSDT", "SOLUSDT", "SUIUSDT", "DOGEUSDT", "XRPUSDT", "PEPEUSDT", "KASUSDT"]');
     window.activeWatchlistFilter = 'all';
+    window.activeWatchlistSort = localStorage.getItem('bybit_wl_sort_v1') || 'chg_desc';
 
     /* Toast Notification */
     function showToast(msg) {
@@ -5905,39 +6011,134 @@
     }
 
     /* Watchlist UI Rendering & Management */
+    window.setWatchlistSort = function(sortVal) {
+      window.activeWatchlistSort = sortVal;
+      try {
+        localStorage.setItem('bybit_wl_sort_v1', sortVal);
+      } catch (e) {}
+      renderWatchlist();
+    };
+
+    window.setWatchlistFilter = function(filter, btn) {
+      window.activeWatchlistFilter = filter;
+      document.querySelectorAll('.wl-filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderWatchlist();
+    };
+
+    window.loadChartCoin = function(symbol, event) {
+      if (event) event.stopPropagation();
+      const cleanSym = (symbol || '').toUpperCase().trim();
+      const formattedSym = cleanSym.endsWith('USDT') ? cleanSym : `${cleanSym}USDT`;
+
+      // Load symbol into Chart visualizer
+      if (typeof loadChartSymbol === 'function') {
+        loadChartSymbol(formattedSym);
+      }
+
+      // Sync calculator inputs as well
+      const symInput = document.getElementById('coinSymbol');
+      if (symInput) symInput.value = cleanSym;
+
+      const liveData = window.liveMarketPrices[formattedSym] || window.liveMarketPrices[cleanSym];
+      if (liveData && liveData.price > 0) {
+        document.getElementById('entryPrice').value = liveData.price > 10 ? liveData.price.toFixed(2) : (liveData.price > 1 ? liveData.price.toFixed(4) : liveData.price.toFixed(5));
+      }
+      onRiskOrEntryChange();
+      fetchBybitTicker();
+      subscribeToBybitWsSymbols();
+      renderWatchlist();
+
+      showToast(`📈 Charting <strong>${formattedSym}</strong> in Dual Split View!`);
+      const chartSec = document.getElementById('interactiveChartSection');
+      if (chartSec) {
+        chartSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+
+    window.loadCoinToCalculator = function(symbol, event) {
+      if (event) event.stopPropagation();
+      const cleanSym = (symbol || '').toUpperCase().trim();
+      const formattedSym = cleanSym.endsWith('USDT') ? cleanSym : `${cleanSym}USDT`;
+      
+      document.getElementById('coinSymbol').value = cleanSym;
+      const liveData = window.liveMarketPrices[formattedSym] || window.liveMarketPrices[cleanSym];
+      if (liveData && liveData.price > 0) {
+        document.getElementById('entryPrice').value = liveData.price > 10 ? liveData.price.toFixed(2) : (liveData.price > 1 ? liveData.price.toFixed(4) : liveData.price.toFixed(5));
+      }
+
+      onRiskOrEntryChange();
+      fetchBybitTicker();
+      subscribeToBybitWsSymbols();
+      if (typeof loadChartSymbol === 'function') {
+        loadChartSymbol(formattedSym);
+      }
+      renderWatchlist();
+
+      showToast(`⚡ Loaded <strong>${cleanSym}</strong> into Position Calculator!`);
+      const calcBox = document.getElementById('coinSymbol');
+      if (calcBox) {
+        calcBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        calcBox.focus();
+      }
+    };
+
     function renderWatchlist() {
       const countElem = document.getElementById('wlCountAll');
       if (countElem) countElem.innerText = window.userWatchlist.length;
+
+      // Sync sort dropdown selection
+      const sortSelect = document.getElementById('wlSortSelect');
+      if (sortSelect && sortSelect.value !== window.activeWatchlistSort) {
+        sortSelect.value = window.activeWatchlistSort;
+      }
 
       const grid = document.getElementById('watchlistCardsGrid');
       if (!grid) return;
 
       let list = [...window.userWatchlist];
 
+      // 1. Filter
       if (window.activeWatchlistFilter === 'gainers') {
         list = list.filter(sym => {
           const d = window.liveMarketPrices[sym];
           return d && d.chgPct > 0;
-        }).sort((a, b) => {
-          const da = window.liveMarketPrices[a] ? window.liveMarketPrices[a].chgPct : 0;
-          const db = window.liveMarketPrices[b] ? window.liveMarketPrices[b].chgPct : 0;
-          return db - da;
         });
       } else if (window.activeWatchlistFilter === 'losers') {
         list = list.filter(sym => {
           const d = window.liveMarketPrices[sym];
           return d && d.chgPct < 0;
-        }).sort((a, b) => {
-          const da = window.liveMarketPrices[a] ? window.liveMarketPrices[a].chgPct : 0;
-          const db = window.liveMarketPrices[b] ? window.liveMarketPrices[b].chgPct : 0;
+        });
+      }
+
+      // 2. Sort
+      const sortMode = window.activeWatchlistSort || 'chg_desc';
+      if (sortMode === 'chg_desc') {
+        list.sort((a, b) => {
+          const da = window.liveMarketPrices[a] ? window.liveMarketPrices[a].chgPct : -9999;
+          const db = window.liveMarketPrices[b] ? window.liveMarketPrices[b].chgPct : -9999;
+          return db - da;
+        });
+      } else if (sortMode === 'chg_asc') {
+        list.sort((a, b) => {
+          const da = window.liveMarketPrices[a] ? window.liveMarketPrices[a].chgPct : 9999;
+          const db = window.liveMarketPrices[b] ? window.liveMarketPrices[b].chgPct : 9999;
           return da - db;
         });
-      } else if (window.activeWatchlistFilter === 'funding') {
+      } else if (sortMode === 'funding_desc') {
         list.sort((a, b) => {
-          const fa = window.liveMarketPrices[a] ? window.liveMarketPrices[a].fundingRate : 0;
-          const fb = window.liveMarketPrices[b] ? window.liveMarketPrices[b].fundingRate : 0;
+          const fa = window.liveMarketPrices[a] ? window.liveMarketPrices[a].fundingRate : -9999;
+          const fb = window.liveMarketPrices[b] ? window.liveMarketPrices[b].fundingRate : -9999;
           return fb - fa;
         });
+      } else if (sortMode === 'price_desc') {
+        list.sort((a, b) => {
+          const pa = window.liveMarketPrices[a] ? window.liveMarketPrices[a].price : 0;
+          const pb = window.liveMarketPrices[b] ? window.liveMarketPrices[b].price : 0;
+          return pb - pa;
+        });
+      } else if (sortMode === 'name_asc') {
+        list.sort((a, b) => a.localeCompare(b));
       }
 
       if (list.length === 0) {
@@ -5949,7 +6150,9 @@
         return;
       }
 
-      grid.innerHTML = list.map(sym => {
+      const activeChartSym = (typeof currentChartSymbol !== 'undefined' ? currentChartSymbol : '').toUpperCase();
+
+      grid.innerHTML = list.map((sym, idx) => {
         const d = window.liveMarketPrices[sym] || { price: 0, chgPct: 0, fundingRate: 0, high24h: 0, low24h: 0 };
         const priceStr = d.price > 1000 ? d.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) :
                          (d.price > 10 ? d.price.toFixed(2) :
@@ -5965,12 +6168,27 @@
         const lowStr = d.low24h > 1000 ? (d.low24h / 1000).toFixed(1) + 'k' : (d.low24h > 1 ? d.low24h.toFixed(2) : (d.low24h > 0 ? d.low24h.toFixed(4) : '—'));
         const highStr = d.high24h > 1000 ? (d.high24h / 1000).toFixed(1) + 'k' : (d.high24h > 1 ? d.high24h.toFixed(2) : (d.high24h > 0 ? d.high24h.toFixed(4) : '—'));
 
+        const isChartActive = (activeChartSym === sym || `${activeChartSym}USDT` === sym || activeChartSym === `${sym}USDT`);
+        const cardActiveCls = isChartActive ? 'chart-active' : '';
+
+        // Rank Badge
+        let rankBadge = '';
+        if (sortMode === 'chg_desc' || window.activeWatchlistFilter === 'gainers') {
+          rankBadge = `<span class="wl-rank-badge top-gainer">#${idx + 1}</span>`;
+        } else if (sortMode === 'chg_asc' || window.activeWatchlistFilter === 'losers') {
+          rankBadge = `<span class="wl-rank-badge top-loser">#${idx + 1}</span>`;
+        }
+
+        const chartBadge = isChartActive ? `<span class="wl-badge-charting">📊 On Chart</span>` : '';
+
         return `
-          <div class="wl-card" id="wl_card_${sym}" onclick="loadCoinToCalculator('${sym}')" title="Click to load into calculator">
+          <div class="wl-card ${cardActiveCls}" id="wl_card_${sym}" onclick="loadChartCoin('${sym}', event)" title="Click to view & chart ${sym}">
             <div class="wl-card-top">
               <div class="wl-sym-group">
+                ${rankBadge}
                 <span class="wl-sym">${sym}</span>
                 <span class="wl-badge-perp">PERP</span>
+                ${chartBadge}
               </div>
               <div class="wl-card-top-right">
                 <span class="wl-chg-badge ${chgClass}" id="wl_chg_${sym}">${chgStr}</span>
@@ -5993,44 +6211,13 @@
             </div>
 
             <div class="wl-card-footer">
-              <button type="button" class="btn-wl-load" onclick="loadCoinToCalculator('${sym}', event)">⚡ Load in Calc</button>
+              <button type="button" class="btn-wl-chart" onclick="loadChartCoin('${sym}', event)" title="Chart ${sym} on Dual Split View">📈 Chart</button>
+              <button type="button" class="btn-wl-load" onclick="loadCoinToCalculator('${sym}', event)" title="Calculate position size for ${sym}">⚡ Calc</button>
             </div>
           </div>
         `;
       }).join('');
     }
-
-    function setWatchlistFilter(filter, btn) {
-      window.activeWatchlistFilter = filter;
-      document.querySelectorAll('.wl-filter-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      renderWatchlist();
-    }
-
-    window.loadCoinToCalculator = function(symbol, event) {
-      if (event) event.stopPropagation();
-      const cleanSym = symbol.toUpperCase().trim();
-      document.getElementById('coinSymbol').value = cleanSym;
-
-      const liveData = window.liveMarketPrices[cleanSym];
-      if (liveData && liveData.price > 0) {
-        document.getElementById('entryPrice').value = liveData.price > 10 ? liveData.price.toFixed(2) : (liveData.price > 1 ? liveData.price.toFixed(4) : liveData.price.toFixed(5));
-      }
-
-      onRiskOrEntryChange();
-      fetchBybitTicker();
-      subscribeToBybitWsSymbols();
-      if (typeof loadChartSymbol === 'function') {
-        loadChartSymbol(cleanSym);
-      }
-      showToast(`⚡ Loaded <strong>${cleanSym}</strong> into Position Calculator!`);
-
-      const calcBox = document.getElementById('coinSymbol');
-      if (calcBox) {
-        calcBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        calcBox.focus();
-      }
-    };
 
     function openAddWatchlistModal() {
       document.getElementById('addWatchlistModal').classList.add('active');
@@ -6969,6 +7156,7 @@
       } else {
         renderTradingViewWidget(fmtSym);
       }
+      renderWatchlist();
     }
 
     function fitChartContent() {
