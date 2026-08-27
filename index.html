@@ -13,10 +13,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- TradingView Lightweight Charts & Advanced Widget SDKs -->
-  <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
-  <script src="https://s3.tradingview.com/tv.js"></script>
-  
   <style>
     :root {
       --bg-dark: #0b0e14;
@@ -2768,377 +2764,6 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* ============================================================ */
-    /* TRADINGVIEW REAL-TIME CHART & VISUAL TRADE PLANNER */
-    /* ============================================================ */
-    .chart-section {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-md);
-      margin-bottom: 24px;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      transition: all 0.3s ease;
-    }
-
-    .chart-header {
-      padding: 12px 18px;
-      background: rgba(11, 14, 20, 0.7);
-      border-bottom: 1px solid var(--card-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .chart-header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .chart-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--text-main);
-      letter-spacing: -0.2px;
-    }
-
-    .chart-symbol-badge {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--accent-yellow);
-      background: rgba(247, 166, 0, 0.12);
-      border: 1px solid rgba(247, 166, 0, 0.3);
-      padding: 3px 8px;
-      border-radius: var(--radius-sm);
-    }
-
-    .chart-header-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .chart-mode-pill-group {
-      display: inline-flex;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: var(--radius-sm);
-      padding: 2px;
-      gap: 2px;
-    }
-
-    .chart-mode-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 11.5px;
-      font-weight: 700;
-      padding: 5px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .chart-mode-btn.active {
-      background: var(--accent-yellow);
-      color: #000;
-      font-weight: 800;
-    }
-
-    .chart-tf-group {
-      display: inline-flex;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: var(--radius-sm);
-      padding: 2px;
-      gap: 2px;
-    }
-
-    .chart-tf-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11.5px;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .chart-tf-btn:hover {
-      color: #fff;
-    }
-
-    .chart-tf-btn.active {
-      background: rgba(41, 121, 255, 0.25);
-      color: #64b5f6;
-      border: 1px solid rgba(41, 121, 255, 0.4);
-    }
-
-    .btn-chart-tool {
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      color: var(--text-muted);
-      padding: 5px 10px;
-      border-radius: var(--radius-sm);
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
-    }
-
-    .btn-chart-tool:hover {
-      background: #252f42;
-      color: #fff;
-      border-color: #4b5563;
-    }
-
-    .chart-body-wrapper {
-      position: relative;
-      width: 100%;
-      height: 480px;
-      background: #0d1117;
-      transition: height 0.2s ease;
-    }
-
-    #lightweightChartContainer {
-      width: 100%;
-      height: 100%;
-    }
-
-    #dualChartContainer {
-      width: 100%;
-      height: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      padding: 8px;
-      box-sizing: border-box;
-    }
-
-    @media (max-width: 900px) {
-      .chart-body-wrapper.dual-active {
-        height: 800px;
-      }
-      #dualChartContainer {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .dual-pane {
-      display: flex;
-      flex-direction: column;
-      background: #0b0e14;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      overflow: hidden;
-      position: relative;
-      height: 100%;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    }
-
-    .dual-pane-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 6px 12px;
-      background: rgba(22, 27, 34, 0.95);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 11px;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-
-    .dual-pane-title {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text-muted);
-    }
-
-    .dual-pane-name {
-      color: #fff;
-    }
-
-    .dual-badge-drag {
-      font-size: 9.5px;
-      padding: 2px 6px;
-      background: rgba(0, 229, 255, 0.15);
-      color: #00e5ff;
-      border: 1px solid rgba(0, 229, 255, 0.3);
-      border-radius: 4px;
-      font-weight: 700;
-    }
-
-    .dual-chart-canvas-wrap {
-      flex: 1;
-      position: relative;
-      width: 100%;
-      height: calc(100% - 35px);
-      min-height: 250px;
-    }
-
-    .dual-canvas {
-      width: 100%;
-      height: 100%;
-    }
-
-    #tradingviewWidgetContainer {
-      width: 100%;
-      height: 100%;
-      display: none;
-    }
-
-    .chart-ohlc-legend {
-      position: absolute;
-      top: 10px;
-      left: 14px;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11.5px;
-      color: var(--text-muted);
-      pointer-events: none;
-      background: rgba(13, 17, 23, 0.88);
-      padding: 4px 10px;
-      border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(4px);
-      flex-wrap: wrap;
-    }
-
-    .chart-ohlc-legend.dual-legend {
-      top: 6px;
-      left: 8px;
-      font-size: 10px;
-      gap: 6px;
-      padding: 2px 8px;
-    }
-
-    .chart-ohlc-item span {
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .chart-setup-legend-bar {
-      padding: 10px 16px;
-      background: rgba(11, 14, 20, 0.85);
-      border-top: 1px solid var(--card-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-      font-size: 12px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .chart-setup-pills {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .chart-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-weight: 700;
-      font-size: 11px;
-    }
-
-    .chart-pill.entry {
-      background: rgba(0, 229, 255, 0.12);
-      color: #00e5ff;
-      border: 1px solid rgba(0, 229, 255, 0.35);
-    }
-
-    .chart-pill.sl {
-      background: rgba(246, 70, 93, 0.12);
-      color: #f6465d;
-      border: 1px solid rgba(246, 70, 93, 0.35);
-    }
-
-    .chart-pill.tp1 {
-      background: rgba(14, 203, 129, 0.1);
-      color: #0ecb81;
-      border: 1px solid rgba(14, 203, 129, 0.3);
-    }
-
-    .chart-pill.tp2 {
-      background: rgba(14, 203, 129, 0.14);
-      color: #0ecb81;
-      border: 1px solid rgba(14, 203, 129, 0.4);
-    }
-
-    .chart-pill.tp3 {
-      background: rgba(14, 203, 129, 0.2);
-      color: #0ecb81;
-      border: 1px solid rgba(14, 203, 129, 0.5);
-    }
-
-    .chart-pill.target-tp {
-      background: rgba(247, 166, 0, 0.15);
-      color: #f7a600;
-      border: 1px solid rgba(247, 166, 0, 0.4);
-    }
-
-    .chart-pill.be {
-      background: rgba(56, 189, 248, 0.12);
-      color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.35);
-    }
-
-    .chart-pill.liq {
-      background: rgba(168, 85, 247, 0.12);
-      color: #c084fc;
-      border: 1px solid rgba(168, 85, 247, 0.3);
-    }
-
-    /* Chart Drag-and-Drop HUD Tooltip */
-    .chart-drag-tooltip {
-      position: absolute;
-      display: none;
-      z-index: 50;
-      pointer-events: none;
-      background: rgba(13, 17, 23, 0.95);
-      border: 1px solid #00e5ff;
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(4px);
-      white-space: nowrap;
-      transition: opacity 0.1s ease;
-    }
-
-    .drag-active-line {
-      cursor: ns-resize !important;
-    }
-
     /* Trailing Stop & Breakeven Safety Cockpit Card */
     .breakeven-cockpit-card {
       background: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
@@ -3260,13 +2885,6 @@
       color: #8b98af;
       margin-top: 3px;
       line-height: 1.3;
-    }
-
-    .chart-section.collapsed .chart-body-wrapper,
-    .chart-section.collapsed .chart-setup-legend-bar {
-      display: none;
-    }
-
     footer {
       margin-top: 40px;
       text-align: center;
@@ -3977,145 +3595,6 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- REAL-TIME TRADINGVIEW CHART & VISUAL TRADE PLANNER -->
-    <!-- ============================================================ -->
-    <div class="chart-section" id="interactiveChartSection">
-      <div class="chart-header">
-        <div class="chart-header-left">
-          <div class="chart-title">
-            <span>📈</span> Real-Time Chart & Trade Setup Visualizer
-          </div>
-          <span class="chart-symbol-badge" id="chartActiveSymbol">KASUSDT PERP</span>
-          <div class="chart-mode-pill-group">
-            <button type="button" class="chart-mode-btn active" id="btnChartModeDual" onclick="setChartMode('dual')">
-              <span>🔲</span> Dual Split (1H + 5m)
-            </button>
-            <button type="button" class="chart-mode-btn" id="btnChartModeVisual" onclick="setChartMode('visual')">
-              <span>⚡</span> Single (Visual)
-            </button>
-            <button type="button" class="chart-mode-btn" id="btnChartModeAdvanced" onclick="setChartMode('advanced')">
-              <span>📊</span> TradingView Advanced
-            </button>
-          </div>
-        </div>
-
-        <div class="chart-header-controls">
-          <!-- Timeframe Selector for Single Mode -->
-          <div class="chart-tf-group" id="chartTfGroup" style="display: none;">
-            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('1', this)">1m</button>
-            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('5', this)">5m</button>
-            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('15', this)">15m</button>
-            <button type="button" class="chart-tf-btn active" onclick="setChartTimeframe('60', this)">1H</button>
-            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('240', this)">4H</button>
-            <button type="button" class="chart-tf-btn" onclick="setChartTimeframe('D', this)">1D</button>
-          </div>
-
-          <button type="button" class="btn-chart-tool" onclick="fitChartContent()" title="Fit Chart Scale">
-            <span>⤢</span> Fit
-          </button>
-          <button type="button" class="btn-chart-tool" onclick="useLivePriceAsEntry()" title="Snap Entry Price to Live Market Price">
-            <span>🎯</span> Snap Entry
-          </button>
-          <button type="button" class="btn-chart-tool" id="btnToggleChartCollapse" onclick="toggleChartSection()" title="Collapse/Expand Chart">
-            <span id="chartCollapseIcon">−</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Chart Display Area -->
-      <div class="chart-body-wrapper dual-active" id="chartBodyWrapper">
-        <!-- Dual Split Chart Container (HTF 1H + LTF 5m) -->
-        <div id="dualChartContainer">
-          <!-- Left Pane: HTF (Market Structure) -->
-          <div class="dual-pane" id="dualPaneHTF">
-            <div class="dual-pane-header">
-              <div class="dual-pane-title">
-                <span class="dual-pane-icon">🏛️</span>
-                <span class="dual-pane-name">Higher Timeframe (Structure)</span>
-              </div>
-              <div class="chart-tf-group">
-                <button type="button" class="chart-tf-btn active" id="btnHtf60" onclick="setDualTf('HTF', '60', this)">1H</button>
-                <button type="button" class="chart-tf-btn" id="btnHtf240" onclick="setDualTf('HTF', '240', this)">4H</button>
-                <button type="button" class="chart-tf-btn" id="btnHtfD" onclick="setDualTf('HTF', 'D', this)">1D</button>
-              </div>
-            </div>
-            <div class="dual-chart-canvas-wrap">
-              <div class="chart-ohlc-legend dual-legend" id="legendHTF">
-                <div class="chart-ohlc-item">O: <span id="legO_HTF">—</span></div>
-                <div class="chart-ohlc-item">H: <span id="legH_HTF">—</span></div>
-                <div class="chart-ohlc-item">L: <span id="legL_HTF">—</span></div>
-                <div class="chart-ohlc-item">C: <span id="legC_HTF">—</span></div>
-                <div class="chart-ohlc-item">Chg: <span id="legChg_HTF">—</span></div>
-              </div>
-              <div id="canvasContainerHTF" class="dual-canvas"></div>
-            </div>
-          </div>
-
-          <!-- Right Pane: LTF (Execution & Drag-and-Drop) -->
-          <div class="dual-pane" id="dualPaneLTF">
-            <div class="dual-pane-header">
-              <div class="dual-pane-title">
-                <span class="dual-pane-icon">🎯</span>
-                <span class="dual-pane-name">Lower Timeframe (Execution)</span>
-                <span class="dual-badge-drag">🖱️ Interactive Drag</span>
-              </div>
-              <div class="chart-tf-group">
-                <button type="button" class="chart-tf-btn" id="btnLtf1" onclick="setDualTf('LTF', '1', this)">1m</button>
-                <button type="button" class="chart-tf-btn active" id="btnLtf5" onclick="setDualTf('LTF', '5', this)">5m</button>
-                <button type="button" class="chart-tf-btn" id="btnLtf15" onclick="setDualTf('LTF', '15', this)">15m</button>
-              </div>
-            </div>
-            <div class="dual-chart-canvas-wrap">
-              <div class="chart-ohlc-legend dual-legend" id="legendLTF">
-                <div class="chart-ohlc-item">O: <span id="legO_LTF">—</span></div>
-                <div class="chart-ohlc-item">H: <span id="legH_LTF">—</span></div>
-                <div class="chart-ohlc-item">L: <span id="legL_LTF">—</span></div>
-                <div class="chart-ohlc-item">C: <span id="legC_LTF">—</span></div>
-                <div class="chart-ohlc-item">Chg: <span id="legChg_LTF">—</span></div>
-              </div>
-              <div id="canvasContainerLTF" class="dual-canvas"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Single Lightweight Charts Canvas Container -->
-        <div id="lightweightChartContainer" style="display: none;">
-          <!-- Live OHLC Header Legend for Single -->
-          <div class="chart-ohlc-legend" id="chartOhlcLegend">
-            <div class="chart-ohlc-item">O: <span id="legO">—</span></div>
-            <div class="chart-ohlc-item">H: <span id="legH">—</span></div>
-            <div class="chart-ohlc-item">L: <span id="legL">—</span></div>
-            <div class="chart-ohlc-item">C: <span id="legC">—</span></div>
-            <div class="chart-ohlc-item">Chg: <span id="legChg">—</span></div>
-          </div>
-        </div>
-
-        <!-- TradingView Full Widget Container -->
-        <div id="tradingviewWidgetContainer">
-          <div id="tradingview_advanced_chart" style="width: 100%; height: 100%;"></div>
-        </div>
-      </div>
-
-      <!-- Live Setup Legend Bar (Entry, SL, TP1, TP2, TP3, Target TP, Breakeven, Liq) -->
-      <div class="chart-setup-legend-bar" id="chartSetupLegendBar">
-        <div class="chart-setup-pills">
-          <span class="chart-pill entry" id="pillEntry">🔵 Entry: <strong id="pillEntryVal">—</strong></span>
-          <span class="chart-pill sl" id="pillSl">🔴 Stop Loss: <strong id="pillSlVal">—</strong></span>
-          <span class="chart-pill be" id="pillBe" title="Fee-Covered Breakeven Price">🛡️ Breakeven: <strong id="pillBeVal">—</strong></span>
-          <span class="chart-pill tp1" id="pillTp1">🟢 TP 1R: <strong id="pillTp1Val">—</strong></span>
-          <span class="chart-pill tp2" id="pillTp2">🟢 TP 2R: <strong id="pillTp2Val">—</strong></span>
-          <span class="chart-pill tp3" id="pillTp3">🟢 TP 3R: <strong id="pillTp3Val">—</strong></span>
-          <span class="chart-pill target-tp" id="pillTargetTp">🎯 Target TP: <strong id="pillTargetTpVal">—</strong></span>
-          <span class="chart-pill liq" id="pillLiq">⚡ Liq: <strong id="pillLiqVal">—</strong></span>
-        </div>
-        <div style="font-size: 11px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-          <span style="color: #00e5ff; font-weight: 700;">🖱️ Drag & Drop Entry / SL / TP lines on chart</span>
-          <span style="color: var(--text-muted);">• Dynamic RRR & Lot Sync</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============================================================ -->
     <!-- MODAL: ADD / EDIT TRADE (MULTI-TIMEFRAME & PSYCHOLOGY) -->
     <!-- ============================================================ -->
     <div class="modal-overlay" id="tradeModal">
@@ -4739,11 +4218,6 @@
     function onSymbolChange() {
       clearTimeout(symbolFetchTimeout);
       symbolFetchTimeout = setTimeout(() => {
-        const rawSym = (document.getElementById('coinSymbol').value || '').toUpperCase().trim();
-        const formattedSym = normalizeSymbol(rawSym);
-        if (typeof loadChartSymbol === 'function') {
-          loadChartSymbol(formattedSym);
-        }
         fetchBybitTicker();
       }, 350);
     }
@@ -4804,9 +4278,6 @@
             document.getElementById('liveStatusHint').innerText = '🟢 Bybit Live';
             document.getElementById('liveStatusHint').style.color = '#0ecb81';
 
-            if (typeof updateLiveCandleTick === 'function') {
-              updateLiveCandleTick(formattedSym, lastPrice);
-            }
             return; // Successful fetch
           }
         } catch (err) {
@@ -5045,9 +4516,6 @@
       safetyText.innerHTML = safetyMsg;
 
       updateLadder(EP, SL, TP, LP, actualNetProfit, actualNetLoss, isSafe);
-      if (typeof updateChartPriceLines === 'function') {
-        updateChartPriceLines();
-      }
       saveCalculatorDraft();
     }
 
@@ -6070,11 +5538,6 @@
                 document.getElementById('liveFundingDisplay').innerText = `⚡ ${fr >= 0 ? '+' : ''}${fr.toFixed(4)}%`;
               }
 
-              // Update active chart candle tick in real time
-              if (typeof updateLiveCandleTick === 'function' && newPrice > 0) {
-                updateLiveCandleTick(sym, newPrice);
-              }
-
               // Re-render open trades in journal if any trade matches this symbol
               if (window.tradesData && window.tradesData.some(tr => normalizeSymbol(tr.symbol) === sym)) {
                 if (window.currentJournalView === 'table' || window.currentJournalView === 'gallery') {
@@ -6146,16 +5609,10 @@
       renderWatchlist();
     };
 
-    window.loadChartCoin = function(symbol, event) {
+    window.loadCoinToCalculator = function(symbol, event) {
       if (event) event.stopPropagation();
       const cleanSym = normalizeSymbol(symbol || 'BTCUSDT');
-
-      // Load symbol into Chart visualizer
-      if (typeof loadChartSymbol === 'function') {
-        loadChartSymbol(cleanSym);
-      }
-
-      // Sync calculator inputs as well
+      
       const symInput = document.getElementById('coinSymbol');
       if (symInput) symInput.value = cleanSym;
 
@@ -6165,36 +5622,10 @@
       } else {
         fetchSingleSymbolPrice(cleanSym);
       }
-      onRiskOrEntryChange();
-      fetchBybitTicker();
-      subscribeToBybitWsSymbols();
-      renderWatchlist();
-
-      showToast(`📈 Charting <strong>${cleanSym}</strong> in Dual Split View!`);
-      const chartSec = document.getElementById('interactiveChartSection');
-      if (chartSec) {
-        chartSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    };
-
-    window.loadCoinToCalculator = function(symbol, event) {
-      if (event) event.stopPropagation();
-      const cleanSym = normalizeSymbol(symbol || 'BTCUSDT');
-      
-      document.getElementById('coinSymbol').value = cleanSym;
-      const liveData = window.liveMarketPrices[cleanSym];
-      if (liveData && liveData.price > 0) {
-        document.getElementById('entryPrice').value = liveData.price > 10 ? liveData.price.toFixed(2) : (liveData.price > 1 ? liveData.price.toFixed(4) : liveData.price.toFixed(5));
-      } else {
-        fetchSingleSymbolPrice(cleanSym);
-      }
 
       onRiskOrEntryChange();
       fetchBybitTicker();
       subscribeToBybitWsSymbols();
-      if (typeof loadChartSymbol === 'function') {
-        loadChartSymbol(cleanSym);
-      }
       renderWatchlist();
 
       showToast(`⚡ Loaded <strong>${cleanSym}</strong> into Position Calculator!`);
@@ -6204,6 +5635,8 @@
         calcBox.focus();
       }
     };
+
+    window.loadChartCoin = window.loadCoinToCalculator;
 
     function renderWatchlist() {
       const countElem = document.getElementById('wlCountAll');
@@ -6237,27 +5670,27 @@
       const sortMode = window.activeWatchlistSort || 'chg_desc';
       if (sortMode === 'chg_desc') {
         list.sort((a, b) => {
-          const da = window.liveMarketPrices[a] ? window.liveMarketPrices[a].chgPct : -9999;
-          const db = window.liveMarketPrices[b] ? window.liveMarketPrices[b].chgPct : -9999;
-          return db - da;
+          const ca = window.liveMarketPrices[a] ? window.liveMarketPrices[a].chgPct : -9999;
+          const cb = window.liveMarketPrices[b] ? window.liveMarketPrices[b].chgPct : -9999;
+          return cb - ca;
         });
       } else if (sortMode === 'chg_asc') {
         list.sort((a, b) => {
-          const da = window.liveMarketPrices[a] ? window.liveMarketPrices[a].chgPct : 9999;
-          const db = window.liveMarketPrices[b] ? window.liveMarketPrices[b].chgPct : 9999;
-          return da - db;
+          const ca = window.liveMarketPrices[a] ? window.liveMarketPrices[a].chgPct : 9999;
+          const cb = window.liveMarketPrices[b] ? window.liveMarketPrices[b].chgPct : 9999;
+          return ca - cb;
+        });
+      } else if (sortMode === 'vol_desc') {
+        list.sort((a, b) => {
+          const pa = window.liveMarketPrices[a] ? window.liveMarketPrices[a].price : 0;
+          const pb = window.liveMarketPrices[b] ? window.liveMarketPrices[b].price : 0;
+          return pb - pa;
         });
       } else if (sortMode === 'funding_desc') {
         list.sort((a, b) => {
           const fa = window.liveMarketPrices[a] ? window.liveMarketPrices[a].fundingRate : -9999;
           const fb = window.liveMarketPrices[b] ? window.liveMarketPrices[b].fundingRate : -9999;
           return fb - fa;
-        });
-      } else if (sortMode === 'price_desc') {
-        list.sort((a, b) => {
-          const pa = window.liveMarketPrices[a] ? window.liveMarketPrices[a].price : 0;
-          const pb = window.liveMarketPrices[b] ? window.liveMarketPrices[b].price : 0;
-          return pb - pa;
         });
       } else if (sortMode === 'name_asc') {
         list.sort((a, b) => a.localeCompare(b));
@@ -6272,7 +5705,8 @@
         return;
       }
 
-      const activeChartSym = (typeof currentChartSymbol !== 'undefined' ? currentChartSymbol : '').toUpperCase();
+      const rawCalcSym = document.getElementById('coinSymbol') ? document.getElementById('coinSymbol').value : '';
+      const activeCalcSym = normalizeSymbol(rawCalcSym || '');
 
       grid.innerHTML = list.map((sym, idx) => {
         const d = window.liveMarketPrices[sym] || { price: 0, chgPct: 0, fundingRate: 0, high24h: 0, low24h: 0 };
@@ -6290,8 +5724,8 @@
         const lowStr = d.low24h > 1000 ? (d.low24h / 1000).toFixed(1) + 'k' : (d.low24h > 1 ? d.low24h.toFixed(2) : (d.low24h > 0 ? d.low24h.toFixed(4) : '—'));
         const highStr = d.high24h > 1000 ? (d.high24h / 1000).toFixed(1) + 'k' : (d.high24h > 1 ? d.high24h.toFixed(2) : (d.high24h > 0 ? d.high24h.toFixed(4) : '—'));
 
-        const isChartActive = (activeChartSym === sym || `${activeChartSym}USDT` === sym || activeChartSym === `${sym}USDT`);
-        const cardActiveCls = isChartActive ? 'chart-active' : '';
+        const isCalcActive = (activeCalcSym === sym || `${activeCalcSym}USDT` === sym || activeCalcSym === `${sym}USDT`);
+        const cardActiveCls = isCalcActive ? 'chart-active' : '';
 
         // Rank Badge
         let rankBadge = '';
@@ -6301,16 +5735,16 @@
           rankBadge = `<span class="wl-rank-badge top-loser">#${idx + 1}</span>`;
         }
 
-        const chartBadge = isChartActive ? `<span class="wl-badge-charting">📊 On Chart</span>` : '';
+        const activeBadge = isCalcActive ? `<span class="wl-badge-charting">⚡ Active</span>` : '';
 
         return `
-          <div class="wl-card ${cardActiveCls}" id="wl_card_${sym}" onclick="loadChartCoin('${sym}', event)" title="Click to view & chart ${sym}">
+          <div class="wl-card ${cardActiveCls}" id="wl_card_${sym}" onclick="loadCoinToCalculator('${sym}', event)" title="Click to load ${sym} into Position Calculator">
             <div class="wl-card-top">
               <div class="wl-sym-group">
                 ${rankBadge}
                 <span class="wl-sym">${sym}</span>
                 <span class="wl-badge-perp">PERP</span>
-                ${chartBadge}
+                ${activeBadge}
               </div>
               <div class="wl-card-top-right">
                 <span class="wl-chg-badge ${chgClass}" id="wl_chg_${sym}">${chgStr}</span>
@@ -6333,8 +5767,7 @@
             </div>
 
             <div class="wl-card-footer">
-              <button type="button" class="btn-wl-chart" onclick="loadChartCoin('${sym}', event)" title="Chart ${sym} on Dual Split View">📈 Chart</button>
-              <button type="button" class="btn-wl-load" onclick="loadCoinToCalculator('${sym}', event)" title="Calculate position size for ${sym}">⚡ Calc</button>
+              <button type="button" class="btn-wl-load" style="width: 100%;" onclick="loadCoinToCalculator('${sym}', event)" title="Load ${sym} into Position Calculator">⚡ Load into Calculator</button>
             </div>
           </div>
         `;
@@ -6448,861 +5881,6 @@
         } catch (err) {
           // Try next mirror
         }
-      }
-    }
-
-    /* ============================================================ */
-    /* 8. REAL-TIME TRADINGVIEW CHART & VISUAL TRADE PLANNER ENGINE */
-    /* ============================================================ */
-    let currentChartSymbol = 'KASUSDT';
-    let currentChartMode = 'dual'; // 'dual' | 'visual' | 'advanced'
-
-    // Single Chart State
-    let tvChart = null;
-    let candleSeries = null;
-    let chartPriceLines = [];
-    let currentChartTimeframe = '60';
-    let lastCandle = null;
-    let chartKlinesList = [];
-
-    // Dual Chart State (HTF 1H + LTF 5m)
-    let tvChartHTF = null;
-    let candleSeriesHTF = null;
-    let chartPriceLinesHTF = [];
-    let currentTfHTF = '60'; // 1H
-    let lastCandleHTF = null;
-
-    let tvChartLTF = null;
-    let candleSeriesLTF = null;
-    let chartPriceLinesLTF = [];
-    let currentTfLTF = '5'; // 5m
-    let lastCandleLTF = null;
-
-    function initInteractiveChart() {
-      if (typeof LightweightCharts === 'undefined') return;
-
-      const sym = (document.getElementById('coinSymbol').value || 'KASUSDT').toUpperCase().trim();
-      currentChartSymbol = sym.endsWith('USDT') ? sym : `${sym}USDT`;
-      const badge = document.getElementById('chartActiveSymbol');
-      if (badge) badge.innerText = `${currentChartSymbol} PERP`;
-
-      if (currentChartMode === 'dual') {
-        initDualCharts();
-      } else if (currentChartMode === 'visual') {
-        initSingleChart();
-      } else if (currentChartMode === 'advanced') {
-        renderTradingViewWidget(currentChartSymbol);
-      }
-    }
-
-    function getChartThemeOptions(container) {
-      return {
-        width: container.clientWidth || 400,
-        height: container.clientHeight || 420,
-        layout: {
-          background: { color: '#0b0e14' },
-          textColor: '#8b98af',
-          fontFamily: "'JetBrains Mono', 'Inter', monospace",
-          fontSize: 11
-        },
-        grid: {
-          vertLines: { color: 'rgba(38, 45, 61, 0.4)' },
-          horzLines: { color: 'rgba(38, 45, 61, 0.4)' }
-        },
-        crosshair: {
-          mode: LightweightCharts.CrosshairMode.Normal,
-          vertLine: {
-            color: 'rgba(247, 166, 0, 0.5)',
-            width: 1,
-            style: LightweightCharts.LineStyle.Dashed,
-            labelBackgroundColor: '#f7a600'
-          },
-          horzLine: {
-            color: 'rgba(247, 166, 0, 0.5)',
-            width: 1,
-            style: LightweightCharts.LineStyle.Dashed,
-            labelBackgroundColor: '#f7a600'
-          }
-        },
-        rightPriceScale: {
-          borderColor: '#262d3d',
-          scaleMargins: {
-            top: 0.12,
-            bottom: 0.15
-          }
-        },
-        timeScale: {
-          borderColor: '#262d3d',
-          timeVisible: true,
-          secondsVisible: false
-        }
-      };
-    }
-
-    function initDualCharts() {
-      const containerHTF = document.getElementById('canvasContainerHTF');
-      const containerLTF = document.getElementById('canvasContainerLTF');
-      if (!containerHTF || !containerLTF) return;
-
-      // 1. Higher Timeframe (Structure)
-      if (!tvChartHTF) {
-        containerHTF.innerHTML = '';
-        tvChartHTF = LightweightCharts.createChart(containerHTF, getChartThemeOptions(containerHTF));
-        candleSeriesHTF = tvChartHTF.addCandlestickSeries({
-          upColor: '#0ecb81',
-          downColor: '#f6465d',
-          borderUpColor: '#0ecb81',
-          borderDownColor: '#f6465d',
-          wickUpColor: '#0ecb81',
-          wickDownColor: '#f6465d'
-        });
-
-        tvChartHTF.subscribeCrosshairMove(param => {
-          updateDualLegend('HTF', param);
-        });
-
-        if (window.ResizeObserver) {
-          const roHTF = new ResizeObserver(entries => {
-            if (!entries || entries.length === 0) return;
-            const { width, height } = entries[0].contentRect;
-            if (tvChartHTF && width > 0 && height > 0) tvChartHTF.applyOptions({ width, height });
-          });
-          roHTF.observe(containerHTF);
-        }
-      }
-
-      // 2. Lower Timeframe (Execution)
-      if (!tvChartLTF) {
-        containerLTF.innerHTML = '';
-        tvChartLTF = LightweightCharts.createChart(containerLTF, getChartThemeOptions(containerLTF));
-        candleSeriesLTF = tvChartLTF.addCandlestickSeries({
-          upColor: '#0ecb81',
-          downColor: '#f6465d',
-          borderUpColor: '#0ecb81',
-          borderDownColor: '#f6465d',
-          wickUpColor: '#0ecb81',
-          wickDownColor: '#f6465d'
-        });
-
-        tvChartLTF.subscribeCrosshairMove(param => {
-          updateDualLegend('LTF', param);
-        });
-
-        setupChartDragAndDrop(containerLTF);
-
-        if (window.ResizeObserver) {
-          const roLTF = new ResizeObserver(entries => {
-            if (!entries || entries.length === 0) return;
-            const { width, height } = entries[0].contentRect;
-            if (tvChartLTF && width > 0 && height > 0) tvChartLTF.applyOptions({ width, height });
-          });
-          roLTF.observe(containerLTF);
-        }
-      }
-
-      fetchDualKlines('HTF', currentChartSymbol, currentTfHTF);
-      fetchDualKlines('LTF', currentChartSymbol, currentTfLTF);
-    }
-
-    function initSingleChart() {
-      const container = document.getElementById('lightweightChartContainer');
-      if (!container || typeof LightweightCharts === 'undefined') return;
-
-      if (!tvChart) {
-        container.innerHTML = '';
-        tvChart = LightweightCharts.createChart(container, getChartThemeOptions(container));
-        candleSeries = tvChart.addCandlestickSeries({
-          upColor: '#0ecb81',
-          downColor: '#f6465d',
-          borderUpColor: '#0ecb81',
-          borderDownColor: '#f6465d',
-          wickUpColor: '#0ecb81',
-          wickDownColor: '#f6465d'
-        });
-
-        if (window.ResizeObserver) {
-          const ro = new ResizeObserver(entries => {
-            if (!entries || entries.length === 0) return;
-            const { width, height } = entries[0].contentRect;
-            if (tvChart && width > 0 && height > 0) {
-              tvChart.applyOptions({ width, height });
-            }
-          });
-          ro.observe(container);
-        }
-
-        tvChart.subscribeCrosshairMove(param => {
-          updateChartLegend(param);
-        });
-
-        setupChartDragAndDrop(container);
-      }
-
-      fetchChartKlines(currentChartSymbol, currentChartTimeframe);
-    }
-
-    async function fetchChartKlines(symbol, timeframe) {
-      const cleanSym = (symbol || 'BTCUSDT').toUpperCase().trim();
-      const fmtSym = cleanSym.endsWith('USDT') ? cleanSym : `${cleanSym}USDT`;
-      currentChartSymbol = fmtSym;
-
-      const badge = document.getElementById('chartActiveSymbol');
-      if (badge) badge.innerText = `${fmtSym} PERP`;
-
-      const urls = [
-        `https://api.bytick.com/v5/market/kline?category=linear&symbol=${fmtSym}&interval=${timeframe}&limit=200`,
-        `https://api.bybit.com/v5/market/kline?category=linear&symbol=${fmtSym}&interval=${timeframe}&limit=200`,
-        `https://api.bybit-global.com/v5/market/kline?category=linear&symbol=${fmtSym}&interval=${timeframe}&limit=200`
-      ];
-
-      for (const url of urls) {
-        try {
-          const res = await fetch(url);
-          if (!res.ok) continue;
-          const data = await res.json();
-          if (data.retCode === 0 && data.result && Array.isArray(data.result.list)) {
-            const rawList = data.result.list;
-            const candles = rawList.map(item => ({
-              time: Math.floor(parseInt(item[0], 10) / 1000),
-              open: parseFloat(item[1]),
-              high: parseFloat(item[2]),
-              low: parseFloat(item[3]),
-              close: parseFloat(item[4])
-            })).sort((a, b) => a.time - b.time);
-
-            chartKlinesList = candles;
-            if (candles.length > 0) {
-              lastCandle = { ...candles[candles.length - 1] };
-              if (candleSeries && tvChart) {
-                candleSeries.setData(candles);
-                tvChart.timeScale().fitContent();
-                setLegendValues(lastCandle.open, lastCandle.high, lastCandle.low, lastCandle.close);
-              }
-              updateChartPriceLines();
-            }
-            return;
-          }
-        } catch (e) {}
-      }
-    }
-
-    async function fetchDualKlines(pane, symbol, timeframe) {
-      const cleanSym = (symbol || 'BTCUSDT').toUpperCase().trim();
-      const fmtSym = cleanSym.endsWith('USDT') ? cleanSym : `${cleanSym}USDT`;
-      currentChartSymbol = fmtSym;
-
-      const badge = document.getElementById('chartActiveSymbol');
-      if (badge) badge.innerText = `${fmtSym} PERP`;
-
-      const urls = [
-        `https://api.bytick.com/v5/market/kline?category=linear&symbol=${fmtSym}&interval=${timeframe}&limit=200`,
-        `https://api.bybit.com/v5/market/kline?category=linear&symbol=${fmtSym}&interval=${timeframe}&limit=200`,
-        `https://api.bybit-global.com/v5/market/kline?category=linear&symbol=${fmtSym}&interval=${timeframe}&limit=200`
-      ];
-
-      for (const url of urls) {
-        try {
-          const res = await fetch(url);
-          if (!res.ok) continue;
-          const data = await res.json();
-          if (data.retCode === 0 && data.result && Array.isArray(data.result.list)) {
-            const rawList = data.result.list;
-            const candles = rawList.map(item => ({
-              time: Math.floor(parseInt(item[0], 10) / 1000),
-              open: parseFloat(item[1]),
-              high: parseFloat(item[2]),
-              low: parseFloat(item[3]),
-              close: parseFloat(item[4])
-            })).sort((a, b) => a.time - b.time);
-
-            if (candles.length > 0) {
-              const last = { ...candles[candles.length - 1] };
-              if (pane === 'HTF' && candleSeriesHTF && tvChartHTF) {
-                lastCandleHTF = last;
-                candleSeriesHTF.setData(candles);
-                tvChartHTF.timeScale().fitContent();
-                setDualLegendValues('HTF', last.open, last.high, last.low, last.close);
-              } else if (pane === 'LTF' && candleSeriesLTF && tvChartLTF) {
-                lastCandleLTF = last;
-                candleSeriesLTF.setData(candles);
-                tvChartLTF.timeScale().fitContent();
-                setDualLegendValues('LTF', last.open, last.high, last.low, last.close);
-              }
-              updateChartPriceLines();
-            }
-            return;
-          }
-        } catch (e) {}
-      }
-    }
-
-    function setDualTf(pane, tf, btn) {
-      if (pane === 'HTF') {
-        currentTfHTF = tf;
-        document.querySelectorAll('#dualPaneHTF .chart-tf-btn').forEach(b => b.classList.remove('active'));
-        if (btn) btn.classList.add('active');
-        fetchDualKlines('HTF', currentChartSymbol, tf);
-      } else {
-        currentTfLTF = tf;
-        document.querySelectorAll('#dualPaneLTF .chart-tf-btn').forEach(b => b.classList.remove('active'));
-        if (btn) btn.classList.add('active');
-        fetchDualKlines('LTF', currentChartSymbol, tf);
-      }
-    }
-
-    function updateLiveCandleTick(sym, lastPrice) {
-      if (!lastPrice) return;
-      const cleanSym = (sym || '').toUpperCase().trim();
-      const fmtSym = cleanSym.endsWith('USDT') ? cleanSym : `${cleanSym}USDT`;
-      if (fmtSym !== currentChartSymbol) return;
-
-      // Update Single chart
-      if (candleSeries && lastCandle) {
-        lastCandle.high = Math.max(lastCandle.high, lastPrice);
-        lastCandle.low = Math.min(lastCandle.low, lastPrice);
-        lastCandle.close = lastPrice;
-        try {
-          candleSeries.update(lastCandle);
-          setLegendValues(lastCandle.open, lastCandle.high, lastCandle.low, lastCandle.close);
-        } catch (e) {}
-      }
-
-      // Update HTF chart
-      if (candleSeriesHTF && lastCandleHTF) {
-        lastCandleHTF.high = Math.max(lastCandleHTF.high, lastPrice);
-        lastCandleHTF.low = Math.min(lastCandleHTF.low, lastPrice);
-        lastCandleHTF.close = lastPrice;
-        try {
-          candleSeriesHTF.update(lastCandleHTF);
-          setDualLegendValues('HTF', lastCandleHTF.open, lastCandleHTF.high, lastCandleHTF.low, lastCandleHTF.close);
-        } catch (e) {}
-      }
-
-      // Update LTF chart
-      if (candleSeriesLTF && lastCandleLTF) {
-        lastCandleLTF.high = Math.max(lastCandleLTF.high, lastPrice);
-        lastCandleLTF.low = Math.min(lastCandleLTF.low, lastPrice);
-        lastCandleLTF.close = lastPrice;
-        try {
-          candleSeriesLTF.update(lastCandleLTF);
-          setDualLegendValues('LTF', lastCandleLTF.open, lastCandleLTF.high, lastCandleLTF.low, lastCandleLTF.close);
-        } catch (e) {}
-      }
-    }
-
-    function setLegendValues(o, h, l, c) {
-      const elO = document.getElementById('legO');
-      const elH = document.getElementById('legH');
-      const elL = document.getElementById('legL');
-      const elC = document.getElementById('legC');
-      const elChg = document.getElementById('legChg');
-      if (!elO || !elH || !elL || !elC) return;
-
-      const fmt = (p) => p > 1000 ? p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : (p > 10 ? p.toFixed(2) : (p > 1 ? p.toFixed(4) : p.toFixed(5)));
-      elO.innerText = fmt(o);
-      elH.innerText = fmt(h);
-      elL.innerText = fmt(l);
-      elC.innerText = fmt(c);
-
-      const chg = ((c - o) / o) * 100;
-      if (elChg) {
-        elChg.innerText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%`;
-        elChg.style.color = chg >= 0 ? '#0ecb81' : '#f6465d';
-      }
-    }
-
-    function setDualLegendValues(pane, o, h, l, c) {
-      const elO = document.getElementById(`legO_${pane}`);
-      const elH = document.getElementById(`legH_${pane}`);
-      const elL = document.getElementById(`legL_${pane}`);
-      const elC = document.getElementById(`legC_${pane}`);
-      const elChg = document.getElementById(`legChg_${pane}`);
-      if (!elO || !elH || !elL || !elC) return;
-
-      const fmt = (p) => p > 1000 ? p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : (p > 10 ? p.toFixed(2) : (p > 1 ? p.toFixed(4) : p.toFixed(5)));
-      elO.innerText = fmt(o);
-      elH.innerText = fmt(h);
-      elL.innerText = fmt(l);
-      elC.innerText = fmt(c);
-
-      const chg = ((c - o) / o) * 100;
-      if (elChg) {
-        elChg.innerText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%`;
-        elChg.style.color = chg >= 0 ? '#0ecb81' : '#f6465d';
-      }
-    }
-
-    function updateChartLegend(param) {
-      if (!param || !param.time || !param.seriesData || !candleSeries) {
-        if (lastCandle) setLegendValues(lastCandle.open, lastCandle.high, lastCandle.low, lastCandle.close);
-        return;
-      }
-      const data = param.seriesData.get(candleSeries);
-      if (data) setLegendValues(data.open, data.high, data.low, data.close);
-    }
-
-    function updateDualLegend(pane, param) {
-      const series = pane === 'HTF' ? candleSeriesHTF : candleSeriesLTF;
-      const last = pane === 'HTF' ? lastCandleHTF : lastCandleLTF;
-      if (!param || !param.time || !param.seriesData || !series) {
-        if (last) setDualLegendValues(pane, last.open, last.high, last.low, last.close);
-        return;
-      }
-      const data = param.seriesData.get(series);
-      if (data) setDualLegendValues(pane, data.open, data.high, data.low, data.close);
-    }
-
-    function drawPriceLinesOnSeries(series, linesArr, isHTF = false) {
-      if (!series || typeof LightweightCharts === 'undefined') return;
-
-      // Clear existing lines
-      linesArr.forEach(line => {
-        try { series.removePriceLine(line); } catch (e) {}
-      });
-      linesArr.length = 0;
-
-      const EP = parseFloat(document.getElementById('entryPrice').value) || 0;
-      const SL = parseFloat(document.getElementById('stopLossPrice').value) || 0;
-      const TP = parseFloat(document.getElementById('takeProfitPrice').value) || 0;
-      const R = parseFloat(document.getElementById('riskAmount').value) || 0.20;
-      const feePct = parseFloat(document.getElementById('feeRateTaker').value) || 0.055;
-      const f = feePct / 100;
-      const deltaP = Math.abs(EP - SL);
-
-      if (EP <= 0 || SL <= 0 || deltaP <= 0) return;
-
-      const lossPerUnit = deltaP + (EP * f) + (SL * f);
-      let tp1 = 0, tp2 = 0, tp3 = 0;
-      if (currentDirection === 'LONG') {
-        tp1 = (1 * lossPerUnit + EP * (1 + f)) / (1 - f);
-        tp2 = (2 * lossPerUnit + EP * (1 + f)) / (1 - f);
-        tp3 = (3 * lossPerUnit + EP * (1 + f)) / (1 - f);
-      } else {
-        tp1 = (EP * (1 - f) - 1 * lossPerUnit) / (1 + f);
-        tp2 = (EP * (1 - f) - 2 * lossPerUnit) / (1 + f);
-        tp3 = (EP * (1 - f) - 3 * lossPerUnit) / (1 + f);
-      }
-
-      const L = parseFloat(document.getElementById('leverageSlider').value) || 1;
-      const mmrFeePct = parseFloat(document.getElementById('mmrFeeRate').value) || 2.0;
-      const B = mmrFeePct / 100;
-      let LP = currentDirection === 'LONG' ? EP * (1 - 1 / L) / (1 - B) : EP * (1 + 1 / L) / (1 + B);
-
-      let P_BE = currentDirection === 'LONG' ? EP * (1 + f) / (1 - f) : EP * (1 - f) / (1 + f);
-
-      const fmt = (p) => p > 1000 ? p.toFixed(2) : (p > 10 ? p.toFixed(2) : (p > 1 ? p.toFixed(4) : p.toFixed(5)));
-
-      // Entry
-      linesArr.push(series.createPriceLine({
-        price: EP,
-        color: '#00e5ff',
-        lineWidth: 2,
-        lineStyle: LightweightCharts.LineStyle.Solid,
-        axisLabelVisible: true,
-        title: `🔵 ENTRY ${fmt(EP)}`
-      }));
-
-      // Stop Loss
-      linesArr.push(series.createPriceLine({
-        price: SL,
-        color: '#f6465d',
-        lineWidth: 2,
-        lineStyle: LightweightCharts.LineStyle.Dashed,
-        axisLabelVisible: true,
-        title: `🔴 SL ${fmt(SL)} (-$${R.toFixed(2)})`
-      }));
-
-      if (!isHTF) {
-        // TP 1R
-        if (tp1 > 0) linesArr.push(series.createPriceLine({ price: tp1, color: '#0ecb81', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted, axisLabelVisible: true, title: `🟢 TP 1R ${fmt(tp1)} (+$${R.toFixed(2)})` }));
-        // TP 2R
-        if (tp2 > 0) linesArr.push(series.createPriceLine({ price: tp2, color: '#0ecb81', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: `🟢 TP 2R ${fmt(tp2)} (+$${(R * 2).toFixed(2)})` }));
-        // TP 3R
-        if (tp3 > 0) linesArr.push(series.createPriceLine({ price: tp3, color: '#0ecb81', lineWidth: 2, lineStyle: LightweightCharts.LineStyle.Solid, axisLabelVisible: true, title: `🟢 TP 3R ${fmt(tp3)} (+$${(R * 3).toFixed(2)})` }));
-        // Breakeven
-        if (P_BE > 0) linesArr.push(series.createPriceLine({ price: P_BE, color: '#38bdf8', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted, axisLabelVisible: true, title: `🛡️ BREAKEVEN ${fmt(P_BE)}` }));
-      }
-
-      // Target TP
-      if (TP > 0) {
-        linesArr.push(series.createPriceLine({
-          price: TP,
-          color: '#f7a600',
-          lineWidth: 2,
-          lineStyle: LightweightCharts.LineStyle.Solid,
-          axisLabelVisible: true,
-          title: `🎯 TARGET TP ${fmt(TP)}`
-        }));
-      }
-
-      // Liq
-      if (LP > 0 && LP < 10000000) {
-        linesArr.push(series.createPriceLine({
-          price: LP,
-          color: '#a855f7',
-          lineWidth: 1,
-          lineStyle: LightweightCharts.LineStyle.Dotted,
-          axisLabelVisible: true,
-          title: `⚡ LIQ ${fmt(LP)}`
-        }));
-      }
-    }
-
-    function updateChartPriceLines() {
-      if (typeof LightweightCharts === 'undefined') return;
-
-      const EP = parseFloat(document.getElementById('entryPrice').value) || 0;
-      const SL = parseFloat(document.getElementById('stopLossPrice').value) || 0;
-      const TP = parseFloat(document.getElementById('takeProfitPrice').value) || 0;
-      const R = parseFloat(document.getElementById('riskAmount').value) || 0.20;
-      const feePct = parseFloat(document.getElementById('feeRateTaker').value) || 0.055;
-      const f = feePct / 100;
-      const deltaP = Math.abs(EP - SL);
-      const lossPerUnit = deltaP + (EP * f) + (SL * f);
-
-      let tp1 = 0, tp2 = 0, tp3 = 0;
-      if (currentDirection === 'LONG') {
-        tp1 = (1 * lossPerUnit + EP * (1 + f)) / (1 - f);
-        tp2 = (2 * lossPerUnit + EP * (1 + f)) / (1 - f);
-        tp3 = (3 * lossPerUnit + EP * (1 + f)) / (1 - f);
-      } else {
-        tp1 = (EP * (1 - f) - 1 * lossPerUnit) / (1 + f);
-        tp2 = (EP * (1 - f) - 2 * lossPerUnit) / (1 + f);
-        tp3 = (EP * (1 - f) - 3 * lossPerUnit) / (1 + f);
-      }
-
-      let P_BE = currentDirection === 'LONG' ? EP * (1 + f) / (1 - f) : EP * (1 - f) / (1 + f);
-
-      const L = parseFloat(document.getElementById('leverageSlider').value) || 1;
-      const mmrFeePct = parseFloat(document.getElementById('mmrFeeRate').value) || 2.0;
-      const B = mmrFeePct / 100;
-      let LP = currentDirection === 'LONG' ? EP * (1 - 1 / L) / (1 - B) : EP * (1 + 1 / L) / (1 + B);
-
-      const fmt = (p) => p > 1000 ? p.toFixed(2) : (p > 10 ? p.toFixed(2) : (p > 1 ? p.toFixed(4) : p.toFixed(5)));
-
-      // Draw on Single chart
-      if (candleSeries) drawPriceLinesOnSeries(candleSeries, chartPriceLines, false);
-
-      // Draw on Dual charts
-      if (candleSeriesHTF) drawPriceLinesOnSeries(candleSeriesHTF, chartPriceLinesHTF, true);
-      if (candleSeriesLTF) drawPriceLinesOnSeries(candleSeriesLTF, chartPriceLinesLTF, false);
-
-      // Update Legend Bar Pills below Chart
-      const pEntry = document.getElementById('pillEntryVal');
-      if (pEntry) pEntry.innerText = `${fmt(EP)} USDT`;
-
-      const pSl = document.getElementById('pillSlVal');
-      if (pSl) pSl.innerText = `${fmt(SL)} USDT (-$${R.toFixed(2)})`;
-
-      const pBe = document.getElementById('pillBeVal');
-      if (pBe) pBe.innerText = `${fmt(P_BE)} USDT`;
-
-      const pTp1 = document.getElementById('pillTp1Val');
-      if (pTp1) pTp1.innerText = `${fmt(tp1)} USDT (+$${R.toFixed(2)})`;
-
-      const pTp2 = document.getElementById('pillTp2Val');
-      if (pTp2) pTp2.innerText = `${fmt(tp2)} USDT (+$${(R * 2).toFixed(2)})`;
-
-      const pTp3 = document.getElementById('pillTp3Val');
-      if (pTp3) pTp3.innerText = `${fmt(tp3)} USDT (+$${(R * 3).toFixed(2)})`;
-
-      const pTargetTp = document.getElementById('pillTargetTpVal');
-      if (pTargetTp) pTargetTp.innerText = `${fmt(TP)} USDT`;
-
-      const pLiq = document.getElementById('pillLiqVal');
-      if (pLiq) pLiq.innerText = `${fmt(LP)} USDT`;
-    }
-
-    /* ------------------------------------------------------------ */
-    /* INTERACTIVE DRAG-AND-DROP ON CANDLESTICK CHART CANVAS        */
-    /* ------------------------------------------------------------ */
-    let isDraggingLine = null; // 'entry' | 'sl' | 'tp' | null
-    let dragTooltipEl = null;
-
-    function setupChartDragAndDrop(container) {
-      if (!container) return;
-
-      const bodyWrapper = document.getElementById('chartBodyWrapper') || container;
-      dragTooltipEl = document.getElementById('chartDragTooltip');
-      if (!dragTooltipEl) {
-        dragTooltipEl = document.createElement('div');
-        dragTooltipEl.id = 'chartDragTooltip';
-        dragTooltipEl.className = 'chart-drag-tooltip';
-        bodyWrapper.appendChild(dragTooltipEl);
-      }
-
-      function getActiveSeriesAndChart() {
-        if (currentChartMode === 'dual') {
-          return { series: candleSeriesLTF, chart: tvChartLTF };
-        }
-        return { series: candleSeries, chart: tvChart };
-      }
-
-      function getRelativeCoords(e) {
-        const rect = container.getBoundingClientRect();
-        const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
-        const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
-        return {
-          x: clientX - rect.left,
-          y: clientY - rect.top,
-          clientX,
-          clientY
-        };
-      }
-
-      function checkHoverLine(y) {
-        const { series } = getActiveSeriesAndChart();
-        if (!series) return null;
-        const EP = parseFloat(document.getElementById('entryPrice').value) || 0;
-        const SL = parseFloat(document.getElementById('stopLossPrice').value) || 0;
-        const TP = parseFloat(document.getElementById('takeProfitPrice').value) || 0;
-
-        const yEP = series.priceToCoordinate(EP);
-        const ySL = series.priceToCoordinate(SL);
-        const yTP = series.priceToCoordinate(TP);
-
-        const hitDist = 14; // 14px grab tolerance
-        if (yEP !== null && Math.abs(y - yEP) <= hitDist) return { type: 'entry', price: EP, coord: yEP };
-        if (ySL !== null && Math.abs(y - ySL) <= hitDist) return { type: 'sl', price: SL, coord: ySL };
-        if (yTP !== null && Math.abs(y - yTP) <= hitDist) return { type: 'tp', price: TP, coord: yTP };
-        return null;
-      }
-
-      container.addEventListener('mousemove', (e) => {
-        if (currentChartMode === 'advanced' || isDraggingLine) return;
-        const { x, y } = getRelativeCoords(e);
-        const hover = checkHoverLine(y);
-
-        if (hover) {
-          container.style.cursor = 'ns-resize';
-          const color = hover.type === 'entry' ? '#00e5ff' : (hover.type === 'sl' ? '#f6465d' : '#0ecb81');
-          const label = hover.type === 'entry' ? '🔵 Drag Entry Price' : (hover.type === 'sl' ? '🔴 Drag Stop Loss' : '🟢 Drag Take Profit');
-          dragTooltipEl.style.display = 'block';
-          dragTooltipEl.style.left = `${Math.min(x + 18, container.clientWidth - 180)}px`;
-          dragTooltipEl.style.top = `${Math.max(10, y - 14)}px`;
-          dragTooltipEl.style.borderColor = color;
-          dragTooltipEl.innerHTML = `<span style="color:${color}; font-weight:700;">${label}</span> (${hover.price})`;
-        } else {
-          container.style.cursor = 'crosshair';
-          dragTooltipEl.style.display = 'none';
-        }
-      });
-
-      const onDragStart = (e) => {
-        if (currentChartMode === 'advanced') return;
-        const { y } = getRelativeCoords(e);
-        const hover = checkHoverLine(y);
-        if (hover) {
-          isDraggingLine = hover.type;
-          container.style.cursor = 'grabbing';
-          const { chart } = getActiveSeriesAndChart();
-          if (chart) {
-            chart.applyOptions({
-              handleScroll: false,
-              handleScale: false
-            });
-          }
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      };
-
-      const onDragMove = (e) => {
-        if (!isDraggingLine) return;
-        const { series } = getActiveSeriesAndChart();
-        if (!series) return;
-        const { x, y } = getRelativeCoords(e);
-        const price = series.coordinateToPrice(y);
-        if (!price || price <= 0) return;
-
-        let dec = 4;
-        if (price > 1000) dec = 2;
-        else if (price > 10) dec = 2;
-        else if (price > 1) dec = 4;
-        else dec = 5;
-
-        const formatted = price.toFixed(dec);
-
-        if (isDraggingLine === 'entry') {
-          document.getElementById('entryPrice').value = formatted;
-          onRiskOrEntryChange();
-        } else if (isDraggingLine === 'sl') {
-          document.getElementById('stopLossPrice').value = formatted;
-          onRiskOrEntryChange();
-        } else if (isDraggingLine === 'tp') {
-          document.getElementById('takeProfitPrice').value = formatted;
-          onTakeProfitChange();
-        }
-
-        const color = isDraggingLine === 'entry' ? '#00e5ff' : (isDraggingLine === 'sl' ? '#f6465d' : '#0ecb81');
-        const label = isDraggingLine === 'entry' ? '🔵 Moving Entry' : (isDraggingLine === 'sl' ? '🔴 Moving Stop Loss' : '🟢 Moving Take Profit');
-        const rrrText = document.getElementById('outRRR').innerText;
-        const netProfitText = document.getElementById('outProfit').innerText;
-        const netLossText = document.getElementById('outActualLoss').innerText;
-
-        dragTooltipEl.style.display = 'block';
-        dragTooltipEl.style.left = `${Math.min(x + 20, container.clientWidth - 220)}px`;
-        dragTooltipEl.style.top = `${Math.max(10, y - 20)}px`;
-        dragTooltipEl.style.borderColor = color;
-        dragTooltipEl.innerHTML = `
-          <div style="color:${color}; font-weight:800; font-size:11px;">${label}: <strong>${formatted} USDT</strong></div>
-          <div style="color:#fff; font-size:10px; margin-top:3px;">Net RRR: <strong>${rrrText}</strong> | Risk: <span style="color:#f6465d">${netLossText}</span></div>
-        `;
-        e.preventDefault();
-      };
-
-      const onDragEnd = (e) => {
-        if (isDraggingLine) {
-          isDraggingLine = null;
-          container.style.cursor = 'crosshair';
-          if (dragTooltipEl) dragTooltipEl.style.display = 'none';
-          const { chart } = getActiveSeriesAndChart();
-          if (chart) {
-            chart.applyOptions({
-              handleScroll: true,
-              handleScale: true
-            });
-          }
-        }
-      };
-
-      container.addEventListener('mousedown', onDragStart);
-      window.addEventListener('mousemove', onDragMove);
-      window.addEventListener('mouseup', onDragEnd);
-
-      container.addEventListener('touchstart', onDragStart, { passive: false });
-      window.addEventListener('touchmove', onDragMove, { passive: false });
-      window.addEventListener('touchend', onDragEnd);
-    }
-
-    function setChartTimeframe(tf, btn) {
-      currentChartTimeframe = tf;
-      document.querySelectorAll('#chartTfGroup .chart-tf-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      if (currentChartMode === 'visual') {
-        fetchChartKlines(currentChartSymbol, tf);
-      }
-    }
-
-    function setChartMode(mode) {
-      currentChartMode = mode;
-      const btnD = document.getElementById('btnChartModeDual');
-      const btnV = document.getElementById('btnChartModeVisual');
-      const btnA = document.getElementById('btnChartModeAdvanced');
-      const boxD = document.getElementById('dualChartContainer');
-      const boxV = document.getElementById('lightweightChartContainer');
-      const boxA = document.getElementById('tradingviewWidgetContainer');
-      const tfGroup = document.getElementById('chartTfGroup');
-      const bodyWrapper = document.getElementById('chartBodyWrapper');
-
-      if (btnD) btnD.classList.remove('active');
-      if (btnV) btnV.classList.remove('active');
-      if (btnA) btnA.classList.remove('active');
-
-      if (mode === 'dual') {
-        if (btnD) btnD.classList.add('active');
-        if (boxD) boxD.style.display = 'grid';
-        if (boxV) boxV.style.display = 'none';
-        if (boxA) boxA.style.display = 'none';
-        if (tfGroup) tfGroup.style.display = 'none';
-        if (bodyWrapper) bodyWrapper.classList.add('dual-active');
-        initDualCharts();
-        setTimeout(() => {
-          if (tvChartHTF) tvChartHTF.timeScale().fitContent();
-          if (tvChartLTF) tvChartLTF.timeScale().fitContent();
-          updateChartPriceLines();
-        }, 80);
-      } else if (mode === 'visual') {
-        if (btnV) btnV.classList.add('active');
-        if (boxD) boxD.style.display = 'none';
-        if (boxV) boxV.style.display = 'block';
-        if (boxA) boxA.style.display = 'none';
-        if (tfGroup) tfGroup.style.display = 'inline-flex';
-        if (bodyWrapper) bodyWrapper.classList.remove('dual-active');
-        initSingleChart();
-        setTimeout(() => {
-          if (tvChart) {
-            tvChart.timeScale().fitContent();
-            updateChartPriceLines();
-          }
-        }, 80);
-      } else {
-        if (btnA) btnA.classList.add('active');
-        if (boxD) boxD.style.display = 'none';
-        if (boxV) boxV.style.display = 'none';
-        if (boxA) boxA.style.display = 'block';
-        if (tfGroup) tfGroup.style.display = 'none';
-        if (bodyWrapper) bodyWrapper.classList.remove('dual-active');
-        renderTradingViewWidget(currentChartSymbol);
-      }
-    }
-
-    function renderTradingViewWidget(symbol) {
-      const container = document.getElementById('tradingview_advanced_chart');
-      if (!container) return;
-      container.innerHTML = '';
-
-      const clean = (symbol || 'BTCUSDT').toUpperCase().replace('USDT', '');
-      const tvSymbol = `BYBIT:${clean}USDT.P`;
-
-      if (typeof TradingView !== 'undefined') {
-        new TradingView.widget({
-          "autosize": true,
-          "symbol": tvSymbol,
-          "interval": "60",
-          "timezone": "Etc/UTC",
-          "theme": "dark",
-          "style": "1",
-          "locale": "en",
-          "toolbar_bg": "#0d1117",
-          "enable_publishing": false,
-          "hide_side_toolbar": false,
-          "allow_symbol_change": true,
-          "container_id": "tradingview_advanced_chart"
-        });
-      }
-    }
-
-    function loadChartSymbol(symbol) {
-      const cleanSym = normalizeSymbol(symbol || 'BTCUSDT');
-      currentChartSymbol = cleanSym;
-      const badge = document.getElementById('chartActiveSymbol');
-      if (badge) badge.innerText = `${cleanSym} PERP`;
-
-      if (currentChartMode === 'dual') {
-        fetchDualKlines('HTF', cleanSym, currentTfHTF);
-        fetchDualKlines('LTF', cleanSym, currentTfLTF);
-      } else if (currentChartMode === 'visual') {
-        fetchChartKlines(cleanSym, currentChartTimeframe);
-      } else {
-        renderTradingViewWidget(cleanSym);
-      }
-      subscribeToBybitWsSymbols();
-      renderWatchlist();
-    }
-
-    function fitChartContent() {
-      if (currentChartMode === 'dual') {
-        if (tvChartHTF) tvChartHTF.timeScale().fitContent();
-        if (tvChartLTF) tvChartLTF.timeScale().fitContent();
-      } else if (currentChartMode === 'visual' && tvChart) {
-        tvChart.timeScale().fitContent();
-      }
-    }
-
-    function toggleChartSection() {
-      const sec = document.getElementById('interactiveChartSection');
-      const icon = document.getElementById('chartCollapseIcon');
-      if (!sec) return;
-      if (sec.classList.contains('collapsed')) {
-        sec.classList.remove('collapsed');
-        if (icon) icon.innerText = '−';
-        setTimeout(() => {
-          fitChartContent();
-        }, 100);
-      } else {
-        sec.classList.add('collapsed');
-        if (icon) icon.innerText = '+';
       }
     }
 
@@ -7547,9 +6125,9 @@
                 <div style="color: var(--text-muted); font-size: 10px;">${dTime}</div>
               </td>
               <td style="white-space: nowrap;">
-                <div style="font-weight: 800; color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" onclick="loadChartCoin('${t.symbol}', event)" title="Click to open ${t.symbol} Chart & Calculator">
+                <div style="font-weight: 800; color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" onclick="loadCoinToCalculator('${t.symbol}', event)" title="Click to load ${t.symbol} into Calculator">
                   <span>${t.symbol}</span>
-                  <span style="font-size: 10px; opacity: 0.7;">📈</span>
+                  <span style="font-size: 10px; opacity: 0.7;">⚡</span>
                 </div>
                 <div><span class="dir-tag ${t.direction.toLowerCase()}">${t.direction}</span></div>
               </td>
@@ -8435,7 +7013,7 @@
       });
     }
 
-    // Initialize Calculator, Watchlist, WebSocket Stream, Interactive Chart & Journal Database
+    // Initialize Calculator, Watchlist, WebSocket Stream & Journal Database
     restoreCalculatorDraft();
     calculate();
     initDB();
@@ -8443,7 +7021,6 @@
     initBybitWebSocket();
     fetchBybitTicker();
     fetchGlobalBybitPrices();
-    setTimeout(initInteractiveChart, 150);
     setInterval(fetchBybitTicker, 6000);
     setInterval(fetchGlobalBybitPrices, 6000); // Live sync all open trades & tickers every 6s
   </script>
