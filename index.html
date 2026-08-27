@@ -3392,10 +3392,10 @@
               <th>Charts</th>
               <th>Date</th>
               <th>Symbol & Side</th>
-              <th>Entry / SL / TP</th>
+              <th>Entry / SL / TP / Exit</th>
               <th>Live Price</th>
               <th>Lev & Qty</th>
-              <th>Net RRR</th>
+              <th>Net RRR (Exit / Plan)</th>
               <th>Strategy</th>
               <th>Status / Trigger</th>
               <th>Live / Realized P&L</th>
@@ -3616,14 +3616,14 @@
             </div>
             <div class="form-group" style="margin: 0;">
               <label><span>Direction</span></label>
-              <select id="mDirection">
+              <select id="mDirection" onchange="computeModalNetPlannedRrr()">
                 <option value="LONG">▲ LONG (Buy)</option>
                 <option value="SHORT">▼ SHORT (Sell)</option>
               </select>
             </div>
             <div class="form-group" style="margin: 0;">
               <label><span>Leverage</span></label>
-              <input type="number" id="mLeverage" value="5">
+              <input type="number" id="mLeverage" value="5" oninput="computeModalNetPlannedRrr()">
             </div>
           </div>
 
@@ -3631,15 +3631,15 @@
           <div class="form-row-3">
             <div class="form-group" style="margin: 0;">
               <label><span>Entry Price</span></label>
-              <input type="number" id="mEntry" step="0.0001" value="0.5581">
+              <input type="number" id="mEntry" step="0.0001" value="0.5581" oninput="computeModalNetPlannedRrr()">
             </div>
             <div class="form-group" style="margin: 0;">
               <label><span>Stop Loss (SL)</span></label>
-              <input type="number" id="mStopLoss" step="0.0001" value="0.5426">
+              <input type="number" id="mStopLoss" step="0.0001" value="0.5426" oninput="computeModalNetPlannedRrr()">
             </div>
             <div class="form-group" style="margin: 0;">
               <label><span>Take Profit (TP)</span></label>
-              <input type="number" id="mTakeProfit" step="0.0001" value="0.6111">
+              <input type="number" id="mTakeProfit" step="0.0001" value="0.6111" oninput="computeModalNetPlannedRrr()">
             </div>
           </div>
 
@@ -3647,15 +3647,24 @@
           <div class="form-row-3">
             <div class="form-group" style="margin: 0;">
               <label><span>Quantity (Units)</span></label>
-              <input type="number" id="mQuantity" value="12">
+              <input type="number" id="mQuantity" value="12" oninput="computeModalNetPlannedRrr()">
             </div>
             <div class="form-group" style="margin: 0;">
               <label><span>Net Risk ($R)</span></label>
-              <input type="number" id="mRisk" step="0.01" value="0.20">
+              <div class="input-wrapper">
+                <input type="number" id="mRisk" step="0.01" value="0.20" oninput="onModalRiskChange()">
+                <span class="unit-badge">USDT</span>
+              </div>
             </div>
             <div class="form-group" style="margin: 0;">
-              <label><span>Net RRR</span></label>
-              <input type="number" id="mRrr" step="0.01" value="3.25">
+              <label>
+                <span>Planned Net RRR</span>
+                <span class="hint" style="color: #69f0ae; font-size: 10px;">Auto-calc</span>
+              </label>
+              <div class="input-wrapper">
+                <input type="number" id="mRrr" step="0.01" value="3.25" oninput="onModalPlannedRrrInput()">
+                <span class="unit-badge">R</span>
+              </div>
             </div>
           </div>
 
@@ -3692,22 +3701,51 @@
             <input type="text" id="mCustomTags" placeholder="Additional custom tags (comma separated, e.g. 15m Retest, S/R Flip)" style="margin-top: 8px; font-size: 12px;">
           </div>
 
-          <!-- Outcome Status & Realized Net P&L -->
-          <div class="form-row">
-            <div class="form-group" style="margin: 0;">
-              <label><span>Trade Status / Outcome</span></label>
-              <select id="mStatus" onchange="onModalStatusChange()">
-                <option value="OPEN">⏳ Open Position</option>
-                <option value="WIN">🟢 WIN (Target Hit)</option>
-                <option value="LOSS">🔴 LOSS (Stop Loss Hit)</option>
-                <option value="BREAKEVEN">⚪ BREAKEVEN</option>
-              </select>
+          <!-- Exit Execution & Outcome Management Section -->
+          <div style="background: rgba(14, 203, 129, 0.04); border: 1px solid rgba(14, 203, 129, 0.18); border-radius: 8px; padding: 12px; margin-top: 4px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 800; font-size: 11.5px; color: #90caf9; text-transform: uppercase; letter-spacing: 0.5px;">🏁 Exit Execution & Outcome</span>
+              <span id="earlyExitFlagBadge" style="display: none; font-size: 10px; font-weight: 700; padding: 2px 7px; background: rgba(247,166,0,0.2); color: #f7a600; border-radius: 4px; border: 1px solid rgba(247,166,0,0.4);">🏃 Exited Too Early</span>
             </div>
-            <div class="form-group" style="margin: 0;">
-              <label><span>Actual Realized Net P&L</span></label>
-              <div class="input-wrapper">
-                <input type="number" id="mRealizedPnl" step="0.0001" placeholder="0.0000">
-                <span class="unit-badge">USDT</span>
+
+            <div class="form-row-3">
+              <div class="form-group" style="margin: 0;">
+                <label><span>Trade Outcome</span></label>
+                <select id="mStatus" onchange="onModalStatusChange()">
+                  <option value="OPEN">⏳ Open Position</option>
+                  <option value="WIN">🟢 WIN</option>
+                  <option value="LOSS">🔴 LOSS</option>
+                  <option value="BREAKEVEN">⚪ BREAKEVEN</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label>
+                  <span>Actual Exit Price</span>
+                  <span class="hint" style="color: #69f0ae; cursor: pointer;" onclick="setModalExitToLivePrice()" title="Fill with current live market price">⚡ Live</span>
+                </label>
+                <input type="number" id="mExitPrice" step="0.0001" placeholder="Optional if open" oninput="onModalExitPriceInput()">
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label><span>Realized Net P&L</span></label>
+                <div class="input-wrapper">
+                  <input type="number" id="mRealizedPnl" step="0.0001" placeholder="0.0000" oninput="onModalRealizedPnlInput()">
+                  <span class="unit-badge">USDT</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Net RRR at Exit (Autocomputed) & Quick Target Fill -->
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.28); border-radius: 6px; padding: 8px 10px; gap: 8px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;">
+                <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Net RRR at Exit:</span>
+                <span id="mExitRrrDisplay" style="font-family: 'JetBrains Mono'; font-weight: 800; font-size: 13.5px; color: #fff;">—</span>
+                <span id="mExitRrrCompare" style="font-size: 10.5px; color: #8b98af;"></span>
+                <input type="hidden" id="mExitRrr" value="">
+              </div>
+              <div style="display: flex; gap: 4px;">
+                <button type="button" class="btn-action" style="font-size: 9.5px; padding: 2px 7px;" onclick="setModalExitToTp()" title="Set Exit Price to TP level">🎯 TP Exit</button>
+                <button type="button" class="btn-action" style="font-size: 9.5px; padding: 2px 7px;" onclick="setModalExitToSl()" title="Set Exit Price to SL level">🛑 SL Exit</button>
+                <button type="button" class="btn-action" style="font-size: 9.5px; padding: 2px 7px;" onclick="setModalExitToBE()" title="Set Exit Price to Breakeven level">⚪ BE Exit</button>
               </div>
             </div>
           </div>
@@ -4987,9 +5025,36 @@
       if (idx > -1) {
         modalSelectedPsychology.splice(idx, 1);
         btnElem.classList.remove('active');
+        if (psyName === 'Exited Too Early') {
+          const badge = document.getElementById('earlyExitFlagBadge');
+          if (badge) badge.style.display = 'none';
+        }
       } else {
         modalSelectedPsychology.push(psyName);
         btnElem.classList.add('active');
+        if (psyName === 'Exited Too Early') {
+          const badge = document.getElementById('earlyExitFlagBadge');
+          if (badge) badge.style.display = 'inline-block';
+          const fIdx = modalSelectedPsychology.indexOf('Followed Plan 100%');
+          if (fIdx > -1) {
+            modalSelectedPsychology.splice(fIdx, 1);
+            resetModalButtons();
+          }
+          const exitInput = document.getElementById('mExitPrice');
+          if (exitInput && !exitInput.value) {
+            const rawSym = (document.getElementById('mSymbol').value || '').toUpperCase().trim();
+            const cleanSym = normalizeSymbol(rawSym);
+            const d = window.liveMarketPrices[cleanSym] || window.liveMarketPrices[rawSym];
+            if (d && d.price > 0) {
+              exitInput.value = d.price > 10 ? d.price.toFixed(2) : (d.price > 1 ? d.price.toFixed(4) : d.price.toFixed(5));
+              onModalExitPriceInput();
+            } else {
+              exitInput.focus();
+            }
+          } else {
+            onModalExitPriceInput();
+          }
+        }
       }
     }
 
@@ -5085,6 +5150,258 @@
       }
     });
 
+    /* Auto-computation for Trade Modal Planned Net RRR */
+    function computeModalNetPlannedRrr() {
+      const EP = parseFloat(document.getElementById('mEntry').value) || 0;
+      const SL = parseFloat(document.getElementById('mStopLoss').value) || 0;
+      const TP = parseFloat(document.getElementById('mTakeProfit').value) || 0;
+      const Q = parseFloat(document.getElementById('mQuantity').value) || 1;
+      const dir = document.getElementById('mDirection').value;
+      const f = 0.00055;
+
+      if (EP > 0 && SL > 0) {
+        const openFee = EP * Q * f;
+        const slFee = SL * Q * f;
+        const grossLoss = dir === 'LONG' ? Q * Math.abs(EP - SL) : Q * Math.abs(SL - EP);
+        const netLoss = grossLoss + openFee + slFee;
+        if (netLoss > 0) {
+          document.getElementById('mRisk').value = netLoss.toFixed(4);
+        }
+
+        if (TP > 0 && netLoss > 0) {
+          const tpFee = TP * Q * f;
+          const grossProfit = dir === 'LONG' ? Q * (TP - EP) : Q * (EP - TP);
+          const netProfit = grossProfit - (openFee + tpFee);
+          if (netProfit > 0) {
+            const plannedRrr = netProfit / netLoss;
+            document.getElementById('mRrr').value = plannedRrr.toFixed(2);
+          }
+        }
+      }
+
+      if (document.getElementById('mExitPrice').value) {
+        onModalExitPriceInput();
+      }
+    }
+
+    function onModalRiskChange() {
+      const risk = parseFloat(document.getElementById('mRisk').value) || 0;
+      const rrr = parseFloat(document.getElementById('mRrr').value) || 0;
+      const pnlInput = document.getElementById('mRealizedPnl');
+      const status = document.getElementById('mStatus').value;
+
+      if (status === 'WIN' && !document.getElementById('mExitPrice').value) {
+        pnlInput.value = (risk * rrr).toFixed(4);
+      } else if (status === 'LOSS' && !document.getElementById('mExitPrice').value) {
+        pnlInput.value = (-risk).toFixed(4);
+      }
+
+      if (document.getElementById('mExitPrice').value) {
+        onModalExitPriceInput();
+      } else if (pnlInput.value) {
+        onModalRealizedPnlInput();
+      }
+    }
+
+    function onModalPlannedRrrInput() {
+      const risk = parseFloat(document.getElementById('mRisk').value) || 0;
+      const rrr = parseFloat(document.getElementById('mRrr').value) || 0;
+      const status = document.getElementById('mStatus').value;
+      if (status === 'WIN' && !document.getElementById('mExitPrice').value) {
+        document.getElementById('mRealizedPnl').value = (risk * rrr).toFixed(4);
+      }
+      if (document.getElementById('mExitPrice').value) {
+        onModalExitPriceInput();
+      }
+    }
+
+    /* Auto-computation for Exit Price, Outcome and Realized Net RRR */
+    function onModalExitPriceInput() {
+      const exitInput = document.getElementById('mExitPrice').value;
+      if (!exitInput || isNaN(parseFloat(exitInput))) {
+        document.getElementById('mExitRrr').value = '';
+        document.getElementById('mExitRrrDisplay').innerText = '—';
+        document.getElementById('mExitRrrDisplay').style.color = '#fff';
+        document.getElementById('mExitRrrCompare').innerText = '';
+        return;
+      }
+
+      const ExitP = parseFloat(exitInput);
+      const EP = parseFloat(document.getElementById('mEntry').value) || 0;
+      const SL = parseFloat(document.getElementById('mStopLoss').value) || 0;
+      const TP = parseFloat(document.getElementById('mTakeProfit').value) || 0;
+      const Q = parseFloat(document.getElementById('mQuantity').value) || 1;
+      const dir = document.getElementById('mDirection').value;
+      const risk = parseFloat(document.getElementById('mRisk').value) || 0.20;
+      const plannedRrr = parseFloat(document.getElementById('mRrr').value) || 3.0;
+      const f = 0.00055;
+
+      if (EP <= 0) return;
+
+      const openFee = EP * Q * f;
+      const exitFee = ExitP * Q * f;
+      const totalFees = openFee + exitFee;
+      const grossPnl = dir === 'LONG' ? Q * (ExitP - EP) : Q * (EP - ExitP);
+      const netPnl = grossPnl - totalFees;
+
+      document.getElementById('mRealizedPnl').value = netPnl.toFixed(4);
+
+      let exitRrr = 0;
+      if (risk > 0) {
+        exitRrr = netPnl / risk;
+      }
+      document.getElementById('mExitRrr').value = exitRrr.toFixed(2);
+
+      const statusSelect = document.getElementById('mStatus');
+      if (netPnl > 0.0005) {
+        statusSelect.value = 'WIN';
+      } else if (netPnl < -0.0005) {
+        statusSelect.value = 'LOSS';
+      } else {
+        statusSelect.value = 'BREAKEVEN';
+      }
+
+      const isEarlyWin = (dir === 'LONG' && TP > 0 && ExitP < TP && netPnl > 0) || (dir === 'SHORT' && TP > 0 && ExitP > TP && netPnl > 0);
+      const isEarlyLoss = (dir === 'LONG' && SL > 0 && ExitP > SL && netPnl < 0) || (dir === 'SHORT' && SL > 0 && ExitP < SL && netPnl < 0);
+      
+      if (isEarlyWin || isEarlyLoss) {
+        if (!modalSelectedPsychology.includes('Exited Too Early') && statusSelect.value !== 'OPEN') {
+          modalSelectedPsychology.push('Exited Too Early');
+          const fIdx = modalSelectedPsychology.indexOf('Followed Plan 100%');
+          if (fIdx > -1) modalSelectedPsychology.splice(fIdx, 1);
+          resetModalButtons();
+        }
+        document.getElementById('earlyExitFlagBadge').style.display = 'inline-block';
+      } else {
+        const hasTag = modalSelectedPsychology.includes('Exited Too Early');
+        document.getElementById('earlyExitFlagBadge').style.display = hasTag ? 'inline-block' : 'none';
+      }
+
+      updateModalExitRrrDisplay(exitRrr, netPnl, plannedRrr);
+    }
+
+    function onModalRealizedPnlInput() {
+      const pnlInput = document.getElementById('mRealizedPnl').value;
+      if (!pnlInput || isNaN(parseFloat(pnlInput))) {
+        document.getElementById('mExitRrr').value = '';
+        document.getElementById('mExitRrrDisplay').innerText = '—';
+        document.getElementById('mExitRrrCompare').innerText = '';
+        return;
+      }
+
+      const netPnl = parseFloat(pnlInput);
+      const risk = parseFloat(document.getElementById('mRisk').value) || 0.20;
+      const plannedRrr = parseFloat(document.getElementById('mRrr').value) || 3.0;
+      const EP = parseFloat(document.getElementById('mEntry').value) || 0;
+      const Q = parseFloat(document.getElementById('mQuantity').value) || 1;
+      const dir = document.getElementById('mDirection').value;
+      const f = 0.00055;
+
+      let exitRrr = 0;
+      if (risk > 0) {
+        exitRrr = netPnl / risk;
+      }
+      document.getElementById('mExitRrr').value = exitRrr.toFixed(2);
+
+      const statusSelect = document.getElementById('mStatus');
+      if (netPnl > 0.0005) {
+        statusSelect.value = 'WIN';
+      } else if (netPnl < -0.0005) {
+        statusSelect.value = 'LOSS';
+      } else {
+        statusSelect.value = 'BREAKEVEN';
+      }
+
+      if (EP > 0 && Q > 0 && !document.getElementById('mExitPrice').value) {
+        const approxFee = 2 * EP * Q * f;
+        const grossPnl = netPnl + approxFee;
+        const exitP = dir === 'LONG' ? (EP + grossPnl / Q) : (EP - grossPnl / Q);
+        if (exitP > 0) {
+          document.getElementById('mExitPrice').value = exitP > 10 ? exitP.toFixed(2) : (exitP > 1 ? exitP.toFixed(4) : exitP.toFixed(5));
+        }
+      }
+
+      updateModalExitRrrDisplay(exitRrr, netPnl, plannedRrr);
+    }
+
+    function updateModalExitRrrDisplay(exitRrr, netPnl, plannedRrr) {
+      const disp = document.getElementById('mExitRrrDisplay');
+      const comp = document.getElementById('mExitRrrCompare');
+      if (exitRrr === null || exitRrr === undefined || exitRrr === '' || isNaN(parseFloat(exitRrr))) {
+        disp.innerText = '—';
+        disp.style.color = '#fff';
+        comp.innerText = '';
+        return;
+      }
+
+      const rVal = parseFloat(exitRrr);
+      const pRrr = parseFloat(plannedRrr) || 3.0;
+
+      if (rVal > 0) {
+        disp.innerText = `+${rVal.toFixed(2)}R (1 : ${rVal.toFixed(2)})`;
+        disp.style.color = '#0ecb81';
+        if (rVal < pRrr) {
+          const pct = ((rVal / pRrr) * 100).toFixed(0);
+          comp.innerHTML = `<span style="color: #f7a600; font-weight: 600;">🏃 Exited early (${pct}% of ${pRrr.toFixed(2)}R target)</span>`;
+        } else {
+          comp.innerHTML = `<span style="color: #0ecb81; font-weight: 600;">🎯 Full target reached / exceeded (+${(rVal - pRrr).toFixed(2)}R)</span>`;
+        }
+      } else if (rVal < 0) {
+        disp.innerText = `${rVal.toFixed(2)}R`;
+        disp.style.color = '#f6465d';
+        if (Math.abs(rVal) < 0.95) {
+          const pct = (Math.abs(rVal) * 100).toFixed(0);
+          comp.innerHTML = `<span style="color: #fca5a5; font-weight: 600;">🛑 Loss cut early (${pct}% of 1.0R SL)</span>`;
+        } else {
+          comp.innerHTML = `<span style="color: #f6465d; font-weight: 600;">Full SL Hit (-1.00R)</span>`;
+        }
+      } else {
+        disp.innerText = `0.00R (BE)`;
+        disp.style.color = '#90a4ae';
+        comp.innerHTML = `<span style="color: #90a4ae;">⚪ Breakeven exit • 0 Risk Loss</span>`;
+      }
+    }
+
+    function setModalExitToLivePrice() {
+      const rawSym = (document.getElementById('mSymbol').value || '').toUpperCase().trim();
+      const cleanSym = normalizeSymbol(rawSym);
+      const d = window.liveMarketPrices[cleanSym] || window.liveMarketPrices[rawSym];
+      if (d && d.price > 0) {
+        document.getElementById('mExitPrice').value = d.price > 10 ? d.price.toFixed(2) : (d.price > 1 ? d.price.toFixed(4) : d.price.toFixed(5));
+        onModalExitPriceInput();
+        showToast(`⚡ Filled Exit Price with live price: <strong>${d.price}</strong>`);
+      } else {
+        showToast(`⚠️ Live price for ${cleanSym} not yet available.`, true);
+      }
+    }
+
+    function setModalExitToTp() {
+      const tp = document.getElementById('mTakeProfit').value;
+      if (tp) {
+        document.getElementById('mExitPrice').value = tp;
+        onModalExitPriceInput();
+      }
+    }
+
+    function setModalExitToSl() {
+      const sl = document.getElementById('mStopLoss').value;
+      if (sl) {
+        document.getElementById('mExitPrice').value = sl;
+        onModalExitPriceInput();
+      }
+    }
+
+    function setModalExitToBE() {
+      const ep = parseFloat(document.getElementById('mEntry').value) || 0;
+      const dir = document.getElementById('mDirection').value;
+      const f = 0.00055;
+      if (ep > 0) {
+        const bePrice = dir === 'LONG' ? ep * (1 + 2 * f) : ep * (1 - 2 * f);
+        document.getElementById('mExitPrice').value = bePrice > 10 ? bePrice.toFixed(2) : (bePrice > 1 ? bePrice.toFixed(4) : bePrice.toFixed(5));
+        onModalExitPriceInput();
+      }
+    }
+
     function openNewTradeModal() {
       document.getElementById('modalTitle').innerHTML = '<span>📝</span> Log New Trade';
       document.getElementById('modalTradeId').value = '';
@@ -5098,7 +5415,13 @@
       document.getElementById('mRisk').value = document.getElementById('riskAmount').value;
       document.getElementById('mRrr').value = document.getElementById('targetRrrInput').value;
       document.getElementById('mStatus').value = 'OPEN';
+      document.getElementById('mExitPrice').value = '';
       document.getElementById('mRealizedPnl').value = '';
+      document.getElementById('mExitRrr').value = '';
+      document.getElementById('mExitRrrDisplay').innerText = '—';
+      document.getElementById('mExitRrrDisplay').style.color = '#fff';
+      document.getElementById('mExitRrrCompare').innerText = '';
+      document.getElementById('earlyExitFlagBadge').style.display = 'none';
       document.getElementById('mCustomTags').value = '';
       document.getElementById('mNotes').value = '';
       
@@ -5106,6 +5429,8 @@
       modalSelectedPsychology = ['Followed Plan 100%'];
       resetModalButtons();
       resetAllModalSlots();
+
+      computeModalNetPlannedRrr();
 
       activeUploadSlot = 'before_1h';
       document.getElementById('tradeModal').classList.add('active');
@@ -5133,13 +5458,20 @@
       document.getElementById('mRisk').value = t.risk;
       document.getElementById('mRrr').value = t.netRrr;
       document.getElementById('mStatus').value = t.status;
+      document.getElementById('mExitPrice').value = (t.exitPrice !== undefined && t.exitPrice !== null) ? t.exitPrice : '';
       document.getElementById('mRealizedPnl').value = t.realizedPnl !== undefined ? t.realizedPnl : '';
+      document.getElementById('mExitRrr').value = (t.exitRrr !== undefined && t.exitRrr !== null) ? t.exitRrr : '';
       document.getElementById('mCustomTags').value = t.customTags || '';
       document.getElementById('mNotes').value = t.notes || '';
+
+      updateModalExitRrrDisplay(t.exitRrr, t.realizedPnl, t.netRrr);
 
       modalSelectedStrategies = Array.isArray(t.strategies) ? [...t.strategies] : [];
       modalSelectedPsychology = Array.isArray(t.psychology) ? [...t.psychology] : ['Followed Plan 100%'];
       resetModalButtons();
+
+      const isEarly = modalSelectedPsychology.includes('Exited Too Early');
+      document.getElementById('earlyExitFlagBadge').style.display = isEarly ? 'inline-block' : 'none';
 
       resetAllModalSlots();
       if (t.images) {
@@ -5159,18 +5491,44 @@
     function onModalStatusChange() {
       const status = document.getElementById('mStatus').value;
       const pnlInput = document.getElementById('mRealizedPnl');
+      const exitInput = document.getElementById('mExitPrice');
       const risk = parseFloat(document.getElementById('mRisk').value) || 0.20;
       const rrr = parseFloat(document.getElementById('mRrr').value) || 3.0;
+      const tp = document.getElementById('mTakeProfit').value;
+      const sl = document.getElementById('mStopLoss').value;
+      const ep = document.getElementById('mEntry').value;
 
       if (status === 'WIN') {
-        const estProfit = risk * rrr;
-        pnlInput.value = estProfit.toFixed(4);
+        if (!exitInput.value && tp) {
+          exitInput.value = tp;
+          onModalExitPriceInput();
+        } else if (!pnlInput.value || parseFloat(pnlInput.value) <= 0) {
+          pnlInput.value = (risk * rrr).toFixed(4);
+          onModalRealizedPnlInput();
+        }
       } else if (status === 'LOSS') {
-        pnlInput.value = (-risk).toFixed(4);
+        if (!exitInput.value && sl) {
+          exitInput.value = sl;
+          onModalExitPriceInput();
+        } else if (!pnlInput.value || parseFloat(pnlInput.value) >= 0) {
+          pnlInput.value = (-risk).toFixed(4);
+          onModalRealizedPnlInput();
+        }
       } else if (status === 'BREAKEVEN') {
-        pnlInput.value = '0.0000';
-      } else {
+        if (!exitInput.value && ep) {
+          setModalExitToBE();
+        } else {
+          pnlInput.value = '0.0000';
+          onModalRealizedPnlInput();
+        }
+      } else if (status === 'OPEN') {
         pnlInput.value = '';
+        exitInput.value = '';
+        document.getElementById('mExitRrr').value = '';
+        document.getElementById('mExitRrrDisplay').innerText = '—';
+        document.getElementById('mExitRrrDisplay').style.color = '#fff';
+        document.getElementById('mExitRrrCompare').innerText = '';
+        document.getElementById('earlyExitFlagBadge').style.display = 'none';
       }
     }
 
@@ -5178,6 +5536,9 @@
       const editId = document.getElementById('modalTradeId').value;
       const id = editId || ('trade_' + Date.now());
       const existing = window.tradesData.find(x => x.id === id);
+
+      const rawExitP = document.getElementById('mExitPrice').value;
+      const rawExitR = document.getElementById('mExitRrr').value;
 
       const trade = {
         id: id,
@@ -5188,6 +5549,8 @@
         entry: parseFloat(document.getElementById('mEntry').value) || 0,
         stopLoss: parseFloat(document.getElementById('mStopLoss').value) || 0,
         takeProfit: parseFloat(document.getElementById('mTakeProfit').value) || 0,
+        exitPrice: rawExitP ? parseFloat(rawExitP) : null,
+        exitRrr: rawExitR ? parseFloat(rawExitR) : null,
         quantity: parseFloat(document.getElementById('mQuantity').value) || 1,
         risk: parseFloat(document.getElementById('mRisk').value) || 0.20,
         netRrr: parseFloat(document.getElementById('mRrr').value) || 3.0,
@@ -5241,10 +5604,17 @@
       t.status = newStatus;
       if (newStatus === 'WIN') {
         t.realizedPnl = parseFloat((t.risk * t.netRrr).toFixed(4));
+        t.exitRrr = parseFloat(t.netRrr);
+        if (!t.exitPrice) t.exitPrice = parseFloat(t.takeProfit);
       } else if (newStatus === 'LOSS') {
         t.realizedPnl = parseFloat((-t.risk).toFixed(4));
+        t.exitRrr = -1.0;
+        if (!t.exitPrice) t.exitPrice = parseFloat(t.stopLoss);
       } else if (newStatus === 'BREAKEVEN') {
         t.realizedPnl = 0;
+        t.exitRrr = 0.0;
+        if (!t.exitPrice) t.exitPrice = parseFloat(t.entry);
+      }
       }
       saveTradeToDB(t);
       if (window.cloudSaveTrade) window.cloudSaveTrade(t);
@@ -5947,14 +6317,26 @@
       if (!t) return;
       if (triggerType === 'TP') {
         t.status = 'WIN';
+        t.exitPrice = parseFloat(t.takeProfit);
+        t.exitRrr = parseFloat(t.netRrr);
         t.realizedPnl = parseFloat((t.risk * t.netRrr).toFixed(4));
       } else if (triggerType === 'SL') {
         t.status = 'LOSS';
+        t.exitPrice = parseFloat(t.stopLoss);
+        t.exitRrr = -1.0;
         t.realizedPnl = parseFloat((-t.risk).toFixed(4));
       } else {
         const liveInfo = computeTradeLiveStatus(t);
-        t.status = (liveInfo.unrealizedPnl || 0) >= 0 ? 'WIN' : 'LOSS';
+        t.exitPrice = liveInfo.livePrice;
         t.realizedPnl = parseFloat((liveInfo.unrealizedPnl || 0).toFixed(4));
+        t.exitRrr = t.risk > 0 ? parseFloat((t.realizedPnl / t.risk).toFixed(2)) : 0;
+        t.status = t.realizedPnl > 0.0005 ? 'WIN' : (t.realizedPnl < -0.0005 ? 'LOSS' : 'BREAKEVEN');
+        if (!t.psychology) t.psychology = [];
+        if (!t.psychology.includes('Exited Too Early')) {
+          t.psychology.push('Exited Too Early');
+          const fIdx = t.psychology.indexOf('Followed Plan 100%');
+          if (fIdx > -1) t.psychology.splice(fIdx, 1);
+        }
       }
       saveTradeToDB(t);
       if (window.cloudSaveTrade) window.cloudSaveTrade(t);
@@ -6117,6 +6499,42 @@
             return `<span class="strat-badge ${isGood ? 'disciplined' : 'psycho'}">${isGood ? '✅' : '⚠️'} ${p}</span>`;
           }).join(' ');
 
+          const hasExitRrr = t.exitRrr !== undefined && t.exitRrr !== null && t.exitRrr !== '';
+          const isEarly = psychoList.includes('Exited Too Early');
+          let rrrDisplayHtml = '';
+
+          if (t.status === 'OPEN') {
+            rrrDisplayHtml = `
+              <div style="color: var(--accent-yellow); font-weight: 800; font-size: 11.5px;">1 : ${t.netRrr}</div>
+              <div style="font-size: 9.5px; color: var(--text-muted);">Planned RRR</div>
+            `;
+          } else if (hasExitRrr) {
+            const exitR = parseFloat(t.exitRrr);
+            let rColor = '#90a4ae';
+            let rLabel = `${exitR.toFixed(2)}R`;
+            if (exitR > 0) {
+              rColor = 'var(--green)';
+              rLabel = `1 : ${exitR.toFixed(2)}`;
+            } else if (exitR < 0) {
+              rColor = 'var(--red)';
+              rLabel = `${exitR.toFixed(2)}R`;
+            } else {
+              rLabel = `0.00R (BE)`;
+            }
+
+            rrrDisplayHtml = `
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="color: ${rColor}; font-weight: 800; font-size: 11.5px; font-family: 'JetBrains Mono';">${rLabel}</span>
+                ${isEarly ? `<span style="font-size: 9px; padding: 1px 4px; background: rgba(247,166,0,0.2); color: #f7a600; border-radius: 3px; border: 1px solid rgba(247,166,0,0.4);" title="Exited Too Early">🏃 Early</span>` : ''}
+              </div>
+              <div style="font-size: 9.5px; color: var(--text-muted); margin-top: 1px;">Plan: 1 : ${t.netRrr}</div>
+            `;
+          } else {
+            rrrDisplayHtml = `
+              <div style="color: var(--accent-yellow); font-weight: 800; font-size: 11.5px;">1 : ${t.netRrr}</div>
+            `;
+          }
+
           return `
             <tr>
               <td>${thumbStrip}</td>
@@ -6136,6 +6554,7 @@
                   <div><span style="color: #60a5fa; font-size: 9px; font-weight: 600; font-family: 'Inter';">E:</span> <span style="color: #90caf9; font-weight: 700;">${t.entry}</span></div>
                   <div><span style="color: var(--red); font-size: 9px; font-weight: 600; font-family: 'Inter';">SL:</span> <span style="color: #fca5a5;">${t.stopLoss}</span></div>
                   <div><span style="color: var(--green); font-size: 9px; font-weight: 600; font-family: 'Inter';">TP:</span> <span style="color: #6ee7b7;">${t.takeProfit}</span></div>
+                  ${t.exitPrice ? `<div><span style="color: #f59e0b; font-size: 9px; font-weight: 600; font-family: 'Inter';">Exit:</span> <span style="color: #fbbf24; font-weight: 700;">${t.exitPrice}</span></div>` : ''}
                 </div>
               </td>
               <td style="white-space: nowrap;">${livePriceHtml}</td>
@@ -6143,7 +6562,7 @@
                 <span style="font-weight: 800; color: #fff; font-size: 11.5px;">${t.leverage}x</span>
                 <span style="color: var(--text-muted); font-size: 10.5px;">(${t.quantity})</span>
               </td>
-              <td style="color: var(--accent-yellow); font-weight: 800; white-space: nowrap; font-size: 11.5px;">1 : ${t.netRrr}</td>
+              <td style="white-space: nowrap;">${rrrDisplayHtml}</td>
               <td>
                 <div class="strategy-badge-container">
                   ${stratBadges}
@@ -6218,6 +6637,20 @@
 
           const livePriceStr = liveInfo.livePrice ? `Live: ${liveInfo.livePrice > 10 ? liveInfo.livePrice.toFixed(2) : liveInfo.livePrice.toFixed(4)}` : '';
 
+          const hasCardExitRrr = t.exitRrr !== undefined && t.exitRrr !== null && t.exitRrr !== '';
+          const isEarlyTrade = Array.isArray(t.psychology) && t.psychology.includes('Exited Too Early');
+
+          let cardRrrLabel = 'Planned Net RRR';
+          let cardRrrValue = `1 : ${t.netRrr}`;
+          let cardRrrColor = 'var(--accent-yellow)';
+
+          if (t.status !== 'OPEN' && hasCardExitRrr) {
+            const exR = parseFloat(t.exitRrr);
+            cardRrrLabel = isEarlyTrade ? 'Exit Net RRR (Early)' : 'Exit Net RRR';
+            cardRrrColor = exR > 0 ? 'var(--green)' : (exR < 0 ? 'var(--red)' : '#90a4ae');
+            cardRrrValue = exR > 0 ? `1 : ${exR.toFixed(2)}` : (exR === 0 ? `0.00R (BE)` : `${exR.toFixed(2)}R`);
+          }
+
           return `
             <div class="trade-card">
               <div class="card-img-container">
@@ -6255,12 +6688,12 @@
                     <span style="color: #90caf9;">${t.entry}</span>
                   </div>
                   <div class="card-meta-item">
-                    <span class="card-meta-label">Net RRR</span>
-                    <span style="color: var(--accent-yellow); font-weight: 700;">1 : ${t.netRrr}</span>
+                    <span class="card-meta-label">${cardRrrLabel}</span>
+                    <span style="color: ${cardRrrColor}; font-weight: 700;">${cardRrrValue}</span>
                   </div>
                   <div class="card-meta-item">
-                    <span class="card-meta-label">Stop Loss</span>
-                    <span style="color: var(--red);">${t.stopLoss}</span>
+                    <span class="card-meta-label">${t.exitPrice ? 'Exit Price' : 'Stop Loss'}</span>
+                    <span style="color: ${t.exitPrice ? '#fbbf24' : 'var(--red)'}; font-weight: ${t.exitPrice ? '700' : 'normal'};">${t.exitPrice ? t.exitPrice : t.stopLoss}</span>
                   </div>
                   <div class="card-meta-item">
                     <span class="card-meta-label">Take Profit</span>
