@@ -3068,11 +3068,10 @@
 
         <!-- Leverage Slider -->
         <div class="form-group" style="margin-top: 14px;">
-          <div class="leverage-header">
-            <label style="margin: 0;">Leverage ($L$)</label>
-            <span class="leverage-value-badge" id="leverageBadge">5x</span>
+          <div class="input-wrapper" style="margin-bottom: 8px;">
+            <input type="number" id="leverageSlider" min="1" max="100" step="1" value="5" oninput="updateLeverage(this.value)">
+            <span class="unit-badge">x</span>
           </div>
-          <input type="range" id="leverageSlider" min="1" max="100" value="5" class="range-slider" oninput="updateLeverage(this.value)">
           <div class="quick-lev-buttons">
             <button class="btn-lev" onclick="updateLeverage(2)">2x</button>
             <button class="btn-lev active" onclick="updateLeverage(5)">5x</button>
@@ -4114,10 +4113,9 @@
     }
 
     function updateLeverage(val) {
-      val = parseInt(val, 10);
+      val = parseInt(val, 10) || 1;
       document.getElementById('leverageSlider').value = val;
-      document.getElementById('leverageBadge').innerText = val + 'x';
-      
+
       const buttons = document.querySelectorAll('.quick-lev-buttons .btn-lev');
       buttons.forEach(btn => {
         if (btn.innerText === val + 'x') {
