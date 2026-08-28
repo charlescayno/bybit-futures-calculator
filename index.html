@@ -2923,51 +2923,7 @@
       <p class="subtitle">Lock your net dollar loss ($R$), monitor live Bybit futures funding rates, and analyze your edge with calendar & session heatmaps.</p>
     </header>
 
-    <!-- ============================================================ -->
-    <!-- LIVE BYBIT FUTURES WATCHLIST & STREAMING HUB -->
-    <!-- ============================================================ -->
-    <div class="watchlist-section" id="watchlistSection">
-      <div class="watchlist-header">
-        <div class="watchlist-title-group">
-          <div class="watchlist-title">
-            <span>⭐</span> Live Bybit Futures Watchlist
-          </div>
-          <span class="ws-status-badge live" id="wsStatusBadge" title="Bybit V5 Linear Perpetual WebSocket Stream">
-            <span class="live-pulse-dot"></span>
-            <span id="wsStatusText">WebSocket Live</span>
-          </span>
-        </div>
-        <div class="watchlist-actions">
-          <div class="watchlist-sort-select-wrap">
-            <span class="wl-sort-label">⇅ Sort:</span>
-            <select class="wl-sort-select" id="wlSortSelect" onchange="setWatchlistSort(this.value)">
-              <option value="chg_desc">🔥 24h % (High → Low)</option>
-              <option value="chg_asc">❄️ 24h % (Low → High)</option>
-              <option value="funding_desc">⚡ Funding Rate (High → Low)</option>
-              <option value="price_desc">💲 Price (High → Low)</option>
-              <option value="name_asc">🔤 Symbol (A → Z)</option>
-              <option value="custom">⭐ Default Watchlist</option>
-            </select>
-          </div>
-          <div class="watchlist-filters">
-            <button type="button" class="wl-filter-btn active" id="wlFilterAll" onclick="setWatchlistFilter('all', this)">All (<span id="wlCountAll">8</span>)</button>
-            <button type="button" class="wl-filter-btn" id="wlFilterGainers" onclick="setWatchlistFilter('gainers', this)">🔥 Gainers</button>
-            <button type="button" class="wl-filter-btn" id="wlFilterLosers" onclick="setWatchlistFilter('losers', this)">❄️ Losers</button>
-            <button type="button" class="wl-filter-btn" id="wlFilterFunding" onclick="setWatchlistFilter('funding', this)">⚡ Funding</button>
-          </div>
-          <button type="button" class="btn-action primary" onclick="openAddWatchlistModal()" style="font-size: 11.5px; padding: 5px 12px;">
-            <span>➕</span> Add Coin
-          </button>
-        </div>
-      </div>
 
-      <!-- Horizontal Scrollable Cards Strip -->
-      <div class="watchlist-carousel-container">
-        <div class="watchlist-cards-grid" id="watchlistCardsGrid">
-          <!-- Dynamically populated by JS -->
-        </div>
-      </div>
-    </div>
 
     <!-- TOP: CALCULATOR GRID -->
     <div class="grid">
