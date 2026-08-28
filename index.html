@@ -2930,10 +2930,108 @@
       font-size: 12px;
       color: #546e7a;
     }
+    .app-layout {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px;
+      width: 100%;
+      max-width: 1780px;
+    }
+
+    .right-sidebar {
+      width: 320px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 24px;
+      height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .watchlist-sidebar-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .wl-header {
+      padding: 16px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--card-border);
+      font-size: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .wl-cols {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(0,0,0,0.2);
+    }
+    .wl-col-chg {
+      cursor: pointer;
+    }
+    .wl-col-chg:hover {
+      color: var(--text-main);
+    }
+    .wl-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .wl-list::-webkit-scrollbar { width: 6px; }
+    .wl-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    
+    .wl-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .wl-row:hover { background: rgba(255,255,255,0.05); }
+    
+    .wl-sym-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .wl-sym-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #2a3142;
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: bold;
+    }
+    .wl-sym-name { font-weight: 600; font-size: 13px; }
+    .wl-chg { font-weight: 600; font-size: 13px; text-align: right; }
+    .wl-chg.up { color: var(--green); }
+    .wl-chg.down { color: var(--red); }
+
+    @media (max-width: 1200px) {
+      .app-layout { flex-direction: column; align-items: center; }
+      .right-sidebar { width: 100%; position: static; height: 500px; max-width: 1420px; }
+    }
   </style>
 </head>
 <body>
-
+<div class="app-layout">
   <div class="container">
     <header>
       <div class="header-top-actions">
@@ -3850,7 +3948,23 @@
     <footer>
       Bybit Isolated Margin Liquidation & Sizing Engine • Live Futures API • Firebase Cloud Sync
     </footer>
-  </div>
+  </div> <!-- End container -->
+
+  <aside class="right-sidebar">
+    <div class="watchlist-sidebar-card">
+      <div class="wl-header">
+        <div class="wl-title">Bybit Futures Watchlist</div>
+      </div>
+      <div class="wl-cols">
+        <div class="wl-col-symbol">Symbol</div>
+        <div class="wl-col-chg" onclick="toggleSidebarWatchlistSort()">Chg% <span id="wlSortIcon">↓</span></div>
+      </div>
+      <div class="wl-list" id="sidebarWatchlist">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </aside>
+</div> <!-- End app-layout -->
 
   <!-- FIREBASE MODULAR SDK -->
   <script type="module">
@@ -7420,6 +7534,73 @@
     fetchGlobalBybitPrices();
     setInterval(fetchBybitTicker, 6000);
     setInterval(fetchGlobalBybitPrices, 6000); // Live sync all open trades & tickers every 6s
+
+    // --- Sidebar Watchlist ---
+    let sidebarTickers = [];
+    let sidebarSortDir = 'desc';
+
+    async function fetchSidebarTickers() {
+      try {
+        const res = await fetch('https://api.bybit.com/v5/market/tickers?category=linear');
+        const data = await res.json();
+        if (data && data.result && data.result.list) {
+          sidebarTickers = data.result.list
+            .filter(t => t.symbol.endsWith('USDT'))
+            .map(t => ({
+              symbol: t.symbol,
+              chgPcnt: parseFloat(t.price24hPcnt) * 100
+            }));
+          renderSidebarWatchlist();
+        }
+      } catch (e) {
+        console.error('Sidebar fetch error:', e);
+      }
+    }
+
+    function renderSidebarWatchlist() {
+      const listEl = document.getElementById('sidebarWatchlist');
+      if (!listEl) return;
+      
+      sidebarTickers.sort((a, b) => {
+        return sidebarSortDir === 'desc' ? b.chgPcnt - a.chgPcnt : a.chgPcnt - b.chgPcnt;
+      });
+
+      let html = '';
+      sidebarTickers.forEach(t => {
+        const isUp = t.chgPcnt >= 0;
+        const chgClass = isUp ? 'up' : 'down';
+        const chgStr = (isUp ? '+' : '') + t.chgPcnt.toFixed(2) + '%';
+        const symFmt = t.symbol.replace('USDT', 'USDT.P');
+        const iconLetter = t.symbol.charAt(0);
+        
+        html += `
+          <div class="wl-row" onclick="loadSidebarCoin('${t.symbol}')">
+            <div class="wl-sym-group">
+              <div class="wl-sym-icon">${iconLetter}</div>
+              <div class="wl-sym-name">${symFmt}</div>
+            </div>
+            <div class="wl-chg ${chgClass}">${chgStr}</div>
+          </div>
+        `;
+      });
+      listEl.innerHTML = html;
+    }
+
+    window.toggleSidebarWatchlistSort = function() {
+      sidebarSortDir = sidebarSortDir === 'desc' ? 'asc' : 'desc';
+      const icon = document.getElementById('wlSortIcon');
+      if (icon) icon.innerText = sidebarSortDir === 'desc' ? '↓' : '↑';
+      renderSidebarWatchlist();
+    };
+
+    window.loadSidebarCoin = function(sym) {
+      document.getElementById('coinSymbol').value = sym;
+      onSymbolChange();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    fetchSidebarTickers();
+    setInterval(fetchSidebarTickers, 10000);
   </script>
 </body>
 </html>
