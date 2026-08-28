@@ -3075,11 +3075,11 @@
             <span class="unit-badge">x</span>
           </div>
           <div class="quick-lev-buttons">
-            <button class="btn-lev" onclick="updateLeverage(2)">2x</button>
-            <button class="btn-lev active" onclick="updateLeverage(5)">5x</button>
-            <button class="btn-lev" onclick="updateLeverage(10)">10x</button>
-            <button class="btn-lev" onclick="updateLeverage(20)">20x</button>
-            <button class="btn-lev" onclick="updateLeverage(50)">50x</button>
+            <button type="button" class="btn-lev" onclick="updateLeverage(2)">2x</button>
+            <button type="button" class="btn-lev active" onclick="updateLeverage(5)">5x</button>
+            <button type="button" class="btn-lev" onclick="updateLeverage(10)">10x</button>
+            <button type="button" class="btn-lev" onclick="updateLeverage(20)">20x</button>
+            <button type="button" class="btn-lev" onclick="updateLeverage(50)">50x</button>
           </div>
         </div>
 
@@ -4120,7 +4120,7 @@
 
       const buttons = document.querySelectorAll('.quick-lev-buttons .btn-lev');
       buttons.forEach(btn => {
-        if (btn.innerText === val + 'x') {
+        if (btn.textContent.trim() === val + 'x') {
           btn.classList.add('active');
         } else {
           btn.classList.remove('active');
