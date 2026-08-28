@@ -7540,20 +7540,29 @@
     let sidebarSortDir = 'desc';
 
     async function fetchSidebarTickers() {
-      try {
-        const res = await fetch('https://api.bybit.com/v5/market/tickers?category=linear');
-        const data = await res.json();
-        if (data && data.result && data.result.list) {
-          sidebarTickers = data.result.list
-            .filter(t => t.symbol.endsWith('USDT'))
-            .map(t => ({
-              symbol: t.symbol,
-              chgPcnt: parseFloat(t.price24hPcnt) * 100
-            }));
-          renderSidebarWatchlist();
+      const endpoints = [
+        'https://api.bytick.com/v5/market/tickers?category=linear',
+        'https://api.bybit.com/v5/market/tickers?category=linear',
+        'https://api.bybit-global.com/v5/market/tickers?category=linear'
+      ];
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (data && data.result && data.result.list) {
+            sidebarTickers = data.result.list
+              .filter(t => t.symbol.endsWith('USDT'))
+              .map(t => ({
+                symbol: t.symbol,
+                chgPcnt: parseFloat(t.price24hPcnt) * 100
+              }));
+            renderSidebarWatchlist();
+            break; // Success, exit loop
+          }
+        } catch (e) {
+          console.warn('Sidebar fetch error on ' + url, e);
         }
-      } catch (e) {
-        console.error('Sidebar fetch error:', e);
       }
     }
 
