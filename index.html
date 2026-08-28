@@ -3100,8 +3100,8 @@
             <div class="form-group" style="margin: 0;">
               <label><span>Fee Preset</span></label>
               <div style="display: flex; gap: 4px;">
-                <button class="btn-lev active" style="height: 42px;" id="btnFeeTaker" onclick="setFeePreset(0.055)">VIP0 Taker (0.055%)</button>
-                <button class="btn-lev" style="height: 42px;" id="btnFeeMaker" onclick="setFeePreset(0.020)">VIP0 Maker (0.02%)</button>
+                <button type="button" class="btn-lev active" style="height: 42px;" id="btnFeeTaker" onclick="setFeePreset(0.055)">VIP0 Taker (0.055%)</button>
+                <button type="button" class="btn-lev" style="height: 42px;" id="btnFeeMaker" onclick="setFeePreset(0.020)">VIP0 Maker (0.02%)</button>
               </div>
             </div>
           </div>
@@ -3115,8 +3115,8 @@
               </div>
             </div>
             <div style="display: flex; gap: 4px; align-items: flex-end;">
-              <button class="btn-lev" style="height: 42px;" onclick="setMMR(2.0)">Altcoin (2%)</button>
-              <button class="btn-lev" style="height: 42px;" onclick="setMMR(0.56)">BTC (0.56%)</button>
+              <button type="button" class="btn-lev" style="height: 42px;" onclick="setMMR(2.0)">Altcoin (2%)</button>
+              <button type="button" class="btn-lev" style="height: 42px;" onclick="setMMR(0.56)">BTC (0.56%)</button>
             </div>
           </div>
         </div>
@@ -4095,8 +4095,11 @@
           btn.classList.remove('active');
         }
       });
-      document.getElementById('stepRoundingHint').innerText = step === '1' ? 'Whole Number (Default)' : (step === 'exact' ? 'Exact (No Rounding)' : `Step: ${step}`);
-      document.getElementById('roundedBadge').innerText = step === '1' ? 'Whole Units' : (step === 'exact' ? 'Exact' : `Step: ${step}`);
+      const hintEl = document.getElementById('stepRoundingHint');
+      if (hintEl) hintEl.innerText = step === '1' ? 'Whole Number (Default)' : (step === 'exact' ? 'Exact (No Rounding)' : `Step: ${step}`);
+      
+      const badgeEl = document.getElementById('roundedBadge');
+      if (badgeEl) badgeEl.innerText = step === '1' ? 'Whole Units' : (step === 'exact' ? 'Exact' : `Step: ${step}`);
       calculate();
     }
 
