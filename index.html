@@ -448,9 +448,14 @@
       min-height: 65px;
     }
 
+    .form-group:focus-within label {
+      color: var(--accent-yellow);
+    }
+
     input[type="number"]:focus, input[type="text"]:focus, select:focus, textarea:focus {
       border-color: var(--accent-yellow);
-      box-shadow: 0 0 0 2px rgba(247, 166, 0, 0.15);
+      box-shadow: 0 0 0 3px rgba(247, 166, 0, 0.25);
+      background: #222b3e;
     }
 
     .unit-badge {
