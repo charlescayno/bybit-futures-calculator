@@ -66,7 +66,7 @@
     /* Header */
     header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 12px;
       position: relative;
     }
 
@@ -215,7 +215,7 @@
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: var(--radius-lg);
-      padding: 24px;
+      padding: 16px;
       box-shadow: var(--shadow);
     }
 
@@ -266,16 +266,9 @@
     .live-pulse-dot {
       width: 8px;
       height: 8px;
+      background-color: var(--green);
       border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 8px var(--green);
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-      100% { opacity: 1; transform: scale(1); }
+      display: inline-block;
     }
 
     .live-symbol-badge {
@@ -458,32 +451,26 @@
 
     .input-entry {
       color: var(--blue) !important;
-      background: var(--blue-bg) !important;
       border-color: rgba(41, 121, 255, 0.3) !important;
     }
     .input-entry:focus {
       border-color: var(--blue) !important;
-      box-shadow: 0 0 0 3px rgba(41, 121, 255, 0.25) !important;
     }
 
     .input-sl {
       color: var(--red) !important;
-      background: var(--red-bg) !important;
       border-color: rgba(246, 70, 93, 0.3) !important;
     }
     .input-sl:focus {
       border-color: var(--red) !important;
-      box-shadow: 0 0 0 3px rgba(246, 70, 93, 0.25) !important;
     }
 
     .input-tp {
       color: var(--green) !important;
-      background: var(--green-bg) !important;
       border-color: rgba(14, 203, 129, 0.3) !important;
     }
     .input-tp:focus {
       border-color: var(--green) !important;
-      box-shadow: 0 0 0 3px rgba(14, 203, 129, 0.25) !important;
     }
 
     input[type="number"]:focus, input[type="text"]:focus, select:focus, textarea:focus {
@@ -3055,9 +3042,7 @@
         </button>
       </div>
 
-      <div class="badge">⚡ Bybit Isolated Margin • Live API • Calendar P&L & Heatmaps</div>
-      <h1>Futures Position Calculator & Trading Journal</h1>
-      <p class="subtitle">Lock your net dollar loss ($R$), monitor live Bybit futures funding rates, and analyze your edge with calendar & session heatmaps.</p>
+      <h1 style="font-size: 20px; margin-bottom: 0;">Futures Position Calculator</h1>
     </header>
 
 
