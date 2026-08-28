@@ -451,6 +451,40 @@
     .form-group:focus-within label {
       color: var(--accent-yellow);
     }
+    
+    .form-group.entry-group:focus-within label { color: var(--blue); }
+    .form-group.sl-group:focus-within label { color: var(--red); }
+    .form-group.tp-group:focus-within label { color: var(--green); }
+
+    .input-entry {
+      color: var(--blue) !important;
+      background: var(--blue-bg) !important;
+      border-color: rgba(41, 121, 255, 0.3) !important;
+    }
+    .input-entry:focus {
+      border-color: var(--blue) !important;
+      box-shadow: 0 0 0 3px rgba(41, 121, 255, 0.25) !important;
+    }
+
+    .input-sl {
+      color: var(--red) !important;
+      background: var(--red-bg) !important;
+      border-color: rgba(246, 70, 93, 0.3) !important;
+    }
+    .input-sl:focus {
+      border-color: var(--red) !important;
+      box-shadow: 0 0 0 3px rgba(246, 70, 93, 0.25) !important;
+    }
+
+    .input-tp {
+      color: var(--green) !important;
+      background: var(--green-bg) !important;
+      border-color: rgba(14, 203, 129, 0.3) !important;
+    }
+    .input-tp:focus {
+      border-color: var(--green) !important;
+      box-shadow: 0 0 0 3px rgba(14, 203, 129, 0.25) !important;
+    }
 
     input[type="number"]:focus, input[type="text"]:focus, select:focus, textarea:focus {
       border-color: var(--accent-yellow);
@@ -2968,8 +3002,8 @@
           </button>
         </div>
 
-        <!-- Coin Symbol & Fixed Risk Row -->
-        <div class="form-row">
+        <!-- Coin Symbol, Risk, & RRR Row -->
+        <div class="form-row-3">
           <div class="form-group">
             <label>
               <span>Coin / Symbol</span>
@@ -2981,60 +3015,53 @@
           </div>
           <div class="form-group">
             <label>
-              <span>Target Net Loss ($R$)</span>
-              <span class="hint" style="color: #69f0ae;">✨ True Net Risk</span>
+              <span>Target Net Loss</span>
+              <span class="hint" style="color: #69f0ae;">✨ True Risk</span>
             </label>
             <div class="input-wrapper">
               <input type="number" id="riskAmount" step="0.01" value="0.20" oninput="onRiskOrEntryChange()">
               <span class="unit-badge">USDT</span>
             </div>
           </div>
-        </div>
-
-        <!-- Entry & Stop Loss Row -->
-        <div class="form-row">
           <div class="form-group">
             <label>
-              <span>Entry Price</span>
-            </label>
-            <div class="input-wrapper">
-              <input type="number" id="entryPrice" step="0.0001" value="0.5581" oninput="onRiskOrEntryChange()">
-              <span class="unit-badge">USDT</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>
-              <span>Stop Loss (SL)</span>
-            </label>
-            <div class="input-wrapper">
-              <input type="number" id="stopLossPrice" step="0.0001" value="0.5426" oninput="onRiskOrEntryChange()">
-              <span class="unit-badge">USDT</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Take Profit Price & Target RRR Row -->
-        <div class="form-row">
-          <div class="form-group">
-            <label>
-              <span>Take Profit (TP)</span>
-              <span class="hint">Price target</span>
-            </label>
-            <div class="input-wrapper">
-              <input type="number" id="takeProfitPrice" step="0.0001" value="0.6111" oninput="onTakeProfitChange()">
-              <span class="unit-badge">USDT</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>
-              <span>Target RRR (Net 1 : X)</span>
+              <span>Target RRR</span>
               <span class="hint">Auto-sets TP</span>
             </label>
             <div class="input-wrapper">
               <input type="number" id="targetRrrInput" step="0.1" value="3.25" oninput="onTargetRrrChange()">
               <span class="unit-badge">R</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry, SL, TP Row -->
+        <div class="form-row-3">
+          <div class="form-group entry-group">
+            <label>
+              <span>Entry Price</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="number" id="entryPrice" step="0.0001" value="0.5581" oninput="onRiskOrEntryChange()" class="input-entry">
+              <span class="unit-badge">USDT</span>
+            </div>
+          </div>
+          <div class="form-group sl-group">
+            <label>
+              <span>Stop Loss (SL)</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="number" id="stopLossPrice" step="0.0001" value="0.5426" oninput="onRiskOrEntryChange()" class="input-sl">
+              <span class="unit-badge">USDT</span>
+            </div>
+          </div>
+          <div class="form-group tp-group">
+            <label>
+              <span>Take Profit (TP)</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="number" id="takeProfitPrice" step="0.0001" value="0.6111" oninput="onTakeProfitChange()" class="input-tp">
+              <span class="unit-badge">USDT</span>
             </div>
           </div>
         </div>
