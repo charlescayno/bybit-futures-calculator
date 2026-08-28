@@ -7545,10 +7545,14 @@
         'https://api.bybit.com/v5/market/tickers?category=linear',
         'https://api.bybit-global.com/v5/market/tickers?category=linear'
       ];
+      let lastError = null;
       for (const url of endpoints) {
         try {
           const res = await fetch(url);
-          if (!res.ok) continue;
+          if (!res.ok) {
+            lastError = `HTTP ${res.status}`;
+            continue;
+          }
           const data = await res.json();
           if (data && data.result && data.result.list) {
             sidebarTickers = data.result.list
@@ -7558,11 +7562,18 @@
                 chgPcnt: parseFloat(t.price24hPcnt) * 100
               }));
             renderSidebarWatchlist();
-            break; // Success, exit loop
+            return; // Success, exit loop
           }
         } catch (e) {
           console.warn('Sidebar fetch error on ' + url, e);
+          lastError = e.message;
         }
+      }
+      
+      // If we got here, all endpoints failed
+      const listEl = document.getElementById('sidebarWatchlist');
+      if (listEl && sidebarTickers.length === 0) {
+        listEl.innerHTML = `<div style="padding: 16px; color: var(--red); font-size: 12px;">Failed to load tickers. Error: ${lastError}</div>`;
       }
     }
 
